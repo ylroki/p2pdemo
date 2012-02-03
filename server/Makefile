@@ -1,2 +1,2 @@
 test_listener:
-	g++ -g listener.cpp  test_listener.cpp -lpthread
+	g++ -g -I../include listener.cpp  test_listener.cpp -lpthread
