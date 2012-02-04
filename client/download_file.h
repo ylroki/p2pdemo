@@ -21,6 +21,7 @@ public:
 private:
 	static void* ThreadFunc(void* arg);
 	void Work();
+	bool RequestSources();
 	KDownStatus m_Status;
 	pthread_t m_Thread;
 };

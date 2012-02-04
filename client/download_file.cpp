@@ -38,8 +38,16 @@ void* CDownloadFile::ThreadFunc(void* arg)
 
 void CDownloadFile::Work()
 {
-	while (m_Status == DS_RUNNIG)	
+	if (RequestSources())
 	{
-		// TODO: download a file
+		while (m_Status == DS_RUNNIG)	
+		{
+			// TODO: download a file, manage sources
+		}
 	}
+}
+
+bool CDownloadFile::RequestSources()
+{
+	// TODO: communicate with server, ask for sources
 }
