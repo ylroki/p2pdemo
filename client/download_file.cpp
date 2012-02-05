@@ -4,6 +4,7 @@ CDownloadFile::CDownloadFile()
 {
 	m_Status = DS_WAIT; 
 	m_Thread = -1;
+	m_VecSource.clear();
 }
 
 CDownloadFile::~CDownloadFile()
@@ -43,6 +44,11 @@ void CDownloadFile::Work()
 		while (m_Status == DS_RUNNIG)	
 		{
 			// TODO: download a file, manage sources
+			for (size_t i = 0; i < m_VecSource.size(); ++i)
+			{
+				// TODO: update each source 
+			}
+			sleep(1);
 		}
 	}
 }
@@ -50,4 +56,6 @@ void CDownloadFile::Work()
 bool CDownloadFile::RequestSources()
 {
 	// TODO: communicate with server, ask for sources
+
+	return true;
 }
