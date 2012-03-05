@@ -36,7 +36,7 @@ void Daemonize()
 	 */
 	if (chdir("/") < 0)
 		ErrorQuit("Can't change directory to /");
-
+	printf("debug");
 	// Close all open file descriptors
 	if (rl.rlim_max == RLIM_INFINITY)
 		rl.rlim_max = 1024;
