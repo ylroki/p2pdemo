@@ -5,5 +5,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <fcntl.h>
+#include <stddef.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/termios.h>
 
+// Some functions.
+void ErrorQuit(const char* errString)
+{
+	printf("%s\n", errString);
+	exit(1);
+}
+
+void Daemonize();
 #endif
