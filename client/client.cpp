@@ -3,7 +3,7 @@
 #include "daemonize.h"
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	// Get network configuration.
 	FILE* file = fopen("config/client.conf", "r");
@@ -39,6 +39,7 @@ int main()
 	if ((n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen)) < 0)
 		exit(1);
 	sendto(sockfd, buf, strlen(buf), 0, (struct sockaddr*)abuf, alen);
+	close(sockfd);
 
 #else
 	int sockfd;	
@@ -50,9 +51,9 @@ int main()
 	if ((n = recv(sockfd, buf, BUF_SIZE, 0)) < 0)
 		ErrorQuit("recv error");
 	printf("%s",  buf);
+	close(sockfd);
 
 #endif
-	close(sockfd);
 	return 0;
 }
 
