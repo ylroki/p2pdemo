@@ -24,11 +24,11 @@ void ErrorQuit(const char* errString)
 
 void Daemonize();
 
-void daemon_log()
+void DebugLog()
 {
-	int	logfd = open("/home/ylroki/project/local_repos/p2p_system/daemon.log", O_RDWR | O_CREAT | O_TRUNC);
-	char buf[] = "daemondebug";
-	write(logfd, buf, 11);
+	int	logfd = open("/home/ylroki/project/local_repos/p2p_system/debug.log", O_RDWR | O_CREAT | O_TRUNC);
+	char buf[] = "debug";
+	write(logfd, buf, 5);
 	close(logfd);
 }
 #endif
