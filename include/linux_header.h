@@ -11,7 +11,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/termios.h>
+#include <string>
+#include <string.h>
 
+#define BUF_SIZE 1024
 // Some functions.
 void ErrorQuit(const char* errString)
 {
