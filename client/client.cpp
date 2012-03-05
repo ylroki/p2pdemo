@@ -14,26 +14,25 @@ int main()
 	char buf[BUF_SIZE];
 	if (fgets(buf, BUF_SIZE, file) == NULL)
 		ErrorQuit("No IP address");
-	printf("IP: %s", buf);
-
+	
 	int port = 31415;
 	if (fgets(buf, BUF_SIZE, file) == NULL)
 		ErrorQuit("No port");
-	printf("port: %s", buf);
 	
 	fclose(file);
 
+
+#ifdef __CLIENT_DAEMON__
+	// A daemon, bind to local address, listennig command.
+	Daemonize();// Close all file descriptors include socket
+	
 	int sockfd;	
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 		ErrorQuit("Can't create socket");
 
-#ifdef __CLIENT_DAEMON__
-	// A daemon, bind to local address, listennig command.
 	if (Bind(sockfd, ipString.c_str(), port) == false)
 		ErrorQuit("Can't bind socket");
-	
-	Daemonize();
-	
+
 	int n;
 	char abuf[MAX_ADDR_SIZE];
 	socklen_t alen = MAX_ADDR_SIZE;
@@ -42,11 +41,14 @@ int main()
 	sendto(sockfd, buf, strlen(buf), 0, (struct sockaddr*)abuf, alen);
 
 #else
-	
-	SendTo(sockfd, "hello", ipString.c_str(), port);
+	int sockfd;	
+	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+		ErrorQuit("Can't create socket");
+	if (SendTo(sockfd, "hello", ipString.c_str(), port) == false)
+		ErrorQuit("sendto error");
 	int n;
 	if ((n = recv(sockfd, buf, BUF_SIZE, 0)) < 0)
-		exit(1);
+		ErrorQuit("recv error");
 	printf("%s",  buf);
 
 #endif

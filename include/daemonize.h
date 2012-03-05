@@ -1,6 +1,7 @@
 #include <sys/resource.h>
 #include "linux_header.h"
 
+
 void Daemonize()
 {
 	// Clear file creation mask.
@@ -36,7 +37,6 @@ void Daemonize()
 	 */
 	if (chdir("/") < 0)
 		ErrorQuit("Can't change directory to /");
-	printf("debug");
 	// Close all open file descriptors
 	if (rl.rlim_max == RLIM_INFINITY)
 		rl.rlim_max = 1024;
@@ -47,4 +47,5 @@ void Daemonize()
 	int fd0 = open("/dev/null", O_RDWR);
 	int fd1 = dup(0);
 	int fd2 = dup(0);
+
 }
