@@ -4,6 +4,12 @@
 #include "command.h"
 #include "string_header.h"
 
+bool g_DaemonStopped = true;
+void DealLocalCommand(const char* command)
+{
+	if (strcmp(command, "stop") == 0)
+		g_DaemonStopped = true;
+}
 
 int main(int argc, char* argv[])
 {
@@ -37,13 +43,30 @@ int main(int argc, char* argv[])
 	if (Bind(sockfd, ipString.c_str(), port) == false)
 		ErrorQuit("Can't bind socket");
 
-	int n;
-	char abuf[MAX_ADDR_SIZE];
-	socklen_t alen = MAX_ADDR_SIZE;
-	if ((n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen)) < 0)
-		exit(1);
-	const char* response = "Received";
-	sendto(sockfd, response, strlen(response), 0, (struct sockaddr*)abuf, alen);
+	g_DaemonStopped = false;
+	while (!g_DaemonStopped)
+	{
+		fd_set rSet;
+		FD_ZERO(&rSet);
+		FD_SET(sockfd, &rSet);
+		if (select(sockfd + 1, &rSet, NULL, NULL, NULL) > 0)
+		{
+			if (FD_ISSET(sockfd, &rSet))
+			{
+				// sockfd can be read.
+				int n;
+				char abuf[MAX_ADDR_SIZE];
+				socklen_t alen = MAX_ADDR_SIZE;
+				memset(buf, 0, sizeof(buf));
+				if ((n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen)) < 0)
+					continue;
+				const char* response = "Received";
+				sendto(sockfd, response, strlen(response), 0, (struct sockaddr*)abuf, alen);
+				DealLocalCommand(buf);
+			}
+		}
+		
+	}
 	close(sockfd);
 
 #else
