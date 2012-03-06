@@ -24,11 +24,17 @@ void ErrorQuit(const char* errString)
 
 void Daemonize();
 
-void DebugLog()
+void DebugLog(const char* dString)
 {
 	int	logfd = open("/home/ylroki/project/local_repos/p2p_system/debug.log", O_RDWR | O_CREAT | O_TRUNC);
-	char buf[] = "debug";
-	write(logfd, buf, 5);
+	write(logfd, dString, strlen(dString));
 	close(logfd);
+}
+
+void DebugPrint(const char* dString)
+{
+#ifdef __DEBUG__
+	printf("%s\n", dString);
+#endif
 }
 #endif
