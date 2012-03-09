@@ -70,4 +70,7 @@ void Daemonize()
 
 }
 
-
+void Sleep(unsigned int ms)
+{
+	usleep(ms*1000);
+}

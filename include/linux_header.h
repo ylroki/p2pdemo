@@ -28,4 +28,6 @@ void DebugLog(const char* dString);
 
 void DebugPrint(const char* dString);
 
+void Sleep(unsigned int ms);// sleep thread amount of milliseconds
+
 #endif
