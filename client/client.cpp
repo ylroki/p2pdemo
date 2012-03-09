@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 				DealLocalCommand(buf);
 			}
 		}
-		sleep(1);
+		Sleep(100);
 		
 	}
 	close(sockfd);

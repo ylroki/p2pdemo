@@ -105,7 +105,7 @@ void CSourceManager::Work()
 			if (FD_ISSET(m_VecSource[i].GetSocket(), &tmpSet))
 				m_VecSource[i].Recv();
 		}
-		sleep(1);
+		Sleep(100);
 	}
 }
 

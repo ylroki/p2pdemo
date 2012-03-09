@@ -47,7 +47,7 @@ void CDownloadFile::Work()
 		manager.Start();
 		while (m_Status == DS_RUNNING)	
 		{
-			sleep(1);
+			Sleep(100);
 		}
 		manager.Stop();
 	}
