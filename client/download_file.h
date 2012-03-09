@@ -1,10 +1,10 @@
 #ifndef __CLIENT_DOWNLOAD_FILE_H__
 #define __CLIENT_DOWNLOAD_FILE_H__
-
+#include "linux_header.h"
 enum KDownStatus
 {
 	DS_WAIT,
-	DS_RUNNIG,
+	DS_RUNNING,
 	DS_DONE,
 	DS_ERROR
 };
@@ -12,12 +12,11 @@ class CDownloadFile
 {
 public:
 	CDownloadFile();
-	~CDownloadFiel();
-	bool GetStatus();
+	~CDownloadFile();
+	KDownStatus GetStatus();
 	bool Start();
 	void Stop();
 	
-	typedef std::vector vector;
 
 private:
 	static void* ThreadFunc(void* arg);
@@ -25,7 +24,6 @@ private:
 	bool RequestSources();
 	KDownStatus m_Status;
 	pthread_t m_Thread;
-	vector<CSource> m_VecSource;
 };
 
 #endif

@@ -1,14 +1,22 @@
 #include "linux_header.h"
 #include "socket_header.h"
-#include "daemonize.h"
 #include "command.h"
 #include "string_header.h"
+#include "download_file.h"
 
 bool g_DaemonStopped = true;
+CDownloadFile g_DownloadFile;
 void DealLocalCommand(const char* command)
 {
 	if (strcmp(command, "stop") == 0)
+	{
+		g_DownloadFile.Stop();
 		g_DaemonStopped = true;
+	}
+	if (strcmp(command, "download") == 0)
+	{
+		g_DownloadFile.Start();
+	}
 }
 
 int main(int argc, char* argv[])
@@ -33,9 +41,9 @@ int main(int argc, char* argv[])
 #ifdef __CLIENT_DAEMON__
 	// A daemon, bind to local address, listennig command.
 	printf("Bind %s:%d\n", ipString.c_str(), port);
-
+#ifndef __DEBUG__
 	Daemonize();// Close all file descriptors include socket
-	
+#endif	
 	int sockfd;	
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 		ErrorQuit("Can't create socket");
@@ -65,6 +73,7 @@ int main(int argc, char* argv[])
 				DealLocalCommand(buf);
 			}
 		}
+		sleep(1);
 		
 	}
 	close(sockfd);

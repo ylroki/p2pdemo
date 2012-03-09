@@ -3,18 +3,10 @@
 #include <linux_header.h>
 
 // Client foreground process send to Client background process.
-const char* g_LocalCommand[] = {"stop", "download"};
+extern const char* g_LocalCommand[];
 
-bool IsLocalCommand(const char* command)
-{
-	int size = sizeof(g_LocalCommand) / sizeof(char*);
-	for (int i = 0; i < size; ++i)
-		if (strcmp(command, g_LocalCommand[i]) == 0)
-			return true;
-	return false;
-}
+bool IsLocalCommand(const char* command);
 
-// Client background process send to Server
 enum KP2PCommand
 {};
 

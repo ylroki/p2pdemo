@@ -1,7 +1,7 @@
 #ifndef __CLIENT_LOGIN_AND_LOGOUT_H__
 #define __CLIENT_LOGIN_AND_LOGOUT_H__
 
-#inlcude "linux_header.h"
+#include "linux_header.h"
 
 class CLogin
 {

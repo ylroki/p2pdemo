@@ -11,30 +11,21 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/termios.h>
+#include <sys/resource.h>
 #include <string>
 #include <string.h>
+#include <vector>
 
 #define BUF_SIZE 1024
+#define THREAD_ERROR -1
 // Some functions.
-void ErrorQuit(const char* errString)
-{
-	printf("%s\n", errString);
-	exit(1);
-}
+
+void ErrorQuit(const char* errString);
 
 void Daemonize();
 
-void DebugLog(const char* dString)
-{
-	int	logfd = open("/home/ylroki/project/local_repos/p2p_system/debug.log", O_RDWR | O_CREAT | O_TRUNC);
-	write(logfd, dString, strlen(dString));
-	close(logfd);
-}
+void DebugLog(const char* dString);
 
-void DebugPrint(const char* dString)
-{
-#ifdef __DEBUG__
-	printf("%s\n", dString);
-#endif
-}
+void DebugPrint(const char* dString);
+
 #endif
