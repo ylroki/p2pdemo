@@ -71,5 +71,7 @@ bool CUploadFile::InitSocket()
 {
 	if ((m_Socket = socket(AF_INET, SOCK_DGRAM, 0) == SOCKET_ERROR))
 		return false;
+	printf("%d\n", m_Socket);
+		
 	return Bind(m_Socket, NULL, m_Config->GetPeerPort());
 }

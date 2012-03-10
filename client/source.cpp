@@ -37,7 +37,6 @@ void CSource::Recv()
 	char buf[BUF_SIZE];
 	memset(buf, 0, sizeof(buf));
 	recv(m_Socket, buf, BUF_SIZE, 0);
-	DebugLog(buf);
 }
 
 void CSource::Send()

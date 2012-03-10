@@ -52,7 +52,10 @@ int main(int argc, char* argv[])
 		fd_set rSet;
 		FD_ZERO(&rSet);
 		FD_SET(sockfd, &rSet);
-		if (select(sockfd + 1, &rSet, NULL, NULL, NULL) > 0)
+		struct timeval t;
+		t.tv_sec = 0;
+		t.tv_usec = 100;
+		if (select(sockfd + 1, &rSet, NULL, NULL, &t) > 0)
 		{
 			if (FD_ISSET(sockfd, &rSet))
 			{
