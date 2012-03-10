@@ -2,6 +2,7 @@
 
 bool FillAddress(struct sockaddr_in& addr, const char* ipString, const int port, int domain)
 {
+	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = domain;
 	addr.sin_port = htons(port);
 	if (ipString != NULL)

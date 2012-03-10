@@ -3,9 +3,13 @@
 #include "command.h"
 #include "string_header.h"
 #include "download_file.h"
+#include "upload_file.h"
 
 bool g_DaemonStopped = true;
 CDownloadFile g_DownloadFile;
+CUploadFile g_UploadFile;
+CConfig g_Config;
+
 void DealLocalCommand(const char* command)
 {
 	if (strcmp(command, "stop") == 0)
@@ -22,22 +26,11 @@ void DealLocalCommand(const char* command)
 int main(int argc, char* argv[])
 {
 	// Get network configuration.
-	FILE* file = fopen("config/client.conf", "r");
-	if (file == NULL)
-		ErrorQuit("No client.conf");
+	if (g_Config.Init("config/client.conf") == false)
+		ErrorQuit("Error on getting configuration ");
+	std::string ipString = g_Config.GetLocalIP();
+	int port = g_Config.GetLocalPort();
 	
-	char buf[BUF_SIZE];
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		ErrorQuit("No IP address");
-	std::string ipString = buf;
-	ipString = TrimString(ipString);
-	
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		ErrorQuit("No port");
-	int port = atoi(buf);
-	
-	fclose(file);
-
 #ifdef __CLIENT_DAEMON__
 	// A daemon, bind to local address, listennig command.
 	printf("Bind %s:%d\n", ipString.c_str(), port);
@@ -50,6 +43,8 @@ int main(int argc, char* argv[])
 
 	if (Bind(sockfd, ipString.c_str(), port) == false)
 		ErrorQuit("Can't bind socket");
+
+	g_UploadFile.Start(&g_Config);
 
 	g_DaemonStopped = false;
 	while (!g_DaemonStopped)
@@ -65,6 +60,7 @@ int main(int argc, char* argv[])
 				int n;
 				char abuf[MAX_ADDR_SIZE];
 				socklen_t alen = MAX_ADDR_SIZE;
+				char buf[BUF_SIZE];
 				memset(buf, 0, sizeof(buf));
 				if ((n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen)) < 0)
 					continue;
@@ -77,6 +73,8 @@ int main(int argc, char* argv[])
 		
 	}
 	close(sockfd);
+	
+	g_UploadFile.Stop();
 
 #else
 	// A Foreground process
@@ -92,6 +90,7 @@ int main(int argc, char* argv[])
 	if (SendTo(sockfd, argv[1], ipString.c_str(), port) == false)
 		ErrorQuit("sendto() error");
 	int n;
+	char buf[BUF_SIZE];
 	memset(buf, 0, sizeof(buf));
 	if ((n = recv(sockfd, buf, BUF_SIZE, 0)) < 0)
 		ErrorQuit("recv() error");

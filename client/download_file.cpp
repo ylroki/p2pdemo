@@ -44,12 +44,14 @@ void CDownloadFile::Work()
 	CSourceManager manager;
 	if (RequestSources())
 	{
+		printf("Download thread work\n");
 		manager.Start();
 		while (m_Status == DS_RUNNING)	
 		{
 			Sleep(100);
 		}
 		manager.Stop();
+		printf("Download thread stop\n");
 	}
 }
 
