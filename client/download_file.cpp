@@ -29,7 +29,8 @@ bool CDownloadFile::Start()
 void CDownloadFile::Stop()
 {
 	m_Status = DS_DONE;
-	pthread_join(m_Thread, NULL);
+	if (m_Thread != THREAD_ERROR)
+		pthread_join(m_Thread, NULL);
 }
 
 void* CDownloadFile::ThreadFunc(void* arg)

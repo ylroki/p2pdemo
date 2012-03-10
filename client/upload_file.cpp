@@ -31,7 +31,8 @@ bool CUploadFile::Start(CConfig* config)
 void CUploadFile::Stop()
 {
 	m_Stopped = true;
-	pthread_join(m_Thread, NULL);
+	if (m_Thread != THREAD_ERROR)
+		pthread_join(m_Thread, NULL);
 }
 
 void* CUploadFile::ThreadFunc(void* arg)
@@ -69,7 +70,7 @@ void CUploadFile::Work()
 
 bool CUploadFile::InitSocket()
 {
-	if ((m_Socket = socket(AF_INET, SOCK_DGRAM, 0) == SOCKET_ERROR))
+	if ((m_Socket = socket(AF_INET, SOCK_DGRAM, 0)) == SOCKET_ERROR)
 		return false;
 	printf("%d\n", m_Socket);
 		

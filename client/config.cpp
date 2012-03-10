@@ -20,21 +20,21 @@ bool CConfig::Init(const char* filename)
 
 	char buf[BUF_SIZE];
 	if (fgets(buf, BUF_SIZE, file) == NULL)
-		ErrorQuit("No local IP address");
+		return false;
 	m_LocalIP = buf;
 	m_LocalIP = TrimString(m_LocalIP);
 	
 	if (fgets(buf, BUF_SIZE, file) == NULL)
-		ErrorQuit("No local port");
+		return false;
 	m_LocalPort = atoi(buf);
 	
 	if (fgets(buf, BUF_SIZE, file) == NULL)
-		ErrorQuit("No peer IP address");
+		return false;
 	m_PeerIP = buf;
 	m_PeerIP = TrimString(m_PeerIP);
 	
 	if (fgets(buf, BUF_SIZE, file) == NULL)
-		ErrorQuit("No local port");
+		return false;
 	m_PeerPort = atoi(buf);
 
 	fclose(file);
