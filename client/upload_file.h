@@ -11,12 +11,13 @@ public:
 	~CUploadFile();
 	bool Start(CConfig* config);
 	void Stop();
-	
 
 private:
 	static void* ThreadFunc(void* arg);
 	void Work();
 	bool InitSocket();
+	void Recv();
+
 	pthread_t m_Thread;
 	bool m_Stopped;
 	int m_Socket;
