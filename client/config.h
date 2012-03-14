@@ -15,6 +15,8 @@ public:
 	int GetPeerPort();
 	int GetMinPort();
 	int GetMaxPort();
+	int GetUpdatePeriod();
+	std::string GetDirectory();
 
 private:
 	std::string m_LocalIP;
@@ -23,6 +25,8 @@ private:
 	int m_PeerPort;
 	int m_MinPort;
 	int m_MaxPort;
+	int m_UpdatePeriod;
+	std::string m_Directory;
 };
 
 #endif

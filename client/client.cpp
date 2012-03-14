@@ -4,11 +4,13 @@
 #include "string_header.h"
 #include "download_file.h"
 #include "upload_file.h"
+#include "file_system.h"
 
 bool g_DaemonStopped = true;
 CDownloadFile g_DownloadFile;
 CUploadFile g_UploadFile;
 CConfig g_Config;
+CFileSystem g_FileSystem;
 
 void DealLocalCommand(const char* command)
 {
@@ -45,6 +47,7 @@ int main(int argc, char* argv[])
 		ErrorQuit("Can't bind socket");
 
 	g_UploadFile.Start(&g_Config);
+	g_FileSystem.Start(&g_Config);
 
 	g_DaemonStopped = false;
 	while (!g_DaemonStopped)
@@ -78,6 +81,7 @@ int main(int argc, char* argv[])
 	close(sockfd);
 	
 	g_UploadFile.Stop();
+	g_FileSystem.Stop();
 
 #else
 	// A Foreground process

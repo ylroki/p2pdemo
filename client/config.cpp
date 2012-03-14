@@ -6,7 +6,8 @@ CConfig::CConfig()
 	m_PeerIP(),
 	m_PeerPort(0),
 	m_MinPort(9000),
-	m_MaxPort(9100)
+	m_MaxPort(9100),
+	m_UpdatePeriod(30)
 {
 }
 
@@ -38,6 +39,14 @@ bool CConfig::Init(const char* filename)
 	if (fgets(buf, BUF_SIZE, file) == NULL)
 		return false;
 	m_PeerPort = atoi(buf);
+
+	if (fgets(buf, BUF_SIZE, file) == NULL)
+		return false;
+	m_UpdatePeriod = atoi(buf);
+
+	if (fgets(buf, BUF_SIZE, file) == NULL)
+		return false;
+	m_Directory = buf;
 
 	fclose(file);
 	return true;
@@ -71,4 +80,14 @@ int CConfig::GetMinPort()
 int CConfig::GetMaxPort()
 {
 	return m_MaxPort;
+}
+
+int CConfig::GetUpdatePeriod()
+{
+	return m_UpdatePeriod;
+}
+
+std::string CConfig::GetDirectory()
+{
+	return m_Directory;
 }
