@@ -1,10 +1,12 @@
 #include "download_file.h"
-#include "source.h"
 
 CDownloadFile::CDownloadFile()
+	:m_Status(DS_WAIT),
+	m_Thread(THREAD_ERROR),
+	m_Socket(SOCKET_ERROR),
+	m_Config(NULL)
 {
-	m_Status = DS_WAIT; 
-	m_Thread = THREAD_ERROR;
+	m_VecSource.clear();	
 }
 
 CDownloadFile::~CDownloadFile()
@@ -15,8 +17,9 @@ KDownStatus CDownloadFile::GetStatus()
 	return m_Status;
 }
 
-bool CDownloadFile::Start()
+bool CDownloadFile::Start(CConfig* config)
 {
+	m_Config = config;
 	if (m_Status == DS_RUNNING)
 		return true;
 	m_Status = DS_RUNNING;
@@ -42,24 +45,53 @@ void* CDownloadFile::ThreadFunc(void* arg)
 
 void CDownloadFile::Work()
 {
-	CSourceManager manager;
-	if (RequestSources())
+	if (InitSocket() == false)
+		m_Status = DS_ERROR;	
+	while (m_Status == DS_RUNNING)	
 	{
-		printf("Download thread work\n");
-		manager.Start();
-		while (m_Status == DS_RUNNING)	
-		{
-			Sleep(100);
-		}
-		manager.Stop();
-		printf("Download thread stop\n");
+		RequestSources();
+		UpdateSources();
+		SelectSocket();
+		Sleep(100);
 	}
 }
 
-bool CDownloadFile::RequestSources()
+void CDownloadFile::RequestSources()
 {
 	// TODO: communicate with server, ask for sources
+}
 
+void CDownloadFile::UpdateSources()
+{
+	// TODO
+}
 
-	return true;
+void CDownloadFile::SelectSocket()
+{
+	fd_set rSet;
+	FD_ZERO(&rSet);
+	FD_SET(m_Socket, &rSet);
+	struct timeval t;
+	t.tv_sec = 0;
+	t.tv_usec = 100;
+
+	if (select(m_Socket+1, &rSet, NULL, NULL, &t))
+		RecvMessage();
+}
+
+void CDownloadFile::RecvMessage()
+{}
+
+bool CDownloadFile::InitSocket()
+{
+	int sock = socket(AF_INET, SOCK_DGRAM, 0);
+	for (int i = m_Config->GetMinPort(); i <= m_Config->GetMaxPort(); ++i)
+	{
+		if (Bind(sock, NULL, i) == true)
+		{
+			m_Socket = sock;
+			return true;
+		}
+	}
+	return false;
 }

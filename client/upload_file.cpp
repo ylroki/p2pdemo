@@ -1,5 +1,4 @@
 #include "upload_file.h"
-#include "source.h"
 
 CUploadFile::CUploadFile()
 	:m_Thread(THREAD_ERROR),
@@ -60,7 +59,7 @@ void CUploadFile::Work()
 		{
 			if (FD_ISSET(m_Socket, &rSet))
 			{
-				//Recv();
+				RecvMessage();
 			}
 		}
 		Sleep(100);
@@ -77,14 +76,13 @@ bool CUploadFile::InitSocket()
 	return Bind(m_Socket, NULL, m_Config->GetPeerPort());
 }
 
-void Recv()
+void CUploadFile::RecvMessage()
 {
 	char abuf[MAX_ADDR_SIZE];
 	socklen_t alen = MAX_ADDR_SIZE;
 	char buf[BUF_SIZE];
 	memset(buf, 0, sizeof(buf));
 	int n;
-	if ((n = recvform(m_Socket, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen)) < 0)
+	if ((n = recvfrom(m_Socket, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen)) < 0)
 		return;
-	DealMessage(buf, n, m_Socket, abuf, alen);
 }

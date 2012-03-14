@@ -16,7 +16,7 @@ private:
 	static void* ThreadFunc(void* arg);
 	void Work();
 	bool InitSocket();
-	void Recv();
+	void RecvMessage();
 
 	pthread_t m_Thread;
 	bool m_Stopped;

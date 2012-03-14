@@ -19,7 +19,7 @@ void DealLocalCommand(const char* command)
 	}
 	if (strcmp(command, "download") == 0)
 	{
-		g_DownloadFile.Start();
+		g_DownloadFile.Start(&g_Config);
 	}
 }
 

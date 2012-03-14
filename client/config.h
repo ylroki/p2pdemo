@@ -13,12 +13,16 @@ public:
 	std::string GetPeerIP();
 	int GetLocalPort();
 	int GetPeerPort();
+	int GetMinPort();
+	int GetMaxPort();
 
 private:
 	std::string m_LocalIP;
 	int m_LocalPort;
 	std::string m_PeerIP;
 	int m_PeerPort;
+	int m_MinPort;
+	int m_MaxPort;
 };
 
 #endif

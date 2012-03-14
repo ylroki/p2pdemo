@@ -4,7 +4,9 @@ CConfig::CConfig()
 	:m_LocalIP(),
 	m_LocalPort(0),
 	m_PeerIP(),
-	m_PeerPort(0)
+	m_PeerPort(0),
+	m_MinPort(9000),
+	m_MaxPort(9100)
 {
 }
 
@@ -61,3 +63,12 @@ int CConfig::GetPeerPort()
 	return m_PeerPort;
 }
 
+int CConfig::GetMinPort()
+{
+	return m_MinPort;
+}
+
+int CConfig::GetMaxPort()
+{
+	return m_MaxPort;
+}
