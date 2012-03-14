@@ -1,6 +1,8 @@
 INCLUDE = ./include
 CLIENT_DIR = client
+SERVER_DIR = server
 CLIENT_CPP = $(CLIENT_DIR)/*.cpp
+SERVER_CPP = $(SERVER_DIR)/*.cpp
 SHARE_CPP = $(INCLUDE)/*.cpp
 p2p_client:
 	g++ -g -I$(INCLUDE)  $(CLIENT_CPP) $(SHARE_CPP) -o ./bin/clientc -lpthread
@@ -13,3 +15,6 @@ test_upload_file:
 	g++ -g -I$(INCLUDE) -I$(CLIENT_DIR) \
 	client/upload_file.cpp client/config.cpp $(SHARE_CPP) \
 	test/test_upload.cpp -o ./bin/test_upload -lpthread
+
+p2p_server:
+	g++ -g -I$(INCLUDE) $(SERVER_CPP) $(SHARE_CPP) -o ./bin/server
