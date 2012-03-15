@@ -3,13 +3,14 @@
 #include "linux_header.h"
 #include "socket_header.h"
 #include "config.h"
+#include "database_header.h"
 
 class CFileSystem
 {
 public:
 	CFileSystem();
 	~CFileSystem();
-	void Start(CConfig*);
+	bool Start(CConfig*);
 	void Stop();
 
 private:
@@ -22,6 +23,7 @@ private:
 	bool m_Stopped;
 	CConfig* m_Config;
 	unsigned int m_PastTime;
+	CDatabase m_Database;
 };
 
 #endif

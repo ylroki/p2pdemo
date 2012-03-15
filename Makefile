@@ -22,4 +22,4 @@ p2p_server:
 test_file_system:
 	g++ -g -I$(INCLUDE) -I$(CLIENT_DIR) \
 	client/file_system.cpp client/config.cpp $(SHARE_CPP) \
-	test/test_file_system.cpp -o ./bin/test_file_system -lpthread
+	test/test_file_system.cpp -o ./bin/test_file_system -lpthread -lsqlite3

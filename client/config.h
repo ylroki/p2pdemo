@@ -17,6 +17,7 @@ public:
 	int GetMaxPort();
 	int GetUpdatePeriod();
 	std::string GetDirectory();
+	std::string GetCacheDir();
 
 private:
 	std::string m_LocalIP;
@@ -27,6 +28,7 @@ private:
 	int m_MaxPort;
 	int m_UpdatePeriod;
 	std::string m_Directory;
+	std::string m_CacheDir;
 };
 
 #endif

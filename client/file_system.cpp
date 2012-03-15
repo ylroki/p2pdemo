@@ -11,16 +11,18 @@ CFileSystem::CFileSystem()
 CFileSystem::~CFileSystem()
 {}
 
-void CFileSystem::Start(CConfig* config)
+bool CFileSystem::Start(CConfig* config)
 {
 	if (!m_Stopped)
-		return;
+		return true;
 	m_Config = config;
+	if (m_Database.Open(m_Config->GetCacheDir()+"/hash.db") == false)
+		return false;
 	m_Stopped = false;
 	if (0 == pthread_create(&m_Thread, NULL, ThreadFunc, this))
-		return ;
+		return true;
 	m_Stopped = true;
-	return ;
+	return false;
 }
 
 void CFileSystem::Stop()
@@ -28,6 +30,7 @@ void CFileSystem::Stop()
 	m_Stopped = true;
 	if (m_Thread != THREAD_ERROR)
 		pthread_join(m_Thread, NULL);
+	m_Database.Close();
 }
 
 void* CFileSystem::ThreadFunc(void* arg)

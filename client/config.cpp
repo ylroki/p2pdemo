@@ -49,6 +49,11 @@ bool CConfig::Init(const char* filename)
 	m_Directory = buf;
 	m_Directory = TrimString(m_Directory);
 
+	if (fgets(buf, BUF_SIZE, file) == NULL)
+		return false;
+	m_CacheDir = buf;
+	m_CacheDir = TrimString(m_CacheDir);
+
 	fclose(file);
 	return true;
 }
@@ -91,4 +96,9 @@ int CConfig::GetUpdatePeriod()
 std::string CConfig::GetDirectory()
 {
 	return m_Directory;
+}
+
+std::string CConfig::GetCacheDir()
+{
+	return m_CacheDir;
 }

@@ -21,6 +21,11 @@ bool CDatabase::Open(const char* filename)
 	return true;
 }
 
+bool CDatabase::Open(const std::string filename)
+{
+	return Open(filename.c_str());
+}
+
 void CDatabase::Close()
 {
 	if (m_DB)
