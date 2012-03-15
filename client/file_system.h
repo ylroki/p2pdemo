@@ -16,6 +16,7 @@ private:
 	static void* ThreadFunc(void* arg);
 	void Work();
 	void FindResources();
+	void DealFile(const std::string file);
 
 	pthread_t m_Thread;
 	bool m_Stopped;

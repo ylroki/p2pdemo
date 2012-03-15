@@ -15,6 +15,8 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include <queue>
+#include <dirent.h>
 
 #define BUF_SIZE 1024
 #define THREAD_ERROR -1
@@ -30,4 +32,5 @@ void DebugPrint(const char* dString);
 
 void Sleep(unsigned int ms);// sleep thread amount of milliseconds
 
+int Kbhit();
 #endif

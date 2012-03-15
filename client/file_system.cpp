@@ -41,7 +41,7 @@ void CFileSystem::Work()
 {
 	while (!m_Stopped)
 	{
-		if (m_PastTime / 60000 >= m_Config->GetUpdatePeriod())
+		if (m_PastTime == 0 || m_PastTime / 60000 >= m_Config->GetUpdatePeriod())
 		{
 			m_PastTime = 0;
 			FindResources();
@@ -52,4 +52,45 @@ void CFileSystem::Work()
 }
 
 void CFileSystem::FindResources()
-{}
+{
+	std::queue<std::string> queFile;
+	queFile.push(m_Config->GetDirectory());
+	while (!queFile.empty())
+	{
+		std::string file = queFile.front();
+		queFile.pop();
+		struct stat statbuf;
+		if (lstat(file.c_str(), &statbuf) == -1)
+		{
+			perror(file.c_str());
+			continue;
+		}
+		if (S_ISDIR(statbuf.st_mode) == 0)// not a directory
+		{
+			DealFile(file);
+		}
+		else
+		{
+			struct dirent* dirp;
+			DIR* dp;
+			if ((dp = opendir(file.c_str())) == NULL)
+				continue;
+			if (file[file.size() - 1] != '/')
+				file.append("/");
+			while ((dirp = readdir(dp)) != NULL)
+			{
+				if (strcmp(dirp->d_name, ".") == 0 ||
+					strcmp(dirp->d_name, "..") == 0)
+					continue;
+				std::string chFile = file + dirp->d_name;
+				queFile.push(chFile);
+			}
+		}
+
+	}
+}
+
+void CFileSystem::DealFile(const std::string file)
+{
+	printf("a file %s\n", file.c_str());
+}

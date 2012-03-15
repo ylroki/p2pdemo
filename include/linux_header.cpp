@@ -74,3 +74,18 @@ void Sleep(unsigned int ms)
 {
 	usleep(ms*1000);
 }
+
+int Kbhit()
+{
+	fd_set rSet;
+	FD_ZERO(&rSet);
+	FD_SET(0, &rSet);
+	struct timeval t;
+	t.tv_sec = 0;
+	t.tv_usec = 100;
+	int n = select(1, &rSet, NULL, NULL, &t);
+	if (FD_ISSET(0, &rSet))
+		return getchar();
+	else
+		return -1;
+}

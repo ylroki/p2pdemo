@@ -18,3 +18,8 @@ test_upload_file:
 
 p2p_server:
 	g++ -g -I$(INCLUDE) $(SERVER_CPP) $(SHARE_CPP) -o ./bin/server
+
+test_file_system:
+	g++ -g -I$(INCLUDE) -I$(CLIENT_DIR) \
+	client/file_system.cpp client/config.cpp $(SHARE_CPP) \
+	test/test_file_system.cpp -o ./bin/test_file_system -lpthread

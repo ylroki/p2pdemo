@@ -47,6 +47,7 @@ bool CConfig::Init(const char* filename)
 	if (fgets(buf, BUF_SIZE, file) == NULL)
 		return false;
 	m_Directory = buf;
+	m_Directory = TrimString(m_Directory);
 
 	fclose(file);
 	return true;
