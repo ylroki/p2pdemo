@@ -4,6 +4,10 @@ SERVER_DIR = server
 CLIENT_CPP = $(CLIENT_DIR)/*.cpp
 SERVER_CPP = $(SERVER_DIR)/*.cpp
 SHARE_CPP = $(INCLUDE)/*.cpp
+SSL_DIR = /usr/local/ssl
+SSL_INCLUDE = $(SSL_DIR)/include
+SSL_LIB = $(SSL_DIR)/lib
+
 p2p_client:
 	g++ -g -I$(INCLUDE)  $(CLIENT_CPP) $(SHARE_CPP) -o ./bin/clientc -lpthread
 	g++ -g -I$(INCLUDE) -D__CLIENT_DAEMON__  $(CLIENT_CPP) $(SHARE_CPP) -o ./bin/clientd -lpthread
@@ -23,3 +27,6 @@ test_file_system:
 	g++ -g -I$(INCLUDE) -I$(CLIENT_DIR) \
 	client/file_system.cpp client/config.cpp $(SHARE_CPP) \
 	test/test_file_system.cpp -o ./bin/test_file_system -lpthread -lsqlite3
+
+test_md5:
+	g++ -g -I$(INCLUDE) -I$(SSL_INCLUDE) -L$(SSL_LIB) test/test_md5.cpp -o ./bin/test_md5 -lcrypto
