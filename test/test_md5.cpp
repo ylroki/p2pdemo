@@ -1,6 +1,4 @@
-#include "linux_header.h"
-#include <openssl/md5.h>
-
+#include "md5_header.h"
 int main(int argc, char* argv[])
 {
 	if (argc > 2)
@@ -19,24 +17,11 @@ int main(int argc, char* argv[])
 		}
 		else if (strcmp(argv[1], "-f") == 0)
 		{
-			int fd = open(argv[2], O_RDWR);
-			if (fd != -1)
-			{
-				MD5_CTX md;
-				unsigned char buf[BUF_SIZE];
-				int n;
-				MD5_Init(&md);
-				while ((n = read(fd, buf, BUF_SIZE)) > 0)
-				{
-					MD5_Update(&md, buf, n);
-				}
-				unsigned char hash[16];
-				MD5_Final(hash, &md);
-				for (int i = 0; i < 16; ++i)
-					printf("%02x", hash[i]);
-				printf("\n");
-
-			}
+			unsigned char hash[16];
+			MD5File(argv[2], hash);
+			for (int i = 0; i < 16; ++i)
+				printf("%02x", hash[i]);
+			printf("\n");
 		}
 	}
 	return 0;

@@ -29,4 +29,5 @@ test_file_system:
 	test/test_file_system.cpp -o ./bin/test_file_system -lpthread -lsqlite3
 
 test_md5:
-	g++ -g -I$(INCLUDE) -I$(SSL_INCLUDE) -L$(SSL_LIB) test/test_md5.cpp -o ./bin/test_md5 -lcrypto
+	g++ -g -I$(INCLUDE) -I$(SSL_INCLUDE) -L$(SSL_LIB) test/test_md5.cpp $(SHARE_CPP) \
+	-o ./bin/test_md5 -lcrypto -lpthread -lsqlite3
