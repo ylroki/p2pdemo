@@ -4,6 +4,7 @@
 #include "socket_header.h"
 #include "config.h"
 #include "database_header.h"
+#include "md5_header.h"
 
 class CFileSystem
 {

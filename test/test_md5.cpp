@@ -22,6 +22,13 @@ int main(int argc, char* argv[])
 			for (int i = 0; i < 16; ++i)
 				printf("%02x", hash[i]);
 			printf("\n");
+
+			char md5[33];
+			md5[32] = 0;
+			Hex2MD5(hash, md5);
+			MD52Hex(md5, hash);
+			Hex2MD5(hash, md5);
+			printf("%s\n", md5);
 		}
 	}
 	return 0;

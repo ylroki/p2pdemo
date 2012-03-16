@@ -21,3 +21,38 @@ bool MD5File(const std::string filename, unsigned char* hexHash)
 {
 	return MD5File(filename.c_str(), hexHash);
 }
+
+int Char2Hex(char ch)
+{
+	if (ch >= '0' && ch <= '9')
+		return (ch - '0');
+	if (ch >= 'a' && ch <= 'f')
+		return (ch - 'a' + 10);
+	return -1;
+}
+
+char Hex2Char(int hex)
+{
+	if (hex >= 0 && hex <= 9)
+		return hex + '0';
+	if (hex >= 10 && hex <= 15)
+		return hex - 10 + 'a';
+	return 0;
+}
+
+void MD52Hex(const char* md5, unsigned char* hex)
+{
+	for (int i = 0; i < 32; i+=2)
+	{	
+		hex[i/2] = Char2Hex(md5[i])*16 + Char2Hex(md5[i+1]);
+	}
+}
+
+void Hex2MD5(const unsigned char* hex, char* md5)
+{
+	for (int i = 0; i < 16; ++i)
+	{
+		md5[i*2] = Hex2Char((hex[i]>>4));
+		md5[i*2+1] = Hex2Char((hex[i]&0x0f));
+	}
+}

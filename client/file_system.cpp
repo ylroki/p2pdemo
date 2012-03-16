@@ -95,5 +95,10 @@ void CFileSystem::FindResources()
 
 void CFileSystem::DealFile(const std::string file)
 {
-	printf("a file %s\n", file.c_str());
+	unsigned char hexHash[16];
+	MD5File(file.c_str(), hexHash);
+	char md5[33];
+	md5[32] = 0;
+	Hex2MD5(hexHash, md5);
+	printf("a file %s %s\n", file.c_str(), md5);
 }

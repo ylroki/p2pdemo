@@ -31,3 +31,15 @@ void CDatabase::Close()
 	if (m_DB)
 		sqlite3_close(m_DB);
 }
+
+void CDatabase::Execute(const char* sql)
+{
+	if (m_DB)
+		sqlite3_exec(m_DB, sql, NULL, NULL, NULL);
+}
+
+void CDatabase::GetTable(const char* sql, char*** result, int* nRow, int* nCol)
+{
+	if (m_DB)
+		sqlite3_get_table(m_DB, sql, result, nRow, nCol, NULL);
+}

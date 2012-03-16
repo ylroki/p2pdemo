@@ -24,9 +24,9 @@ p2p_server:
 	g++ -g -I$(INCLUDE) $(SERVER_CPP) $(SHARE_CPP) -o ./bin/server
 
 test_file_system:
-	g++ -g -I$(INCLUDE) -I$(CLIENT_DIR) \
+	g++ -g -I$(INCLUDE) -I$(CLIENT_DIR) -I$(SSL_INCLUDE) -L$(SSL_LIB) \
 	client/file_system.cpp client/config.cpp $(SHARE_CPP) \
-	test/test_file_system.cpp -o ./bin/test_file_system -lpthread -lsqlite3
+	test/test_file_system.cpp -o ./bin/test_file_system -lpthread -lsqlite3 -lcrypto
 
 test_md5:
 	g++ -g -I$(INCLUDE) -I$(SSL_INCLUDE) -L$(SSL_LIB) test/test_md5.cpp $(SHARE_CPP) \
