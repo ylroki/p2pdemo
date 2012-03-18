@@ -32,14 +32,29 @@ void CDatabase::Close()
 		sqlite3_close(m_DB);
 }
 
-void CDatabase::Execute(const char* sql)
+bool CDatabase::Execute(const char* sql)
 {
 	if (m_DB)
-		sqlite3_exec(m_DB, sql, NULL, NULL, NULL);
+	{
+		int ret = sqlite3_exec(m_DB, sql, NULL, NULL, NULL);
+		return (ret == SQLITE_OK);
+	}
+	return false;
 }
 
-void CDatabase::GetTable(const char* sql, char*** result, int* nRow, int* nCol)
+bool CDatabase::GetTable(const char* sql, char*** result, int* nRow, int* nCol)
 {
 	if (m_DB)
-		sqlite3_get_table(m_DB, sql, result, nRow, nCol, NULL);
+	{
+		int ret = sqlite3_get_table(m_DB, sql, result, nRow, nCol, NULL);
+		return (ret == SQLITE_OK);
+	}
+	return false;
+}
+
+bool CDatabase::CreateTable(const char* tbName, const char* colDef)
+{
+	char sql[BUF_SIZE];
+	sprintf(sql, "create table if not exists %s%s", tbName, colDef);
+	return Execute(sql);
 }

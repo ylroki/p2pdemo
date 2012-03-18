@@ -18,6 +18,9 @@ bool CFileSystem::Start(CConfig* config)
 	m_Config = config;
 	if (m_Database.Open(m_Config->GetCacheDir()+"/hash.db") == false)
 		return false;
+	if (m_Database.CreateTable("hash", "(md5 TEXT primary key, path TEXT)") == false)
+		return false;
+
 	m_Stopped = false;
 	if (0 == pthread_create(&m_Thread, NULL, ThreadFunc, this))
 		return true;
@@ -101,4 +104,8 @@ void CFileSystem::DealFile(const std::string file)
 	md5[32] = 0;
 	Hex2MD5(hexHash, md5);
 	printf("a file %s %s\n", file.c_str(), md5);
+	char sql[BUF_SIZE];
+	sprintf(sql, "insert into hash values('%s', '%s')", 
+				md5, file.c_str());
+	m_Database.Execute(sql);
 }
