@@ -7,7 +7,7 @@ SSL_LIB = $(SSL_DIR)/lib
 
 p2p_clientc:	
 	g++ -g -Iinclude -Ip2p_class -I$(SSL_INCLUDE) -L$(SSL_LIB) -D__DEBUG__ \
-		p2p_class/config.cpp $(SHARE_CPP) client/clientc.cpp\
+		p2p_class/command.cpp p2p_class/config.cpp $(SHARE_CPP) client/clientc.cpp\
 		-o bin/clientc -lpthread -lcrypto -lsqlite3
 	
 p2p_clientd_debug:
