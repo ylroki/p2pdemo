@@ -1,6 +1,6 @@
 <map version="0.9.0">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
-<node CREATED="1294123845969" ID="ID_1125410527" LINK="../downloader/network/doc/kugou7-network.mm" MODIFIED="1331384434338" TEXT="p2p main procedure">
+<node CREATED="1294123845969" ID="ID_1125410527" LINK="../downloader/network/doc/kugou7-network.mm" MODIFIED="1332303747094" TEXT="p2p">
 <node CREATED="1331536121632" HGAP="93" ID="ID_452468075" MODIFIED="1331725105314" POSITION="left" TEXT="protocol" VSHIFT="-76">
 <node CREATED="1331538146425" ID="ID_398814164" MODIFIED="1331538155571" TEXT="C/S">
 <node CREATED="1331536137006" ID="ID_158097607" MODIFIED="1331536158912" TEXT="server">
@@ -63,7 +63,7 @@
 </node>
 <node CREATED="1331536159778" ID="ID_1350210120" MODIFIED="1331536162340" TEXT="client">
 <node CREATED="1331536206630" HGAP="148" ID="ID_1221378393" MODIFIED="1331538126477" TEXT="send" VSHIFT="26">
-<node CREATED="1331536430903" ID="ID_1358088132" MODIFIED="1331537191645" TEXT="login">
+<node CREATED="1331536430903" ID="ID_1358088132" MODIFIED="1332146227879" TEXT="login">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -73,13 +73,13 @@
       char|1|commandID|0x01
     </p>
     <p>
-      short|2|peerPort
+      unsigned short|2|peerPort
     </p>
     <p>
-      unsigned int|4|numbers of hashes
+      unsigned long|4|numbers of hashes
     </p>
     <p>
-      char|16*n|hashes
+      unsigned char*|16*n|hashes
     </p>
   </body>
 </html></richcontent>
@@ -115,7 +115,7 @@
 </html></richcontent>
 <arrowlink DESTINATION="ID_91180679" ENDARROW="Default" ENDINCLINATION="95;0;" ID="Arrow_ID_218409333" STARTARROW="None" STARTINCLINATION="95;0;"/>
 </node>
-<node CREATED="1331537658001" ID="ID_1898748950" MODIFIED="1331720438884" TEXT="request source of a hash">
+<node CREATED="1331537658001" ID="ID_1898748950" MODIFIED="1332146218453" TEXT="request source of a hash">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -125,7 +125,7 @@
       char|1|commandID|0x04
     </p>
     <p>
-      char|16|hash
+      unsigned char*|16|hash
     </p>
   </body>
 </html></richcontent>
@@ -136,7 +136,7 @@
 </node>
 <node CREATED="1331538175051" ID="ID_1798528038" MODIFIED="1331538183609" TEXT="P/P">
 <node CREATED="1331538212259" ID="ID_326672241" MODIFIED="1331538223319" TEXT="source peer">
-<node CREATED="1331538364484" ID="ID_1867565399" MODIFIED="1331538451576" TEXT="check result">
+<node CREATED="1331538364484" ID="ID_1867565399" MODIFIED="1332146244180" TEXT="check result">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -146,7 +146,7 @@
       char|1|commandID|0x31
     </p>
     <p>
-      char|16|hash
+      unsigned char*|16|hash
     </p>
     <p>
       char|1|status
@@ -154,7 +154,7 @@
   </body>
 </html></richcontent>
 </node>
-<node CREATED="1331538970928" ID="ID_115023932" MODIFIED="1331539061179" TEXT="file data">
+<node CREATED="1331538970928" ID="ID_115023932" MODIFIED="1332146317107" TEXT="file data">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -164,7 +164,7 @@
       char|1|commandID|0x32
     </p>
     <p>
-      char|16|hash
+      unsigned c*har|16|hash
     </p>
     <p>
       char|1|block size, 1 means 1k
@@ -176,14 +176,14 @@
       long|4|block offset end
     </p>
     <p>
-      char|*|content
+      char*|*|content
     </p>
   </body>
 </html></richcontent>
 </node>
 </node>
 <node CREATED="1331538224166" ID="ID_804188050" MODIFIED="1331538242720" TEXT="request peer">
-<node CREATED="1331538258953" ID="ID_1525254213" MODIFIED="1331538451577" TEXT="check">
+<node CREATED="1331538258953" ID="ID_1525254213" MODIFIED="1332146256931" TEXT="check">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -193,13 +193,13 @@
       char|1|commandID|0x21
     </p>
     <p>
-      char|16|hash
+      unsigned char*|16|hash
     </p>
   </body>
 </html></richcontent>
 <arrowlink DESTINATION="ID_1867565399" ENDARROW="Default" ENDINCLINATION="41;0;" ID="Arrow_ID_1492304979" STARTARROW="None" STARTINCLINATION="41;0;"/>
 </node>
-<node CREATED="1331538708024" ID="ID_30407450" MODIFIED="1331539061180" TEXT="get file data">
+<node CREATED="1331538708024" ID="ID_30407450" MODIFIED="1332146271367" TEXT="get file data">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -209,7 +209,7 @@
       char|1|commandID|0x22
     </p>
     <p>
-      char|16|hash
+      unsigned char*|16|hash
     </p>
     <p>
       char|1|block size, 1 means 1k

@@ -17,10 +17,15 @@
 #include <vector>
 #include <queue>
 #include <dirent.h>
+#include <stdarg.h>
 
 #define BUF_SIZE 1024
 #define THREAD_ERROR -1
+typedef long long Int64;
 // Some functions.
+#define Min(a,b) a<b?a:b
+#define Max(a,b) a>b?a:b
+
 
 void ErrorQuit(const char* errString);
 

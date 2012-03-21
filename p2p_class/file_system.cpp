@@ -59,6 +59,7 @@ void CFileSystem::Work()
 
 void CFileSystem::FindResources()
 {
+	CProtocolManager protocol(m_Config);
 	std::queue<std::string> queFile;
 	queFile.push(m_Config->GetDirectory());
 	while (!queFile.empty())
@@ -73,7 +74,7 @@ void CFileSystem::FindResources()
 		}
 		if (S_ISDIR(statbuf.st_mode) == 0)// not a directory
 		{
-			DealFile(file);
+			DealFile(file, &protocol);
 		}
 		else
 		{
@@ -92,11 +93,11 @@ void CFileSystem::FindResources()
 				queFile.push(chFile);
 			}
 		}
-
 	}
+	protocol.SendCommand(0x01, SOCKET_ERROR);
 }
 
-void CFileSystem::DealFile(const std::string file)
+void CFileSystem::DealFile(const std::string file, CProtocolManager* protocol)
 {
 	unsigned char hexHash[16];
 	MD5File(file.c_str(), hexHash);
@@ -108,4 +109,5 @@ void CFileSystem::DealFile(const std::string file)
 	sprintf(sql, "insert into hash values('%s', '%s')", 
 				md5, file.c_str());
 	m_Database.Execute(sql);
+	protocol->AddHash(hexHash);	
 }

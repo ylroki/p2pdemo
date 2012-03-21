@@ -1,6 +1,8 @@
 #ifndef __INCLUDE_COMMAND_H__
 #define __INCLUDE_COMMAND_H__
-#include <linux_header.h>
+#include "linux_header.h"
+#include "socket_header.h"
+#include "stream.h"
 
 // Client foreground process send to Client background process.
 extern const char* g_LocalCommand[];
@@ -18,4 +20,5 @@ enum KP2PCommand
 	PPC_FILE_DATA = 0x32
 };
 
+int GenerateCommand(char* buf, char id, ...);
 #endif

@@ -1,4 +1,4 @@
-#include "config.h"
+#include "server_config.h"
 
 CConfig::CConfig()
 	:m_Port(8000)

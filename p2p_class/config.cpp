@@ -7,7 +7,9 @@ CConfig::CConfig()
 	m_PeerPort(0),
 	m_MinPort(9000),
 	m_MaxPort(9100),
-	m_UpdatePeriod(30)
+	m_UpdatePeriod(30),
+	m_ServerIP(),
+	m_ServerPort(0)
 {
 }
 
@@ -54,6 +56,15 @@ bool CConfig::Init(const char* filename)
 	m_CacheDir = buf;
 	m_CacheDir = TrimString(m_CacheDir);
 
+	if (fgets(buf, BUF_SIZE, file) == NULL)
+		return false;
+	m_ServerIP = buf;
+	m_ServerIP = TrimString(m_ServerIP);
+	
+	if (fgets(buf, BUF_SIZE, file) == NULL)
+		return false;
+	m_ServerPort = atoi(buf);
+
 	fclose(file);
 	return true;
 }
@@ -68,22 +79,22 @@ std::string CConfig::GetPeerIP()
 	return m_PeerIP;
 }
 
-int CConfig::GetLocalPort()
+unsigned short CConfig::GetLocalPort()
 {
 	return m_LocalPort;
 }
 
-int CConfig::GetPeerPort()
+unsigned short CConfig::GetPeerPort()
 {
 	return m_PeerPort;
 }
 
-int CConfig::GetMinPort()
+unsigned short CConfig::GetMinPort()
 {
 	return m_MinPort;
 }
 
-int CConfig::GetMaxPort()
+unsigned short CConfig::GetMaxPort()
 {
 	return m_MaxPort;
 }
@@ -101,4 +112,14 @@ std::string CConfig::GetDirectory()
 std::string CConfig::GetCacheDir()
 {
 	return m_CacheDir;
+}
+
+std::string CConfig::GetServerIP()
+{
+	return m_ServerIP;
+}
+
+unsigned short CConfig::GetServerPort()
+{
+	return m_ServerPort;
 }

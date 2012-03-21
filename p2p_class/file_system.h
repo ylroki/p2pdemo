@@ -5,6 +5,7 @@
 #include "config.h"
 #include "database_header.h"
 #include "md5_header.h"
+#include "protocol_manager.h"
 
 class CFileSystem
 {
@@ -18,7 +19,7 @@ private:
 	static void* ThreadFunc(void* arg);
 	void Work();
 	void FindResources();
-	void DealFile(const std::string file);
+	void DealFile(const std::string file, CProtocolManager* protocol);
 
 	pthread_t m_Thread;
 	bool m_Stopped;

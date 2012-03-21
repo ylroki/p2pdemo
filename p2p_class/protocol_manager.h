@@ -1,18 +1,21 @@
 #ifndef __P2P_CLASS_PROTOCOL_MANAGER_H__
 #define __P2P_CLASS_PROTOCOL_MANAGER_H__
 #include "linux_header.h"
+#include "socket_header.h"
 #include "config.h"
+#include "command.h"
 
 class CProtocolManager
 {
 public:
-	CProtocolManager();
+	CProtocolManager(CConfig*);
 	~CProtocolManager();
-	void AddHash(unsigned char* md5);
-	void SendCommand(char id, ...);
+	void AddHash(unsigned char* hexHash);
+	void SendCommand(char id, int sock, ...);
 
 private:
 	CConfig* m_Config;
+	std::vector<unsigned char> vecHashes;
 };
 
 #endif
