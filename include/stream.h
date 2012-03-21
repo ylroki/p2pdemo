@@ -6,11 +6,12 @@
 class CMemoryStream
 {
 public:
-	CMemoryStream(void* buffer, Int64 size);
+	CMemoryStream(void* buffer, Int64 size = 0, Int64 maxSize = BUF_SIZE);
 	~CMemoryStream();
 	bool ReadBuffer(void* buffer, Int64 size);
 	bool WriteBuffer(const void* buffer, Int64 size);
 	Int64 GetSize();
+	Int64 GetMaxSize();
 
 	template <typename Integer>
 	inline Integer ReadInteger()
@@ -29,6 +30,7 @@ public:
 private:
 	void* m_Buffer;
 	Int64 m_Size;
+	Int64 m_MaxSize;
 	Int64 m_Pointer;
 
 };

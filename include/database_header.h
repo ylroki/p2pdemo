@@ -4,6 +4,7 @@
 #include "linux_header.h"
 #include <sqlite3.h>
 
+typedef int (*ExecuteCallback)(void*, int, char**, char**);
 class CDatabase
 {
 public:
@@ -11,7 +12,7 @@ public:
 	~CDatabase();
 	bool Open(const char* filename);
 	bool Open(const std::string);
-	bool Execute(const char* sql);
+	bool Execute(const char* sql, ExecuteCallback func = NULL, void* arg = NULL);
 	bool GetTable(const char* sql, char*** result, int* nRow, int* nCol);
 	bool CreateTable(const char* tbName, const char* colDef);
 	void Close();

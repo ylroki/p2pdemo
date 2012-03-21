@@ -43,10 +43,15 @@ bool Connect(const int sockfd, const char* ipString, const int port)
 
 bool SendTo(int sockfd, const std::string buf, const char* ipString, const int port)
 {
+	return SendTo(sockfd, buf.c_str(), buf.size(), ipString, port);
+}
+
+bool SendTo(int sockfd, const char* buf, int size, const char* ipString, const int port)
+{
 	struct sockaddr_in addr;
 	if (FillAddress(addr, ipString, port) == false)
 		return false;
-	if (sendto(sockfd, buf.c_str(), buf.size(), 0, (struct sockaddr*)&addr, sizeof(addr)) == -1)
+	if (sendto(sockfd, buf, size, 0, (struct sockaddr*)&addr, sizeof(addr)) == -1)
 		return false;
 	return true;
 }

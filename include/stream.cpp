@@ -1,8 +1,9 @@
 #include "stream.h"
 
-CMemoryStream::CMemoryStream(void* buffer, Int64 size)
+CMemoryStream::CMemoryStream(void* buffer, Int64 size, Int64 maxSize)
 	:m_Buffer(buffer),
 	m_Size(size),
+	m_MaxSize(maxSize),
 	m_Pointer(0)
 {}
 
@@ -20,6 +21,8 @@ bool CMemoryStream::ReadBuffer(void* buffer, Int64 size)
 
 bool CMemoryStream::WriteBuffer(const void* buffer, Int64 size)
 {	
+	if (m_Pointer + size > m_MaxSize)
+		return false;
 	memcpy((char*)m_Buffer + m_Pointer, buffer, size);
 	m_Pointer += size;
 	if (m_Pointer > m_Size)
@@ -30,4 +33,9 @@ bool CMemoryStream::WriteBuffer(const void* buffer, Int64 size)
 Int64 CMemoryStream::GetSize()
 {
 	return m_Size;
+}
+
+Int64 CMemoryStream::GetMaxSize()
+{
+	return m_MaxSize;
 }

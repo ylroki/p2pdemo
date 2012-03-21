@@ -1,16 +1,19 @@
 #include "download_file.h"
 
-CDownloadFile::CDownloadFile()
+CDownloadFile::CDownloadFile(const char* md5)
 	:m_Status(DS_WAIT),
 	m_Thread(THREAD_ERROR),
 	m_Socket(SOCKET_ERROR),
-	m_Config(NULL)
+	m_Config(NULL),
+	m_MD5(md5)
 {
 	m_VecSource.clear();	
 }
 
 CDownloadFile::~CDownloadFile()
-{}
+{
+	m_VecSource.clear();	
+}
 
 KDownStatus CDownloadFile::GetStatus()
 {
@@ -55,10 +58,19 @@ void CDownloadFile::Work()
 		Sleep(100);
 	}
 }
-
+const int g_LowerBoundOfSources = 5;
 void CDownloadFile::RequestSources()
 {
-	// TODO: communicate with server, ask for sources
+	if (m_VecSource.size() < g_LowerBoundOfSources)
+	{
+		char buf[BUF_SIZE];
+		CMemoryStream stream(buf, 0);
+		stream.WriteInteger<char>(0x04);
+		unsigned char hexHash[16];
+		MD52Hex(m_MD5.c_str(), hexHash);
+		stream.WriteBuffer(hexHash, 16);
+		SendTo(m_Socket, buf, stream.GetSize(), m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
+	}
 }
 
 void CDownloadFile::UpdateSources()

@@ -7,6 +7,29 @@
 
 CConfig g_Config;
 
+int DealEachSource(void* arg, int nCol, char** result, char** name)
+{
+	CMemoryStream* stream = static_cast<CMemoryStream*>(arg);
+	if (stream->GetSize() + 6 <= stream->GetMaxSize())
+	{
+		unsigned long ipv4 = atoi(result[0]);
+		unsigned short port = atoi(result[1]);
+		stream->WriteInteger<unsigned long>(htonl(ipv4));
+		stream->WriteInteger<unsigned short>(htons(port));
+	}
+	return 0;
+}
+
+void ResponseSources(unsigned char* hexHash, int n, char* srcBuf)
+{
+	char sendBuf[BUF_SIZE];
+	CMemoryStream sender(sendBuf, 0, BUF_SIZE);
+	sender.WriteInteger<char>(0x14);
+	sender.WriteBuffer(hexHash, 16);
+	sender.WriteInteger<char>(n);
+	sender.WriteBuffer(srcBuf, 6*n);
+}
+
 int main()
 {
 	if (g_Config.Init("config/server.conf") == false)
@@ -49,6 +72,22 @@ int main()
 									md5, ipv4, port);
 						database.Execute(sql);
 					}
+					break;
+				}
+			case 0x04:
+				{
+					//request sources
+					unsigned char hexHash[16];
+					stream.ReadBuffer(hexHash, 16);
+					char md5[33];
+					md5[32] = 0;
+					Hex2MD5(hexHash, md5);
+					char sql[BUF_SIZE];
+					sprintf(sql, "select ipv4,port from hash where md5='%s'", md5);
+					char srcBuf[BUF_SIZE - 100];
+					CMemoryStream srcStream(srcBuf, 0, BUF_SIZE - 100);
+					database.Execute(sql, DealEachSource, &srcStream);
+					ResponseSources(hexHash, srcStream.GetSize()/6, srcBuf);
 				}
 			}
 		}

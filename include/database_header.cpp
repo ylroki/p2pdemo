@@ -32,11 +32,11 @@ void CDatabase::Close()
 		sqlite3_close(m_DB);
 }
 
-bool CDatabase::Execute(const char* sql)
+bool CDatabase::Execute(const char* sql, ExecuteCallback func, void* arg)
 {
 	if (m_DB)
 	{
-		int ret = sqlite3_exec(m_DB, sql, NULL, NULL, NULL);
+		int ret = sqlite3_exec(m_DB, sql, func, arg, NULL);
 		return (ret == SQLITE_OK);
 	}
 	return false;

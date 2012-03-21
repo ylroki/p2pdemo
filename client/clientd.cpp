@@ -7,7 +7,7 @@
 #include "file_system.h"
 
 bool g_DaemonStopped = true;
-CDownloadFile g_DownloadFile;
+CDownloadFile g_DownloadFile("ffffffffffffffffffffffffffffffff");
 CUploadFile g_UploadFile;
 CConfig g_Config;
 CFileSystem g_FileSystem;

@@ -3,6 +3,8 @@
 #include "linux_header.h"
 #include "socket_header.h"
 #include "config.h"
+#include "stream.h"
+#include "md5_header.h"
 
 enum KDownStatus
 {
@@ -21,7 +23,7 @@ struct TPeer
 class CDownloadFile
 {
 public:
-	CDownloadFile();
+	CDownloadFile(const char* md5);
 	~CDownloadFile();
 	KDownStatus GetStatus();
 	bool Start(CConfig*);
@@ -37,10 +39,11 @@ private:
 	void SelectSocket();
 	void RecvMessage();
 
+	std::string m_MD5;
 	KDownStatus m_Status;
 	pthread_t m_Thread;
 	int m_Socket;
-	std::vector<TPeer*> m_VecSource;
+	std::vector<TPeer> m_VecSource;
 	CConfig* m_Config;
 };
 

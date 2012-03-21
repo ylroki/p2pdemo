@@ -14,6 +14,8 @@ bool Bind(const int sockfd, const char* ipString, const int port);
 
 bool Connect(const int sockfd, const char* ipString, const int port);
 
+bool SendTo(int sockfd, const char* buf, int size, const char* ipString, const int port);
+
 bool SendTo(int sockfd, const std::string buf, const char* ipString, const int port);
 
 #endif
