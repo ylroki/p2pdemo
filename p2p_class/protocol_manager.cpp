@@ -28,7 +28,60 @@ void CProtocolManager::SendCommand(char id, int sock, ...)
 				int len = GenerateCommand(buf, 0x01, m_Config->GetPeerPort(), n, &(vecHashes[i]));
 				SendTo(sock, buf, m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
 			}
+			break;
 		}
+	default:
+		{
+			 break;
+		}
+	}
+}
 
+void CProtocolManager::Response(int sockfd, ...)
+{
+	if (sockfd == SOCKET_ERROR)
+		return ;
+	char abuf[MAX_ADDR_SIZE];
+	socklen_t alen = MAX_ADDR_SIZE;
+	char buf[BUF_SIZE * 2];
+	memset(buf, 0, sizeof(buf));
+	int n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen);
+	if (n > 0)
+	{
+		CMemoryStream reader(buf, n, BUF_SIZE * 2);
+		char id = reader.ReadInteger<char>();
+		switch (id)
+		{
+		case 0x14:
+			{// server sends sources back.
+				unsigned char hexHash[16];
+				reader.ReadBuffer(hexHash, 16);
+				va_list ap;
+				va_start(ap, sockfd);
+				unsigned char* hash = va_arg(ap, unsigned char*);
+				if (memcmp(hash, hexHash, 16) == 0)
+				{
+					int nSrc = reader.ReadInteger<char>();
+					std::vector<TPeer>* vecSource = va_arg(ap, std::vector<TPeer>*);
+					while (nSrc--)
+					{
+						unsigned long ip = reader.ReadInteger<unsigned long>();
+						unsigned short port = reader.ReadInteger<unsigned short>();
+						struct in_addr ia;
+						ia.s_addr= ip;
+						struct TPeer peer;
+						peer.IPv4 = inet_ntoa(ia);
+						peer.Port = ntohs(port);
+						vecSource->push_back(peer);
+					}
+				}
+				va_end(ap);
+				break;
+			}
+		default:
+			{
+				break;
+			}
+		}
 	}
 }

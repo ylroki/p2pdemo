@@ -12,6 +12,7 @@ public:
 	~CProtocolManager();
 	void AddHash(unsigned char* hexHash);
 	void SendCommand(char id, int sock, ...);
+	void Response(int sockfd = SOCKET_ERROR, ...); 
 
 private:
 	CConfig* m_Config;

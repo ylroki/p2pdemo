@@ -5,6 +5,8 @@
 #include "config.h"
 #include "stream.h"
 #include "md5_header.h"
+#include "command.h"
+#include "protocol_manager.h"
 
 enum KDownStatus
 {
@@ -14,11 +16,7 @@ enum KDownStatus
 	DS_ERROR
 };
 
-struct TPeer
-{
-	std::string IPv4;
-	int port;
-};
+
 
 class CDownloadFile
 {
@@ -45,6 +43,7 @@ private:
 	int m_Socket;
 	std::vector<TPeer> m_VecSource;
 	CConfig* m_Config;
+	CProtocolManager* m_Protocol;
 };
 
 #endif

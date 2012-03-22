@@ -88,6 +88,11 @@ int main()
 					CMemoryStream srcStream(srcBuf, 0, BUF_SIZE - 100);
 					database.Execute(sql, DealEachSource, &srcStream);
 					ResponseSources(hexHash, srcStream.GetSize()/6, srcBuf);
+					break;
+				}
+			default:
+				{
+					break;
 				}
 			}
 		}

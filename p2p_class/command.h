@@ -20,5 +20,10 @@ enum KP2PCommand
 	PPC_FILE_DATA = 0x32
 };
 
+struct TPeer
+{
+	std::string IPv4;
+	unsigned short Port;
+};
 int GenerateCommand(char* buf, char id, ...);
 #endif

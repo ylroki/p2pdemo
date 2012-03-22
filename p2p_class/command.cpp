@@ -29,6 +29,10 @@ int GenerateCommand(char* buf, char id, ...)// parameter in host byte order
 			stream.WriteBuffer(pHash, nHash*16);
 			return stream.GetSize();
 		}
+	default:	
+		{
+			break;
+		}
 	}
 	va_end(ap);
 }

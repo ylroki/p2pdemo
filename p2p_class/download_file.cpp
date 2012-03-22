@@ -5,7 +5,8 @@ CDownloadFile::CDownloadFile(const char* md5)
 	m_Thread(THREAD_ERROR),
 	m_Socket(SOCKET_ERROR),
 	m_Config(NULL),
-	m_MD5(md5)
+	m_MD5(md5),
+	m_Protocol(NULL)
 {
 	m_VecSource.clear();	
 }
@@ -23,6 +24,7 @@ KDownStatus CDownloadFile::GetStatus()
 bool CDownloadFile::Start(CConfig* config)
 {
 	m_Config = config;
+	m_Protocol = new CProtocolManager(config);
 	if (m_Status == DS_RUNNING)
 		return true;
 	m_Status = DS_RUNNING;
@@ -37,6 +39,9 @@ void CDownloadFile::Stop()
 	m_Status = DS_DONE;
 	if (m_Thread != THREAD_ERROR)
 		pthread_join(m_Thread, NULL);
+	
+	if (m_Protocol)
+		delete m_Protocol;
 }
 
 void* CDownloadFile::ThreadFunc(void* arg)
@@ -92,7 +97,11 @@ void CDownloadFile::SelectSocket()
 }
 
 void CDownloadFile::RecvMessage()
-{}
+{
+	unsigned char hexHash[16];
+	MD52Hex(m_MD5.c_str(), hexHash);
+	m_Protocol->Response(m_Socket, hexHash, &m_VecSource);	
+}
 
 bool CDownloadFile::InitSocket()
 {
