@@ -4,7 +4,9 @@ CUploadFile::CUploadFile()
 	:m_Thread(THREAD_ERROR),
 	m_Stopped(true),
 	m_Socket(SOCKET_ERROR),
-	m_Config(NULL)
+	m_Config(NULL),
+	m_Protocol(NULL),
+	m_FileSystem(NULL)
 {
 }
 
@@ -17,6 +19,7 @@ bool CUploadFile::Start(CConfig* config)
 	if (!m_Stopped)
 		return true;
 	m_Config = config;
+	m_Protocol = new CProtocolManager(config);
 	if (InitSocket() == false)
 		return false;
 		
@@ -32,6 +35,13 @@ void CUploadFile::Stop()
 	m_Stopped = true;
 	if (m_Thread != THREAD_ERROR)
 		pthread_join(m_Thread, NULL);
+	if (m_Protocol)
+		delete m_Protocol;
+}
+
+void CUploadFile::SetFileSystem(CFileSystem* fs)
+{
+	m_FileSystem = fs;
 }
 
 void* CUploadFile::ThreadFunc(void* arg)
@@ -78,11 +88,5 @@ bool CUploadFile::InitSocket()
 
 void CUploadFile::RecvMessage()
 {
-	char abuf[MAX_ADDR_SIZE];
-	socklen_t alen = MAX_ADDR_SIZE;
-	char buf[BUF_SIZE];
-	memset(buf, 0, sizeof(buf));
-	int n;
-	if ((n = recvfrom(m_Socket, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen)) < 0)
-		return;
+	m_Protocol->Response(m_Socket, m_FileSystem);
 }

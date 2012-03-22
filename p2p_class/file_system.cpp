@@ -111,3 +111,18 @@ void CFileSystem::DealFile(const std::string file, CProtocolManager* protocol)
 	m_Database.Execute(sql);
 	protocol->AddHash(hexHash);	
 }
+
+bool CFileSystem::IsExist(const unsigned char* hexHash)
+{
+	char md5[33];
+	md5[32] = 0;
+	Hex2MD5(hexHash, md5);
+	char sql[BUF_SIZE];
+	sprintf(sql, "select * from hash where md5='%s'", md5);
+	int nRow = 0;
+	m_Database.GetTable(sql, NULL, &nRow, NULL);
+	if (nRow >= 2)
+		return true;
+	else
+		return false;
+}

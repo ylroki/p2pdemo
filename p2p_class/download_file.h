@@ -42,6 +42,7 @@ private:
 	pthread_t m_Thread;
 	int m_Socket;
 	std::vector<TPeer> m_VecSource;
+	std::vector<TPeer> m_VecWorkSource;
 	CConfig* m_Config;
 	CProtocolManager* m_Protocol;
 };

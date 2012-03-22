@@ -9,11 +9,13 @@ CDownloadFile::CDownloadFile(const char* md5)
 	m_Protocol(NULL)
 {
 	m_VecSource.clear();	
+	m_VecWorkSource.clear();
 }
 
 CDownloadFile::~CDownloadFile()
 {
 	m_VecSource.clear();	
+	m_VecWorkSource.clear();
 }
 
 KDownStatus CDownloadFile::GetStatus()
@@ -77,10 +79,17 @@ void CDownloadFile::RequestSources()
 		SendTo(m_Socket, buf, stream.GetSize(), m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
 	}
 }
-
+const int g_NWork = 5;
 void CDownloadFile::UpdateSources()
 {
-	// TODO
+	if (g_NWork > m_VecWorkSource.size())
+	{
+		for (size_t i = 0; i < m_VecSource.size(); ++i)		
+		{
+			TPeer peer = m_VecSource[i];
+			m_Protocol->SendCommand(0x21, m_Socket, m_MD5.c_str(), &peer);
+		}
+	}
 }
 
 void CDownloadFile::SelectSocket()

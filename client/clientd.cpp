@@ -47,6 +47,7 @@ int main(int argc, char* argv[])
 
 	g_UploadFile.Start(&g_Config);
 	g_FileSystem.Start(&g_Config);
+	g_UploadFile.SetFileSystem(&g_FileSystem);
 
 	g_DaemonStopped = false;
 	while (!g_DaemonStopped)

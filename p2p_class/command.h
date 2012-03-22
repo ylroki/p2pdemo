@@ -24,6 +24,7 @@ struct TPeer
 {
 	std::string IPv4;
 	unsigned short Port;
+	unsigned long SessionID;
 };
 int GenerateCommand(char* buf, char id, ...);
 #endif

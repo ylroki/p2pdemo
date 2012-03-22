@@ -13,10 +13,10 @@ void CProtocolManager::AddHash(unsigned char* hexHash)
 }
 
 const int g_NHashes = 50;
-void CProtocolManager::SendCommand(char id, int sock, ...)
+void CProtocolManager::SendCommand(char id, int sockfd, ...)
 {
-	if (sock == SOCKET_ERROR)
-		sock = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sockfd == SOCKET_ERROR)
+		sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	switch (id)
 	{
 	case 0x01:
@@ -26,9 +26,26 @@ void CProtocolManager::SendCommand(char id, int sock, ...)
 			{
 				int n = Min(g_NHashes, vecHashes.size() - i);
 				int len = GenerateCommand(buf, 0x01, m_Config->GetPeerPort(), n, &(vecHashes[i]));
-				SendTo(sock, buf, m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
+				SendTo(sockfd, buf, m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
 			}
 			break;
+		}
+	case 0x21:
+		{
+			// Check if file is exist or not.
+			va_list ap;
+			va_start(ap, sockfd);
+			const char* md5 = va_arg(ap, const char*);
+			unsigned char hexHash[16];
+			MD52Hex(md5, hexHash);
+			TPeer* peer = va_arg(ap, TPeer*);
+			char buf[BUF_SIZE];
+			CMemoryStream stream(buf, 0, BUF_SIZE);
+			stream.WriteInteger<char>(id);
+			stream.WriteBuffer(hexHash, 16);
+			stream.WriteInteger<unsigned long>(htonl(peer->SessionID));
+			SendTo(sockfd, buf, stream.GetSize(), peer->IPv4.c_str(), peer->Port);
+			va_end(ap);
 		}
 	default:
 		{
@@ -72,9 +89,30 @@ void CProtocolManager::Response(int sockfd, ...)
 						struct TPeer peer;
 						peer.IPv4 = inet_ntoa(ia);
 						peer.Port = ntohs(port);
+						peer.SessionID = ntohl(ip);
 						vecSource->push_back(peer);
 					}
 				}
+				va_end(ap);
+				break;
+			}
+		case 0x21:
+			{
+				unsigned char hexHash[16];
+				reader.ReadBuffer(hexHash, 16);
+				unsigned long sessionID = reader.ReadInteger<unsigned long>();
+				va_list ap;
+				va_start(ap, sockfd);
+				CFileSystem* fs = va_arg(ap, CFileSystem*);
+				bool flag = fs->IsExist(hexHash);
+				
+				char sendBuf[BUF_SIZE];
+				CMemoryStream sender(sendBuf, 0, BUF_SIZE);
+				sender.WriteInteger<char>(0x31);
+				sender.WriteBuffer(hexHash, 16);
+				sender.WriteInteger<unsigned long>(sessionID);
+				sender.WriteInteger<char>(flag);
+				sendto(sockfd, sendBuf, sender.GetSize(), 0, (struct sockaddr*)abuf, alen);
 				va_end(ap);
 				break;
 			}

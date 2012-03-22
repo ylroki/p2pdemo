@@ -6,7 +6,7 @@
 #include "database_header.h"
 #include "md5_header.h"
 #include "protocol_manager.h"
-
+class CProtocolManager;
 class CFileSystem
 {
 public:
@@ -14,6 +14,7 @@ public:
 	~CFileSystem();
 	bool Start(CConfig*);
 	void Stop();
+	bool IsExist(const unsigned char* hexHash);
 
 private:
 	static void* ThreadFunc(void* arg);

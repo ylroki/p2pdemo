@@ -4,6 +4,8 @@
 #include "socket_header.h"
 #include "config.h"
 #include "command.h"
+#include "md5_header.h"
+#include "file_system.h"
 
 class CProtocolManager
 {

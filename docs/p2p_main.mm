@@ -136,7 +136,7 @@
 </node>
 <node CREATED="1331538175051" ID="ID_1798528038" MODIFIED="1331538183609" TEXT="P/P">
 <node CREATED="1331538212259" ID="ID_326672241" MODIFIED="1331538223319" TEXT="source peer">
-<node CREATED="1331538364484" ID="ID_1867565399" MODIFIED="1332146244180" TEXT="check result">
+<node CREATED="1331538364484" ID="ID_1867565399" MODIFIED="1332422863722" TEXT="check result">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -149,10 +149,14 @@
       unsigned char*|16|hash
     </p>
     <p>
+      unsigned long|4|sessionID
+    </p>
+    <p>
       char|1|status
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 <node CREATED="1331538970928" ID="ID_115023932" MODIFIED="1332146317107" TEXT="file data">
 <richcontent TYPE="NOTE"><html>
@@ -183,7 +187,7 @@
 </node>
 </node>
 <node CREATED="1331538224166" ID="ID_804188050" MODIFIED="1331538242720" TEXT="request peer">
-<node CREATED="1331538258953" ID="ID_1525254213" MODIFIED="1332146256931" TEXT="check">
+<node CREATED="1331538258953" ID="ID_1525254213" MODIFIED="1332422876159" TEXT="check">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -195,8 +199,12 @@
     <p>
       unsigned char*|16|hash
     </p>
+    <p>
+      unsigned long|4|sessionID
+    </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 <arrowlink DESTINATION="ID_1867565399" ENDARROW="Default" ENDINCLINATION="41;0;" ID="Arrow_ID_1492304979" STARTARROW="None" STARTINCLINATION="41;0;"/>
 </node>
 <node CREATED="1331538708024" ID="ID_30407450" MODIFIED="1332146271367" TEXT="get file data">

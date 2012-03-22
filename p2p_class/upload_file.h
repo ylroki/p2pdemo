@@ -3,6 +3,8 @@
 #include "linux_header.h"
 #include "socket_header.h"
 #include "config.h"
+#include "file_system.h"
+#include "protocol_manager.h"
 
 class CUploadFile
 {
@@ -11,6 +13,7 @@ public:
 	~CUploadFile();
 	bool Start(CConfig* config);
 	void Stop();
+	void SetFileSystem(CFileSystem* fs);
 
 private:
 	static void* ThreadFunc(void* arg);
@@ -22,6 +25,8 @@ private:
 	bool m_Stopped;
 	int m_Socket;
 	CConfig* m_Config;
+	CProtocolManager* m_Protocol;
+	CFileSystem* m_FileSystem;
 };
 
 #endif
