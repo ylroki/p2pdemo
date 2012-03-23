@@ -126,10 +126,25 @@ bool CDownloadFile::InitSocket()
 
 void CDownloadFile::DealSourceResponse(const unsigned char* hexHash, std::vector<TPeer>* vecSource)
 {
-	unsigned char hash[16];
-	MD52Hex(m_MD5.c_str(), hash);
-	if (memcmp(hexHash, hash, 16))
+	if (MD5IsSame2Hex(m_MD5.c_str(), hexHash) == false)
 		return ;
 	for (size_t i = 0; i < vecSource->size(); ++i)
 		m_VecSource.push_back((*vecSource)[i]);	
+}
+
+void CDownloadFile::DealCheckResult(const unsigned char* hexHash, unsigned long sessionID, char status)
+{
+	if (MD5IsSame2Hex(m_MD5.c_str(), hexHash) == false)
+		return ;
+	for (size_t i = 0; i < m_VecSource.size(); ++i)
+	{
+		if (m_VecSource[i].SessionID == sessionID)
+		{
+			if (status)
+				m_VecWorkSource.push_back(m_VecSource[i]);
+			m_VecSource[i] = m_VecSource[m_VecSource.size() - 1];
+			m_VecSource.pop_back();
+			break;
+		}
+	}
 }

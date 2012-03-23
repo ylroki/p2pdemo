@@ -10,4 +10,6 @@ bool MD5File(const std::string filename, unsigned char* hexHash);
 void MD52Hex(const char* md5, unsigned char* hex);
 
 void Hex2MD5(const unsigned char* hex, char* md5);
+
+bool MD5IsSame2Hex(const char* md5, const unsigned char* hexHash);
 #endif

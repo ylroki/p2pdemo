@@ -56,3 +56,12 @@ void Hex2MD5(const unsigned char* hex, char* md5)
 		md5[i*2+1] = Hex2Char((hex[i]&0x0f));
 	}
 }
+
+bool MD5IsSame2Hex(const char* md5, const unsigned char* hexHash)
+{
+	unsigned char hash[16];
+	MD52Hex(md5, hash);
+	if (memcmp(hash, hexHash, 16))
+		return false;
+	return true;
+}

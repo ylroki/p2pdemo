@@ -93,6 +93,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 			}
 		case 0x21:
 			{
+				// Check if file exists or not.
 				unsigned char hexHash[16];
 				reader.ReadBuffer(hexHash, 16);
 				unsigned long sessionID = reader.ReadInteger<unsigned long>();
@@ -107,6 +108,17 @@ void CProtocolManager::Response(int sockfd, void* arg)
 				sender.WriteInteger<char>(flag);
 				sendto(sockfd, sendBuf, sender.GetSize(), 0, (struct sockaddr*)abuf, alen);
 				break;
+			}
+		case 0x31:
+			{
+				// Check result return.
+				unsigned char hexHash[16];
+				reader.ReadBuffer(hexHash, 16);
+				unsigned long sessionID = ntohl(reader.ReadInteger<unsigned long>());
+				char status = reader.ReadInteger<char>();
+
+				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
+				down->DealCheckResult(hexHash, sessionID, status);
 			}
 		default:
 			{

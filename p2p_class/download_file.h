@@ -28,6 +28,7 @@ public:
 	bool Start(CConfig*);
 	void Stop();
 	void DealSourceResponse(const unsigned char* hexHash, std::vector<TPeer>* vec);
+	void DealCheckResult(const unsigned char* hexHash, unsigned long sessionID, char status);
 	
 
 private:
