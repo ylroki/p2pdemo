@@ -54,7 +54,7 @@ void CProtocolManager::SendCommand(char id, int sockfd, ...)
 	}
 }
 
-void CProtocolManager::Response(int sockfd, ...)
+void CProtocolManager::Response(int sockfd, void* arg)
 {
 	if (sockfd == SOCKET_ERROR)
 		return ;
@@ -73,27 +73,22 @@ void CProtocolManager::Response(int sockfd, ...)
 			{// server sends sources back.
 				unsigned char hexHash[16];
 				reader.ReadBuffer(hexHash, 16);
-				va_list ap;
-				va_start(ap, sockfd);
-				unsigned char* hash = va_arg(ap, unsigned char*);
-				if (memcmp(hash, hexHash, 16) == 0)
+				int nSrc = reader.ReadInteger<char>();
+				std::vector<TPeer> vecSource;
+				while (nSrc--)
 				{
-					int nSrc = reader.ReadInteger<char>();
-					std::vector<TPeer>* vecSource = va_arg(ap, std::vector<TPeer>*);
-					while (nSrc--)
-					{
-						unsigned long ip = reader.ReadInteger<unsigned long>();
-						unsigned short port = reader.ReadInteger<unsigned short>();
-						struct in_addr ia;
-						ia.s_addr= ip;
-						struct TPeer peer;
-						peer.IPv4 = inet_ntoa(ia);
-						peer.Port = ntohs(port);
-						peer.SessionID = ntohl(ip);
-						vecSource->push_back(peer);
-					}
+					unsigned long ip = reader.ReadInteger<unsigned long>();
+					unsigned short port = reader.ReadInteger<unsigned short>();
+					struct in_addr ia;
+					ia.s_addr= ip;
+					struct TPeer peer;
+					peer.IPv4 = inet_ntoa(ia);
+					peer.Port = ntohs(port);
+					peer.SessionID = ntohl(ip);
+					vecSource.push_back(peer);
 				}
-				va_end(ap);
+				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
+				down->DealSourceResponse(hexHash, &vecSource);
 				break;
 			}
 		case 0x21:
@@ -101,11 +96,9 @@ void CProtocolManager::Response(int sockfd, ...)
 				unsigned char hexHash[16];
 				reader.ReadBuffer(hexHash, 16);
 				unsigned long sessionID = reader.ReadInteger<unsigned long>();
-				va_list ap;
-				va_start(ap, sockfd);
-				CFileSystem* fs = va_arg(ap, CFileSystem*);
-				bool flag = fs->IsExist(hexHash);
-				
+				CUploadFile* upload = static_cast<CUploadFile*>(arg);
+				bool flag = upload->IsExist(hexHash);
+
 				char sendBuf[BUF_SIZE];
 				CMemoryStream sender(sendBuf, 0, BUF_SIZE);
 				sender.WriteInteger<char>(0x31);
@@ -113,7 +106,6 @@ void CProtocolManager::Response(int sockfd, ...)
 				sender.WriteInteger<unsigned long>(sessionID);
 				sender.WriteInteger<char>(flag);
 				sendto(sockfd, sendBuf, sender.GetSize(), 0, (struct sockaddr*)abuf, alen);
-				va_end(ap);
 				break;
 			}
 		default:

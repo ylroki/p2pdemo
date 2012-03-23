@@ -107,9 +107,7 @@ void CDownloadFile::SelectSocket()
 
 void CDownloadFile::RecvMessage()
 {
-	unsigned char hexHash[16];
-	MD52Hex(m_MD5.c_str(), hexHash);
-	m_Protocol->Response(m_Socket, hexHash, &m_VecSource);	
+	m_Protocol->Response(m_Socket, this);	
 }
 
 bool CDownloadFile::InitSocket()
@@ -124,4 +122,14 @@ bool CDownloadFile::InitSocket()
 		}
 	}
 	return false;
+}
+
+void CDownloadFile::DealSourceResponse(const unsigned char* hexHash, std::vector<TPeer>* vecSource)
+{
+	unsigned char hash[16];
+	MD52Hex(m_MD5.c_str(), hash);
+	if (memcmp(hexHash, hash, 16))
+		return ;
+	for (size_t i = 0; i < vecSource->size(); ++i)
+		m_VecSource.push_back((*vecSource)[i]);	
 }

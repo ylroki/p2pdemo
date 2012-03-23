@@ -7,6 +7,7 @@
 #include "md5_header.h"
 #include "command.h"
 #include "protocol_manager.h"
+class CProtocolManager;
 
 enum KDownStatus
 {
@@ -26,6 +27,7 @@ public:
 	KDownStatus GetStatus();
 	bool Start(CConfig*);
 	void Stop();
+	void DealSourceResponse(const unsigned char* hexHash, std::vector<TPeer>* vec);
 	
 
 private:

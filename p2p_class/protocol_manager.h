@@ -6,6 +6,9 @@
 #include "command.h"
 #include "md5_header.h"
 #include "file_system.h"
+#include "upload_file.h"
+#include "download_file.h"
+
 
 class CProtocolManager
 {
@@ -14,7 +17,7 @@ public:
 	~CProtocolManager();
 	void AddHash(unsigned char* hexHash);
 	void SendCommand(char id, int sock, ...);
-	void Response(int sockfd = SOCKET_ERROR, ...); 
+	void Response(int sockfd = SOCKET_ERROR, void* arg = NULL);
 
 private:
 	CConfig* m_Config;

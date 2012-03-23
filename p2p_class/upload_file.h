@@ -6,6 +6,9 @@
 #include "file_system.h"
 #include "protocol_manager.h"
 
+class CFileSystem;
+class CProtocolManager;
+
 class CUploadFile
 {
 public:
@@ -14,6 +17,7 @@ public:
 	bool Start(CConfig* config);
 	void Stop();
 	void SetFileSystem(CFileSystem* fs);
+	bool IsExist(const unsigned char* hexHash);
 
 private:
 	static void* ThreadFunc(void* arg);

@@ -88,5 +88,10 @@ bool CUploadFile::InitSocket()
 
 void CUploadFile::RecvMessage()
 {
-	m_Protocol->Response(m_Socket, m_FileSystem);
+	m_Protocol->Response(m_Socket, this);
+}
+
+bool CUploadFile::IsExist(const unsigned char* hexHash)
+{
+	return m_FileSystem->IsExist(hexHash);
 }
