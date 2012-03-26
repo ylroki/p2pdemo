@@ -38,3 +38,8 @@ test_md5:
 	g++ -g -Iinclude -I$(SSL_INCLUDE) -L$(SSL_LIB) \
 		test/test_md5.cpp $(SHARE_CPP) \
 		-o bin/test_md5 -lcrypto -lpthread -lsqlite3
+
+test_advanced_file:
+	g++ -g -Iinclude -Ip2p_class -I$(SSL_INCLUDE) -L$(SSL_LIB)\
+		test/test_advanced_file.cpp $(SHARE_CPP) p2p_class/advanced_file.cpp \
+		-o bin/test_advanced_file -lpthread -lsqlite3 -lcrypto

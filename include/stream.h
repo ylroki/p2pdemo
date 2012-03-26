@@ -35,4 +35,38 @@ private:
 
 };
 
+
+#define FILE_ERROR -1
+#define POINTER_ERROR -1
+#define FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+class CFileStream
+{
+public:
+	CFileStream(const char* filename, int flag, mode_t mode = FILE_MODE);
+	~CFileStream();
+	Int64 Seek(Int64 offset, int whence = SEEK_SET);
+	Int64 Write(Int64 offset, const void* src, Int64 size);
+	Int64 Read(Int64 offset, void* dst, Int64 size);
+	Int64 Write(const void* src, Int64 size);
+	Int64 Read(void* dst, Int64 size);
+
+	template <typename Integer>
+	inline Integer ReadInteger(Int64 offset)
+	{
+		Integer i;
+		Read(offset, &i, sizeof(i));
+		return i;
+	}
+
+	template <typename Integer>
+	inline Int64 WriteInteger(Int64 offset, Integer i)
+	{
+		return Write(offset, &i, sizeof(i));
+	}
+private:
+	int m_File;
+	Int64 m_Pointer;
+};
+
 #endif
+
