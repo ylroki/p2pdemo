@@ -15,6 +15,8 @@ public:
 	bool Start(CConfig*);
 	void Stop();
 	bool IsExist(const unsigned char* hexHash);
+	unsigned long GetFileSize(const unsigned char* hexHash);
+	std::string GetPath(const char* md5);
 
 private:
 	static void* ThreadFunc(void* arg);

@@ -104,12 +104,20 @@ void CFileSystem::DealFile(const std::string file, CProtocolManager* protocol)
 	char md5[33];
 	md5[32] = 0;
 	Hex2MD5(hexHash, md5);
+	unsigned char buf[20];
+	CMemoryStream writer(buf, 0, BUF_SIZE);
+	writer.WriteBuffer(hexHash, 16);
+	
+	struct stat st;
+	stat(file.c_str(), &st);
+	writer.WriteInteger<unsigned long>(htonl(st.st_size));
+
 	printf("a file %s %s\n", file.c_str(), md5);
 	char sql[BUF_SIZE];
 	sprintf(sql, "insert into hash values('%s', '%s')", 
 				md5, file.c_str());
 	m_Database.Execute(sql);
-	protocol->AddHash(hexHash);	
+	protocol->AddHash(buf);	
 }
 
 bool CFileSystem::IsExist(const unsigned char* hexHash)
@@ -125,4 +133,33 @@ bool CFileSystem::IsExist(const unsigned char* hexHash)
 		return true;
 	else
 		return false;
+}
+
+std::string CFileSystem::GetPath(const char* md5)
+{
+	char sql[BUF_SIZE];
+	sprintf(sql, "select path from hash where md5='%s'", md5);
+	char** result;
+	int nRow = 0;
+	int nCol = 0;
+	m_Database.GetTable(sql, &result, &nRow, &nCol);
+	if (nCol == 1 && nRow == 2)
+		return result[1];
+	return "";
+
+}
+
+unsigned long CFileSystem::GetFileSize(const unsigned char* hexHash)
+{
+	char md5[33];
+	md5[32] = 0;
+	Hex2MD5(hexHash, md5);
+	std::string pathname = GetPath(md5);
+	if (pathname != "")
+	{
+		struct stat st;
+		stat(pathname.c_str(), &st);
+		return st.st_size;
+	}
+	return 0;
 }

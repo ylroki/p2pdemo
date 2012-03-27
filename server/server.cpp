@@ -7,6 +7,18 @@
 
 CConfig g_Config;
 
+unsigned long GetFileSize(CDatabase database, const char* md5)
+{
+	char sql[BUF_SIZE];
+	sprintf(sql, "select size from filesize where md5='%s'", md5);
+	char** res;
+	int nRow = 0;
+	int nCol = 0;
+	database.GetTable(sql, &res, &nRow, &nCol);
+	return atoi(res[nCol]);
+}
+
+
 int DealEachSource(void* arg, int nCol, char** result, char** name)
 {
 	CMemoryStream* stream = static_cast<CMemoryStream*>(arg);
@@ -20,12 +32,13 @@ int DealEachSource(void* arg, int nCol, char** result, char** name)
 	return 0;
 }
 
-void ResponseSources(unsigned char* hexHash, int n, char* srcBuf)
+void ResponseSources(unsigned char* hexHash, unsigned long filesize, int n, char* srcBuf)
 {
 	char sendBuf[BUF_SIZE];
 	CMemoryStream sender(sendBuf, 0, BUF_SIZE);
 	sender.WriteInteger<char>(0x14);
 	sender.WriteBuffer(hexHash, 16);
+	sender.WriteInteger<unsigned long>(htonl(filesize));
 	sender.WriteInteger<char>(n);
 	sender.WriteBuffer(srcBuf, 6*n);
 }
@@ -42,7 +55,8 @@ int main()
 		ErrorQuit("Bind error");
 	CDatabase database;
 	database.Open("cache/server.db");
-	database.CreateTable("hash", "(md5 TEXT, ipv4 TEXT, port INTEGER)");
+	database.CreateTable("hash", "(md5 TEXT, ipv4 INTEGER, port INTEGER)");
+	database.CreateTable("filesize", "(md5 TEXT primary key, size INTEGER)");
 	while (true)
 	{
 		char abuf[MAX_ADDR_SIZE];
@@ -64,12 +78,16 @@ int main()
 					{
 						unsigned char hexHash[16];
 						stream.ReadBuffer(hexHash, 16);
+						unsigned long filesize = ntohl(stream.ReadInteger<unsigned long>());
 						char md5[33];
 						md5[32] = 0;
 						Hex2MD5(hexHash, md5);
 						char sql[BUF_SIZE];
 						sprintf(sql, "insert into hash values('%s', %lu, %hu)",
 									md5, ipv4, port);
+						database.Execute(sql);
+						sprintf(sql, "insert into filesize values('%s', %lu)",
+									md5, filesize);
 						database.Execute(sql);
 					}
 					break;
@@ -87,7 +105,9 @@ int main()
 					char srcBuf[BUF_SIZE - 100];
 					CMemoryStream srcStream(srcBuf, 0, BUF_SIZE - 100);
 					database.Execute(sql, DealEachSource, &srcStream);
-					ResponseSources(hexHash, srcStream.GetSize()/6, srcBuf);
+
+					unsigned long filesize = GetFileSize(database, md5);
+					ResponseSources(hexHash, filesize, srcStream.GetSize()/6, srcBuf);
 					break;
 				}
 			default:

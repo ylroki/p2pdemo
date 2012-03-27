@@ -9,7 +9,7 @@ CProtocolManager::~CProtocolManager()
 
 void CProtocolManager::AddHash(unsigned char* hexHash)
 {
-	vecHashes.insert(vecHashes.end(), hexHash, hexHash+16);		
+	vecHashes.insert(vecHashes.end(), hexHash, hexHash+20);		
 }
 
 const int g_NHashes = 50;
@@ -73,6 +73,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 			{// server sends sources back.
 				unsigned char hexHash[16];
 				reader.ReadBuffer(hexHash, 16);
+				unsigned long filesize = ntohl(reader.ReadInteger<unsigned long>());
 				int nSrc = reader.ReadInteger<char>();
 				std::vector<TPeer> vecSource;
 				while (nSrc--)
@@ -88,7 +89,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 					vecSource.push_back(peer);
 				}
 				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
-				down->DealSourceResponse(hexHash, &vecSource);
+				down->DealSourceResponse(hexHash, filesize, &vecSource);
 				break;
 			}
 		case 0x21:

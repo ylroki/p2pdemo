@@ -124,10 +124,12 @@ bool CDownloadFile::InitSocket()
 	return false;
 }
 
-void CDownloadFile::DealSourceResponse(const unsigned char* hexHash, std::vector<TPeer>* vecSource)
+void CDownloadFile::DealSourceResponse(const unsigned char* hexHash, unsigned long filesize, 
+	std::vector<TPeer>* vecSource)
 {
 	if (MD5IsSame2Hex(m_MD5.c_str(), hexHash) == false)
 		return ;
+	// TODO
 	for (size_t i = 0; i < vecSource->size(); ++i)
 		m_VecSource.push_back((*vecSource)[i]);	
 }
