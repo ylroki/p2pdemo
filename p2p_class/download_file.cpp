@@ -6,7 +6,8 @@ CDownloadFile::CDownloadFile(const char* md5)
 	m_Socket(SOCKET_ERROR),
 	m_Config(NULL),
 	m_MD5(md5),
-	m_Protocol(NULL)
+	m_Protocol(NULL),
+	m_AdFile(NULL)
 {
 	m_VecSource.clear();	
 	m_VecWorkSource.clear();
@@ -41,7 +42,10 @@ void CDownloadFile::Stop()
 	m_Status = DS_DONE;
 	if (m_Thread != THREAD_ERROR)
 		pthread_join(m_Thread, NULL);
-	
+	if (m_Socket != SOCKET_ERROR)
+		close(m_Socket);
+	if (m_AdFile)
+		delete m_AdFile;
 	if (m_Protocol)
 		delete m_Protocol;
 }
@@ -65,7 +69,7 @@ void CDownloadFile::Work()
 		Sleep(100);
 	}
 }
-const int g_LowerBoundOfSources = 5;
+const int g_LowerBoundOfSources = 1;
 void CDownloadFile::RequestSources()
 {
 	if (m_VecSource.size() < g_LowerBoundOfSources)
@@ -79,7 +83,7 @@ void CDownloadFile::RequestSources()
 		SendTo(m_Socket, buf, stream.GetSize(), m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
 	}
 }
-const int g_NWork = 5;
+const int g_NWork = 1;
 void CDownloadFile::UpdateSources()
 {
 	if (g_NWork > m_VecWorkSource.size())
@@ -89,6 +93,12 @@ void CDownloadFile::UpdateSources()
 			TPeer peer = m_VecSource[i];
 			m_Protocol->SendCommand(0x21, m_Socket, m_MD5.c_str(), &peer);
 		}
+	}
+
+	// TEST: just use a source
+	if (m_VecWorkSource.size() >= 1)
+	{
+		RequestFileData(m_VecWorkSource[0]);	
 	}
 }
 
@@ -129,7 +139,8 @@ void CDownloadFile::DealSourceResponse(const unsigned char* hexHash, unsigned lo
 {
 	if (MD5IsSame2Hex(m_MD5.c_str(), hexHash) == false)
 		return ;
-	// TODO
+	if (m_AdFile == NULL)
+		m_AdFile = new CAdvancedFile(m_MD5.c_str(), filesize);
 	for (size_t i = 0; i < vecSource->size(); ++i)
 		m_VecSource.push_back((*vecSource)[i]);	
 }
@@ -149,4 +160,24 @@ void CDownloadFile::DealCheckResult(const unsigned char* hexHash, unsigned long 
 			break;
 		}
 	}
+}
+
+void CDownloadFile::RequestFileData(TPeer peer)
+{
+	unsigned long offset = m_AdFile->FirstBlock();
+	if (offset == -1)
+	{
+		m_Status = DS_DONE; 
+		printf("File done.\n");
+	}
+	m_Protocol->SendCommand(0x22, m_Socket, &peer, m_MD5.c_str(), offset, offset);
+}
+
+void CDownloadFile::DealFileData(const unsigned char* hexHash,
+	unsigned long offset, const char* src, unsigned long size)
+{
+	if (MD5IsSame2Hex(m_MD5.c_str(), hexHash) == false)
+		return ;
+	if (m_AdFile)
+		m_AdFile->Write(offset, src, size);
 }

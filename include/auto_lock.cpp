@@ -10,12 +10,12 @@ CLock::~CLock()
 	pthread_mutex_destroy(&m_Mutex);
 }
 
-CLock::Lock()
+void CLock::Lock()
 {
 	pthread_mutex_lock(&m_Mutex);
 }
 
-CLock::Unlock()
+void CLock::Unlock()
 {
 	pthread_mutex_unlock(&m_Mutex);
 }

@@ -46,6 +46,28 @@ void CProtocolManager::SendCommand(char id, int sockfd, ...)
 			stream.WriteInteger<unsigned long>(htonl(peer->SessionID));
 			SendTo(sockfd, buf, stream.GetSize(), peer->IPv4.c_str(), peer->Port);
 			va_end(ap);
+			break;
+		}
+	case 0x22:
+		{
+			va_list	ap;
+			va_start(ap, sockfd);
+			TPeer* peer = va_arg(ap, TPeer*);
+			const char* md5 = va_arg(ap, const char*);
+			unsigned long st_blk = va_arg(ap, unsigned long);
+			unsigned long ed_blk = va_arg(ap, unsigned long);
+			
+			unsigned char hexHash[16];
+			MD52Hex(md5, hexHash);
+			char buf[BUF_SIZE];
+			CMemoryStream sender(buf, 0, BUF_SIZE);
+			sender.WriteInteger<char>(0x22);
+			sender.WriteBuffer(hexHash, 16);
+			sender.WriteInteger<unsigned long>(htonl(st_blk));
+			sender.WriteInteger<unsigned long>(htonl(ed_blk));
+			SendTo(sockfd, buf, sender.GetSize(), peer->IPv4.c_str(), peer->Port);
+			va_end(ap);
+			break;
 		}
 	default:
 		{
@@ -60,7 +82,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 		return ;
 	char abuf[MAX_ADDR_SIZE];
 	socklen_t alen = MAX_ADDR_SIZE;
-	char buf[BUF_SIZE * 2];
+	char buf[BUF_SIZE * 8];
 	memset(buf, 0, sizeof(buf));
 	int n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen);
 	if (n > 0)
@@ -110,6 +132,31 @@ void CProtocolManager::Response(int sockfd, void* arg)
 				sendto(sockfd, sendBuf, sender.GetSize(), 0, (struct sockaddr*)abuf, alen);
 				break;
 			}
+		case 0x22:
+			{
+				CUploadFile* upload = static_cast<CUploadFile*>(arg);
+				unsigned char hexHash[16];
+				reader.ReadBuffer(hexHash, 16);
+				unsigned long st_blk = ntohl(reader.ReadInteger<unsigned long>());
+				unsigned long ed_blk = ntohl(reader.ReadInteger<unsigned long>());
+				unsigned long offset = st_blk * BLOCK_SIZE;
+				unsigned long size = (ed_blk - st_blk + 1) * BLOCK_SIZE;
+				char* dataBuf = new char[size];
+				unsigned long fSize = upload->GetFileData(hexHash, offset, size, dataBuf);
+
+				char* sendBuf = new char[size + BUF_SIZE];
+				CMemoryStream sender(sendBuf, 0, size+ BUF_SIZE);
+				sender.WriteInteger<char>(0x32);
+				sender.WriteBuffer(hexHash, 16);
+				sender.WriteInteger<unsigned long>(htonl(st_blk));
+				sender.WriteInteger<unsigned long>(htonl(fSize));
+				sender.WriteBuffer(dataBuf, fSize);
+
+				sendto(sockfd, sendBuf, sender.GetSize(), 0, (struct sockaddr*)abuf, alen);
+				delete sendBuf;
+				delete dataBuf;
+				break;
+			}
 		case 0x31:
 			{
 				// Check result return.
@@ -120,6 +167,21 @@ void CProtocolManager::Response(int sockfd, void* arg)
 
 				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
 				down->DealCheckResult(hexHash, sessionID, status);
+				break;
+			}
+		case 0x32:
+			{
+				// File data.
+				unsigned char hexHash[16];
+				reader.ReadBuffer(hexHash, 16);
+				unsigned long offset = ntohl(reader.ReadInteger<unsigned long>());
+				unsigned long size = ntohl(reader.ReadInteger<unsigned long>());
+				char* dataBuf = new char[size];
+				reader.ReadBuffer(dataBuf, size);
+				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
+				down->DealFileData(hexHash, offset, dataBuf, size);
+				delete dataBuf;
+				break;	
 			}
 		default:
 			{

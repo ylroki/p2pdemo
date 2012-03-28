@@ -135,6 +135,14 @@ bool CFileSystem::IsExist(const unsigned char* hexHash)
 		return false;
 }
 
+std::string CFileSystem::GetPath(const unsigned char* hexHash)
+{
+	char md5[33];
+	md5[32] = 0;
+	Hex2MD5(hexHash, md5);
+	return GetPath(md5);	
+}
+
 std::string CFileSystem::GetPath(const char* md5)
 {
 	char sql[BUF_SIZE];
@@ -151,10 +159,7 @@ std::string CFileSystem::GetPath(const char* md5)
 
 unsigned long CFileSystem::GetFileSize(const unsigned char* hexHash)
 {
-	char md5[33];
-	md5[32] = 0;
-	Hex2MD5(hexHash, md5);
-	std::string pathname = GetPath(md5);
+	std::string pathname = GetPath(hexHash);
 	if (pathname != "")
 	{
 		struct stat st;

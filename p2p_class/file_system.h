@@ -17,6 +17,7 @@ public:
 	bool IsExist(const unsigned char* hexHash);
 	unsigned long GetFileSize(const unsigned char* hexHash);
 	std::string GetPath(const char* md5);
+	std::string GetPath(const unsigned char* hexHash);
 
 private:
 	static void* ThreadFunc(void* arg);

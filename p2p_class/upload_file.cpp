@@ -37,6 +37,8 @@ void CUploadFile::Stop()
 		pthread_join(m_Thread, NULL);
 	if (m_Protocol)
 		delete m_Protocol;
+	if (m_Socket != SOCKET_ERROR)
+		close(m_Socket);
 }
 
 void CUploadFile::SetFileSystem(CFileSystem* fs)
@@ -94,4 +96,16 @@ void CUploadFile::RecvMessage()
 bool CUploadFile::IsExist(const unsigned char* hexHash)
 {
 	return m_FileSystem->IsExist(hexHash);
+}
+
+unsigned long CUploadFile::GetFileData(const unsigned char* hexHash, 
+	unsigned long offset, unsigned long size, char* dst)
+{
+	std::string pathname = m_FileSystem->GetPath(hexHash);
+	if (access(pathname.c_str(), F_OK) == 0)
+	{
+		CFileStream file(pathname.c_str(), O_RDONLY);
+		return file.Read(offset, dst, size);
+	}
+	return 0;
 }

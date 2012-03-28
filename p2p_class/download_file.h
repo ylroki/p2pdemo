@@ -7,6 +7,8 @@
 #include "md5_header.h"
 #include "command.h"
 #include "protocol_manager.h"
+#include "advanced_file.h"
+
 class CProtocolManager;
 
 enum KDownStatus
@@ -30,6 +32,8 @@ public:
 	void DealSourceResponse(const unsigned char* hexHash, unsigned long filesize,
 		std::vector<TPeer>* vec);
 	void DealCheckResult(const unsigned char* hexHash, unsigned long sessionID, char status);
+	void DealFileData(const unsigned char* hexHash,
+		unsigned long offset, const char* src, unsigned long size);
 	
 
 private:
@@ -37,6 +41,7 @@ private:
 	void Work();
 	void RequestSources();
 	void UpdateSources();
+	void RequestFileData(TPeer peer);
 	bool InitSocket();
 	void SelectSocket();
 	void RecvMessage();
@@ -49,6 +54,7 @@ private:
 	std::vector<TPeer> m_VecWorkSource;
 	CConfig* m_Config;
 	CProtocolManager* m_Protocol;
+	CAdvancedFile* m_AdFile;
 };
 
 #endif

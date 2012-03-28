@@ -60,8 +60,7 @@
       short|2|port
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 </node>
@@ -86,8 +85,7 @@
       unsigned char*|20*n|hashes
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1331536441888" ID="ID_588323776" MODIFIED="1332841248291" TEXT="0x02 logout">
 <richcontent TYPE="NOTE"><html>
@@ -160,10 +158,9 @@
       char|1|status
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
-<node CREATED="1331538970928" ID="ID_115023932" MODIFIED="1332841309132" TEXT="0x32 file data">
+<node CREATED="1331538970928" ID="ID_115023932" MODIFIED="1332934786381" TEXT="0x32 file data">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -176,19 +173,17 @@
       unsigned c*har|16|hash
     </p>
     <p>
-      char|1|block size, 1 means 1k
-    </p>
-    <p>
       long|4|block offset start
     </p>
     <p>
-      long|4|block offset end
+      long|4|size of content
     </p>
     <p>
       char*|*|content
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node CREATED="1331538224166" ID="ID_804188050" MODIFIED="1331538242720" TEXT="request peer">
@@ -211,7 +206,7 @@
 </html></richcontent>
 <arrowlink DESTINATION="ID_1867565399" ENDARROW="Default" ENDINCLINATION="41;0;" ID="Arrow_ID_1492304979" STARTARROW="None" STARTINCLINATION="41;0;"/>
 </node>
-<node CREATED="1331538708024" ID="ID_30407450" MODIFIED="1332841317844" TEXT="0x22 get file data">
+<node CREATED="1331538708024" ID="ID_30407450" MODIFIED="1332934499395" TEXT="0x22 get file data">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -224,16 +219,14 @@
       unsigned char*|16|hash
     </p>
     <p>
-      char|1|block size, 1 means 1k
-    </p>
-    <p>
       long|4|block offset start
     </p>
     <p>
       long|4|block offset end
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 <arrowlink DESTINATION="ID_115023932" ENDARROW="Default" ENDINCLINATION="55;0;" ID="Arrow_ID_916413121" STARTARROW="None" STARTINCLINATION="55;0;"/>
 </node>
 </node>
@@ -266,12 +259,14 @@
       0x04
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 <arrowlink DESTINATION="ID_1721342018" ENDARROW="Default" ENDINCLINATION="922;0;" ID="Arrow_ID_307573770" STARTARROW="None" STARTINCLINATION="922;0;"/>
 </node>
 <node CREATED="1331720938686" ID="ID_660665471" MODIFIED="1331722836936" TEXT="UpdateSource()">
 <node CREATED="1332841548096" ID="ID_988285582" MODIFIED="1332841561220" TEXT="send 0x21 check"/>
+<node CREATED="1332935460428" ID="ID_1141091011" MODIFIED="1332936287303" TEXT="RequestFileData()">
+<arrowlink DESTINATION="ID_980837094" ENDARROW="Default" ENDINCLINATION="632;0;" ID="Arrow_ID_567257821" STARTARROW="None" STARTINCLINATION="632;0;"/>
+</node>
 </node>
 <node CREATED="1331720991202" ID="ID_612826724" MODIFIED="1331722839768" TEXT="SelectSocket()">
 <node CREATED="1331722861419" ID="ID_1107248652" MODIFIED="1331722872312" TEXT="RecvMessage()">
@@ -280,6 +275,9 @@
 </node>
 <node CREATED="1332841710021" ID="ID_1314315164" MODIFIED="1332841723039" TEXT="recv 0x31">
 <node CREATED="1332841749614" ID="ID_1281261928" MODIFIED="1332841762327" TEXT="DealCheckResult()"/>
+</node>
+<node CREATED="1332937117740" ID="ID_384956420" MODIFIED="1332937121674" TEXT="recv 0x32">
+<node CREATED="1332937125222" ID="ID_1669097700" MODIFIED="1332937143179" TEXT="DealFileData()"/>
 </node>
 </node>
 </node>
@@ -302,9 +300,22 @@
       check if file exist or not, send 0x31
     </p>
   </body>
+</html></richcontent>
+<arrowlink DESTINATION="ID_1314315164" ENDARROW="Default" ENDINCLINATION="666;0;" ID="Arrow_ID_457294045" STARTARROW="None" STARTINCLINATION="666;0;"/>
+</node>
+<node CREATED="1332935488329" ID="ID_980837094" MODIFIED="1332937143180" TEXT="recv 0x22">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      upload-&gt;GetFileData()
+    </p>
+  </body>
 </html>
 </richcontent>
-<arrowlink DESTINATION="ID_1314315164" ENDARROW="Default" ENDINCLINATION="666;0;" ID="Arrow_ID_457294045" STARTARROW="None" STARTINCLINATION="666;0;"/>
+<arrowlink DESTINATION="ID_1669097700" ENDARROW="Default" ENDINCLINATION="789;0;" ID="Arrow_ID_1700358458" STARTARROW="None" STARTINCLINATION="789;0;"/>
 </node>
 </node>
 </node>
@@ -323,8 +334,7 @@
       Insert ip,port,filesize into database
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1332841158636" ID="ID_1721342018" MODIFIED="1332841428065" TEXT="0x04 request source">
 <richcontent TYPE="NOTE"><html>
@@ -336,8 +346,7 @@
       response 0x14
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 <arrowlink DESTINATION="ID_420994736" ENDARROW="Default" ENDINCLINATION="1053;0;" ID="Arrow_ID_1121048093" STARTARROW="None" STARTINCLINATION="1053;0;"/>
 </node>
 </node>

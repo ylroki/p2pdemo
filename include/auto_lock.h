@@ -6,8 +6,8 @@ class CLock
 public:
 	CLock();
 	~CLock();
-	Lock();
-	Unlock();
+	void Lock();
+	void Unlock();
 
 private:
 	pthread_mutex_t m_Mutex;

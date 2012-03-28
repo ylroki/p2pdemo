@@ -17,6 +17,8 @@ public:
 	bool Start(CConfig* config);
 	void Stop();
 	void SetFileSystem(CFileSystem* fs);
+	unsigned long GetFileData(const unsigned char* hexHash, 
+		unsigned long offset, unsigned long size, char* dst);
 	bool IsExist(const unsigned char* hexHash);
 
 private:
