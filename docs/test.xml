@@ -81,7 +81,14 @@
 	<procedure>
 		<title>Check Output</title>
 		<para>Just run 'clientc' is enough</para>
-		<step><para>Each clientd will output the file and hash.</para></step>
-		<step><para>Server will receive the 0x01 command</para></step>
+		<step>
+			<para>Each clientd will output the file and hash.</para>
+			<para>Check if it will update periodically.</para>
+		</step>
+		<step>
+			<para>Server will receive the 0x01 command</para>
+			<para>This cmd contains several hashes</para>
+			<para>Server record (md5,ip,port) in server.db, the record should be unique.</para>
+		</step>
 	</procedure>
 </article>
