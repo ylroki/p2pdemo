@@ -57,7 +57,7 @@ int main()
 		ErrorQuit("Bind error");
 	CDatabase database;
 	database.Open("cache/server.db");
-	database.CreateTable("hash", "(md5 TEXT, ipv4 INTEGER, port INTEGER)");
+	database.CreateTable("hash", "(md5 TEXT, ipv4 INTEGER, port INTEGER, primary key(md5,ipv4,port))");
 	database.CreateTable("filesize", "(md5 TEXT primary key, size INTEGER)");
 	while (true)
 	{

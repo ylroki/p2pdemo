@@ -26,5 +26,4 @@ struct TPeer
 	unsigned short Port;
 	unsigned long SessionID;
 };
-int GenerateCommand(char* buf, char id, ...);
 #endif

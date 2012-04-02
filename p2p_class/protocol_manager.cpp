@@ -22,11 +22,16 @@ void CProtocolManager::SendCommand(char id, int sockfd, ...)
 	case 0x01:
 		{
 			char buf[BUF_SIZE];
-			for (size_t i = 0 ; i < vecHashes.size(); i+=g_NHashes)
+			for (size_t i = 0 ; i < vecHashes.size(); i+=g_NHashes*20)
 			{
-				int n = Min(g_NHashes, vecHashes.size() - i);
-				int len = GenerateCommand(buf, 0x01, m_Config->GetPeerPort(), n, &(vecHashes[i]));
-				SendTo(sockfd, buf, m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
+				int n = Min(g_NHashes, (vecHashes.size() - i)/20);
+				CMemoryStream stream(buf, 0, BUF_SIZE);
+				stream.WriteInteger<char>(0x01);
+				stream.WriteInteger<unsigned short>(htons(m_Config->GetPeerPort()));
+				stream.WriteInteger<unsigned long>(htonl(n));
+				stream.WriteBuffer(&(vecHashes[i]), n*20);
+				SendTo(sockfd, buf, stream.GetSize(), 
+					m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
 			}
 			break;
 		}
