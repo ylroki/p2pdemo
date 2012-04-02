@@ -23,7 +23,7 @@ public:
 
 private:
 	std::string m_LocalIP;
-	int m_LocalPort;
+	unsigned short m_LocalPort;
 	std::string m_PeerIP;
 	unsigned short m_PeerPort;
 	unsigned short m_MinPort;

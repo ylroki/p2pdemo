@@ -1,0 +1,87 @@
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" 
+	"/home/ylroki/project/docbook/dtd/4.5/docbookx.dtd">
+
+<article>
+	<articleinfo>
+		<title>Test</title>
+	</articleinfo>
+
+	<!-- -->
+	<procedure>
+		<title>Modify</title>
+	</procedure>
+
+	<procedure>
+		<title>Make</title>
+		<step>
+			<para>make server program</para>
+			<programlisting>
+				make p2p_server_debug
+			</programlisting>
+		</step>
+		<step>
+			<para>make client program</para>
+			<programlisting>
+				make p2p_client_debug
+			</programlisting>
+		</step>
+	</procedure>
+
+	<!--Write least 3 config files-->
+	<procedure>
+		<title>Configure Least 3 progresses</title>
+
+		<step>
+			<para>A server</para>
+			<substeps>
+				<step>
+					<para>port:8000</para>
+				</step>
+			</substeps>
+		</step>
+
+		<step>
+			<para>A client</para>
+			<substeps>
+				<step>
+					<para>local port:31415</para>
+				</step>
+				<step>
+					<para>peer port:15926</para>
+				</step>
+			</substeps>
+		</step>
+
+		<step>
+			<para>One more client</para>
+			<substeps>
+				<step>
+					<para>local port:26535</para>
+				</step>
+				<step>
+					<para>peer port:14159</para>
+				</step>
+			</substeps>
+		</step>
+
+	</procedure>
+
+	<procedure>
+		<title>Run</title>
+		<step>
+		<programlisting>
+			./bin/server
+			./bin/clientd
+			./bin/clientd config/client2.conf
+		</programlisting>
+		</step>
+	</procedure>
+
+
+	<procedure>
+		<title>Check Output</title>
+		<para>Just run 'clientc' is enough</para>
+		<step><para>Each clientd will output the file and hash.</para></step>
+		<step><para>Server will receive the 0x01 command</para></step>
+	</procedure>
+</article>

@@ -48,7 +48,9 @@ int main()
 	if (g_Config.Init("config/server.conf") == false)
 		ErrorQuit("Error config file");
 	 
+#ifndef __DEBUG__
 	Daemonize();
+#endif
 
 	int sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (Bind(sock, NULL, g_Config.GetPort()) == false)
@@ -71,6 +73,7 @@ int main()
 			{
 			case 0x01:
 				{
+					printf("Receive 0x01 command.\n");
 					unsigned short port = ntohs(stream.ReadInteger<unsigned short>());
 					unsigned long nHash = ntohl(stream.ReadInteger<unsigned long>());
 					unsigned long ipv4 = ntohl(((struct sockaddr_in*)abuf)->sin_addr.s_addr);

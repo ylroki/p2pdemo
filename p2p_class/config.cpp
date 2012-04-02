@@ -24,47 +24,33 @@ bool CConfig::Init(const char* filename)
 		return false;
 
 	char buf[BUF_SIZE];
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_LocalIP = buf;
-	m_LocalIP = TrimString(m_LocalIP);
-	
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_LocalPort = atoi(buf);
-	
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_PeerIP = buf;
-	m_PeerIP = TrimString(m_PeerIP);
-	
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_PeerPort = atoi(buf);
-
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_UpdatePeriod = atoi(buf);
-
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_Directory = buf;
-	m_Directory = TrimString(m_Directory);
-
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_CacheDir = buf;
-	m_CacheDir = TrimString(m_CacheDir);
-
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_ServerIP = buf;
-	m_ServerIP = TrimString(m_ServerIP);
-	
-	if (fgets(buf, BUF_SIZE, file) == NULL)
-		return false;
-	m_ServerPort = atoi(buf);
-
+	while (fgets(buf, BUF_SIZE, file))
+	{
+		// NAME:VALUE
+		std::string equ = buf;
+		equ = TrimString(equ);
+		size_t pos = equ.find_first_of(':');
+		if (pos != equ.size())
+		{
+			std::string name = equ.substr(0, pos);
+			std::string value = equ.substr(pos + 1, equ.size() - pos - 1);
+			printf("%s:%s\n", name.c_str(), value.c_str());
+			if (name == "local port")
+				m_LocalPort = atoi(value.c_str());
+			else if (name == "peer port")
+				m_PeerPort = atoi(value.c_str());
+			else if (name == "update period")
+				m_UpdatePeriod = atoi(value.c_str());
+			else if (name == "resource dir")
+				m_Directory = value;
+			else if (name == "cache dir")
+				m_CacheDir = value;
+			else if (name == "server ip")
+				m_ServerIP = value;
+			else if (name == "server port")
+				m_ServerPort = atoi(value.c_str());
+		}
+	}
 	fclose(file);
 	return true;
 }

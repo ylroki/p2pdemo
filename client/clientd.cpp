@@ -7,7 +7,7 @@
 #include "file_system.h"
 
 bool g_DaemonStopped = true;
-CDownloadFile g_DownloadFile("ffffffffffffffffffffffffffffffff");
+CDownloadFile g_DownloadFile("2781dea1445042e8e02fa7303bd53f5b");
 CUploadFile g_UploadFile;
 CConfig g_Config;
 CFileSystem g_FileSystem;
@@ -28,13 +28,18 @@ void DealLocalCommand(const char* command)
 int main(int argc, char* argv[])
 {
 	// Get network configuration.
-	if (g_Config.Init("config/client.conf") == false)
+	std::string configName = "config/client.conf";
+	if (argc >= 2 && access(argv[1], F_OK) == 0)
+	{
+		configName = argv[1];
+	}
+	if (g_Config.Init(configName.c_str()) == false)
 		ErrorQuit("Error on getting configuration ");
-	std::string ipString = g_Config.GetLocalIP();
+
 	int port = g_Config.GetLocalPort();
 	
 	// A daemon, bind to local address, listennig command.
-	printf("Bind %s:%d\n", ipString.c_str(), port);
+	printf("Bind %s:%d\n", "127.0.0.1", port);
 #ifndef __DEBUG__
 	Daemonize();// Close all file descriptors include socket
 #endif	
@@ -42,7 +47,7 @@ int main(int argc, char* argv[])
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 		ErrorQuit("Can't create socket");
 
-	if (Bind(sockfd, ipString.c_str(), port) == false)
+	if (Bind(sockfd, NULL, port) == false)
 		ErrorQuit("Can't bind socket");
 
 	g_UploadFile.Start(&g_Config);

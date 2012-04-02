@@ -29,6 +29,11 @@ p2p_server:
 		$(SERVER_CPP) $(SHARE_CPP) \
 		-o bin/server -lcrypto -lsqlite3
 
+p2p_server_debug:
+	g++ -g -Iinclude -I$(SSL_INCLUDE) -L$(SSL_LIB) -D__DEBUG__\
+		$(SERVER_CPP) $(SHARE_CPP) \
+		-o bin/server -lcrypto -lsqlite3
+
 test_file_system:
 	g++ -g -Iinclude -Ip2p_class -I$(SSL_INCLUDE) -L$(SSL_LIB) \
 		p2p_class/file_system.cpp p2p_class/config.cpp $(SHARE_CPP) test/test_file_system.cpp \
@@ -43,3 +48,9 @@ test_advanced_file:
 	g++ -g -Iinclude -Ip2p_class -I$(SSL_INCLUDE) -L$(SSL_LIB)\
 		test/test_advanced_file.cpp $(SHARE_CPP) p2p_class/advanced_file.cpp \
 		-o bin/test_advanced_file -lpthread -lsqlite3 -lcrypto
+
+doc_test:
+	xsltproc \
+	-o docs/test.html \
+	/home/ylroki/project/docbook/xsl/html/docbook.xsl \
+	docs/test.xml
