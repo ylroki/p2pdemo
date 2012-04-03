@@ -15,8 +15,12 @@ void CProtocolManager::AddHash(unsigned char* hexHash)
 const int g_NHashes = 50;
 void CProtocolManager::SendCommand(char id, int sockfd, ...)
 {
+	bool newSock = false;
 	if (sockfd == SOCKET_ERROR)
+	{
 		sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+		newSock = true;
+	}
 	switch (id)
 	{
 	case 0x01:
@@ -79,6 +83,8 @@ void CProtocolManager::SendCommand(char id, int sockfd, ...)
 			 break;
 		}
 	}
+	if (newSock == true)
+		close(sockfd);
 }
 
 void CProtocolManager::Response(int sockfd, void* arg)

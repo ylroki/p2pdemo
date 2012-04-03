@@ -56,7 +56,8 @@ int main()
 	while (true)
 	{
 		char abuf[MAX_ADDR_SIZE];
-		socklen_t alen;
+		memset(abuf, 0, MAX_ADDR_SIZE);
+		socklen_t alen = MAX_ADDR_SIZE;
 		char buf[BUF_SIZE];
 		int n;
 		if ((n = recvfrom(sock, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen)) > 0)
