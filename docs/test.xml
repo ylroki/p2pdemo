@@ -14,13 +14,13 @@
 	<procedure>
 		<title>Make</title>
 		<step>
-			<para>make server program</para>
+			<para>make server program.</para>
 			<programlisting>
 				make p2p_server_debug
 			</programlisting>
 		</step>
 		<step>
-			<para>make client program</para>
+			<para>make client program.</para>
 			<programlisting>
 				make p2p_client_debug
 			</programlisting>
@@ -80,15 +80,30 @@
 
 	<procedure>
 		<title>Check Output</title>
-		<para>Just run 'clientc' is enough</para>
+		<para>Just run 'clientc' is enough.</para>
 		<step>
 			<para>Each clientd will output the file and hash.</para>
 			<para>Check if it will update periodically.</para>
 		</step>
 		<step>
-			<para>Server will receive the 0x01 command</para>
-			<para>This cmd contains several hashes</para>
+			<para>Server will receive the 0x01 command.</para>
+			<para>This cmd contains several hashes.</para>
 			<para>Server record (md5,ip,port) in server.db, the record should be unique.</para>
+		</step>
+		<step>
+			<para>Download.</para>
+			<programlisting>
+				./bin/clientc download
+			</programlisting>
+			<substeps>
+				<step>Client send 0x04 cmd to request sources from server.</step>
+				<step>Server response 0x14 cmd to client.</step>
+				<step>Client send 0x21 cmd to source, check if file is exist.</step>
+				<step>Source response whether file exists or not. if exists, 
+					Client adds it to workSource.</step>
+				<step>Client send 0x22 cmd to workSource, to get file data.</step>
+				<step>workSource response file data.</step>
+			</substeps>
 		</step>
 	</procedure>
 </article>

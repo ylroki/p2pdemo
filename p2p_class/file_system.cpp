@@ -127,9 +127,11 @@ bool CFileSystem::IsExist(const unsigned char* hexHash)
 	Hex2MD5(hexHash, md5);
 	char sql[BUF_SIZE];
 	sprintf(sql, "select * from hash where md5='%s'", md5);
-	int nRow = 0;
-	m_Database.GetTable(sql, NULL, &nRow, NULL);
-	if (nRow >= 2)
+	char** result;
+	int nRow = 0;//result table actually contains nRow+1 rows, the first row is name of each colume.
+	int nCol = 0;
+	m_Database.GetTable(sql, &result, &nRow, &nCol);
+	if (nRow >= 1)
 		return true;
 	else
 		return false;
@@ -151,7 +153,7 @@ std::string CFileSystem::GetPath(const char* md5)
 	int nRow = 0;
 	int nCol = 0;
 	m_Database.GetTable(sql, &result, &nRow, &nCol);
-	if (nCol == 1 && nRow == 2)
+	if (nCol == 1 && nRow >= 1)
 		return result[1];
 	return "";
 

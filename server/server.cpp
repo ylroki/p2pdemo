@@ -15,7 +15,10 @@ unsigned long GetFileSize(CDatabase database, const char* md5)
 	int nRow = 0;
 	int nCol = 0;
 	database.GetTable(sql, &res, &nRow, &nCol);
-	return atoi(res[nCol]);
+	if (nRow >= 1)
+		return atoi(res[nCol]);
+	else
+		return 0;
 }
 
 
@@ -24,6 +27,7 @@ int DealEachSource(void* arg, int nCol, char** result, char** name)
 	CMemoryStream* stream = static_cast<CMemoryStream*>(arg);
 	if (stream->GetSize() + 6 <= stream->GetMaxSize())
 	{
+		printf("%s:%s\n", result[0], result[1]);
 		unsigned long ipv4 = atoi(result[0]);
 		unsigned short port = atoi(result[1]);
 		stream->WriteInteger<unsigned long>(htonl(ipv4));
@@ -32,16 +36,6 @@ int DealEachSource(void* arg, int nCol, char** result, char** name)
 	return 0;
 }
 
-void ResponseSources(unsigned char* hexHash, unsigned long filesize, int n, char* srcBuf)
-{
-	char sendBuf[BUF_SIZE];
-	CMemoryStream sender(sendBuf, 0, BUF_SIZE);
-	sender.WriteInteger<char>(0x14);
-	sender.WriteBuffer(hexHash, 16);
-	sender.WriteInteger<unsigned long>(htonl(filesize));
-	sender.WriteInteger<char>(n);
-	sender.WriteBuffer(srcBuf, 6*n);
-}
 
 int main()
 {
@@ -98,6 +92,7 @@ int main()
 			case 0x04:
 				{
 					//request sources
+					printf("received 0x04.\n");
 					unsigned char hexHash[16];
 					stream.ReadBuffer(hexHash, 16);
 					char md5[33];
@@ -110,7 +105,14 @@ int main()
 					database.Execute(sql, DealEachSource, &srcStream);
 
 					unsigned long filesize = GetFileSize(database, md5);
-					ResponseSources(hexHash, filesize, srcStream.GetSize()/6, srcBuf);
+					char sendBuf[BUF_SIZE];
+					CMemoryStream sender(sendBuf, 0, BUF_SIZE);
+					sender.WriteInteger<char>(0x14);
+					sender.WriteBuffer(hexHash, 16);
+					sender.WriteInteger<unsigned long>(htonl(filesize));
+					sender.WriteInteger<char>(srcStream.GetSize()/6);
+					sender.WriteBuffer(srcBuf, 6*n);
+					sendto(sock, sendBuf, sender.GetSize(), 0, (struct sockaddr*)abuf, alen);
 					break;
 				}
 			default:

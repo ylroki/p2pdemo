@@ -114,6 +114,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 					peer.Port = ntohs(port);
 					peer.SessionID = ntohl(ip);
 					vecSource.push_back(peer);
+					printf("request result, Source:%s, %hu\n", peer.IPv4.c_str(), peer.Port);
 				}
 				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
 				down->DealSourceResponse(hexHash, filesize, &vecSource);
@@ -122,6 +123,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 		case 0x21:
 			{
 				// Check if file exists or not.
+				printf("check\n");
 				unsigned char hexHash[16];
 				reader.ReadBuffer(hexHash, 16);
 				unsigned long sessionID = reader.ReadInteger<unsigned long>();
@@ -139,6 +141,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 			}
 		case 0x22:
 			{
+				//Get file data.
 				CUploadFile* upload = static_cast<CUploadFile*>(arg);
 				unsigned char hexHash[16];
 				reader.ReadBuffer(hexHash, 16);
@@ -148,6 +151,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 				unsigned long size = (ed_blk - st_blk + 1) * BLOCK_SIZE;
 				char* dataBuf = new char[size];
 				unsigned long fSize = upload->GetFileData(hexHash, offset, size, dataBuf);
+				printf("get file data, byte offset:%lu byte size:%lu\n", offset, size);
 
 				char* sendBuf = new char[size + BUF_SIZE];
 				CMemoryStream sender(sendBuf, 0, size+ BUF_SIZE);
@@ -169,6 +173,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 				reader.ReadBuffer(hexHash, 16);
 				unsigned long sessionID = ntohl(reader.ReadInteger<unsigned long>());
 				char status = reader.ReadInteger<char>();
+				printf("check result:%d\n", status);
 
 				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
 				down->DealCheckResult(hexHash, sessionID, status);
@@ -181,6 +186,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 				reader.ReadBuffer(hexHash, 16);
 				unsigned long offset = ntohl(reader.ReadInteger<unsigned long>());
 				unsigned long size = ntohl(reader.ReadInteger<unsigned long>());
+				printf("file data, block offset:%lu byte size:%lu\n", offset, size);
 				char* dataBuf = new char[size];
 				reader.ReadBuffer(dataBuf, size);
 				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
