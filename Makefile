@@ -54,3 +54,9 @@ doc_test:
 	-o docs/test.html \
 	/home/ylroki/project/docbook/xsl/html/docbook.xsl \
 	docs/test.xml
+
+doc_kad:
+	xsltproc \
+	-o docs/kad.html \
+	/home/ylroki/project/docbook/xsl/html/docbook.xsl \
+	docs/kad.xml

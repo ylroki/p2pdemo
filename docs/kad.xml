@@ -1,0 +1,65 @@
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" 
+	"/home/ylroki/project/docbook/dtd/4.5/docbookx.dtd">
+
+<article>
+	<articleinfo>
+		<title>Note About Kad</title>
+	</articleinfo>
+
+	<sect1>
+		<title>1 Introduction</title>
+		<para>Participating computers each have a node ID in the 160-bit key space.</para>
+		<para>&lt;key, value&gt; pairs are stored on nodes with IDs "close" to the key for some 
+			notion of closeness.</para>
+	</sect1>
+
+
+	<sect1>
+		<title>2 System description</title>
+		<para>Kademilia effectively treats nodes as leaves in a binary tree</para>
+
+		<sect2>
+			<title>2.1 XOR metric</title>
+			<para>d(x,y) = x &oplus; y</para>
+		</sect2>
+
+		<sect2>
+			<title>2.2 Node state</title>
+			<para>For each 0 &le; i &lt; 160, every node keeps 
+				a list of &lt;IP address, UDP port, Node ID&gt;
+				triples for nodes of distance between 
+				2<superscript>i</superscript> and 2<superscript>i+1</superscript>
+				from itself. We call these lists k-buckets.</para>
+			<para>Form each node in i-th bucket, the high (159 - i) bits of its Node ID is same with
+				the host node. In another words, they all in a subtree of host node.</para>
+			<para>Each k-bucket is kept sorted by time last seen.</para>
+		</sect2>
+
+		<sect2>
+			<title>2.3 Kademilia protocol</title>
+			<para></para>
+			<itemizedlist>
+				<listitem>PING
+					<para>The PING RPC probes a node to see if it is online.</para>
+				</listitem>
+				<listitem>STORE
+					<para>STORE instructs a node to store a &lt;key, value&gt;
+						pair for later retrieval.</para>
+				</listitem>
+				<listitem>FIND_NODE
+					<para>FIND_NODE takes a 160-bit ID as an argument.</para>
+					<para>The recipient of the RPC returns 
+						&lt;IP address, UDP port, Node ID&gt;
+						triples for the k nodes it knows about closest to the target ID.</para>
+				</listitem>
+				<listitem>FIND_VALUE
+					<para>FIND_VALUE behaves like FIND_NODE--returning
+						&lt;IP address, UDP port, Node ID&gt;
+						triples--with one exception. If the RPC recopient has received 
+						a STORE RPC for the key, it just returns the stored value.</para>
+				</listitem>
+			</itemizedlist>
+		</sect2>
+	</sect1>
+
+</article>
