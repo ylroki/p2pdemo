@@ -1,17 +1,43 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Note About Kad</title><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" title="Note About Kad"><div class="titlepage"><div><div><h2 class="title"><a name="idm14840320"></a>Note About Kad</h2></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#idp170240">1 Introduction</a></span></dt><dt><span class="sect1"><a href="#idp172008">2 System description</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp172616">2.1 XOR metric</a></span></dt><dt><span class="sect2"><a href="#idp2371632">2.2 Node state</a></span></dt><dt><span class="sect2"><a href="#idp1291048">2.3 Kademilia protocol</a></span></dt></dl></dd></dl></div><div class="sect1" title="1 Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp170240"></a>1 Introduction</h2></div></div></div><p>Participating computers each have a node ID in the 160-bit key space.</p><p>&lt;key, value&gt; pairs are stored on nodes with IDs "close" to the key for some 
-			notion of closeness.</p></div><div class="sect1" title="2 System description"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp172008"></a>2 System description</h2></div></div></div><p>Kademilia effectively treats nodes as leaves in a binary tree</p><div class="sect2" title="2.1 XOR metric"><div class="titlepage"><div><div><h3 class="title"><a name="idp172616"></a>2.1 XOR metric</h3></div></div></div><p>d(x,y) = x &#8853; y</p></div><div class="sect2" title="2.2 Node state"><div class="titlepage"><div><div><h3 class="title"><a name="idp2371632"></a>2.2 Node state</h3></div></div></div><p>For each 0 &#8804; i &lt; 160, every node keeps 
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Note About Kad</title><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" title="Note About Kad"><div class="titlepage"><div><div><h2 class="title"><a name="idm14900096"></a>Note About Kad</h2></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#idp105440">1 Introduction</a></span></dt><dt><span class="sect1"><a href="#idp107136">2 System description</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp108776">2.1 XOR metric</a></span></dt><dt><span class="sect2"><a href="#idp1540696">2.2 Node state</a></span></dt><dt><span class="sect2"><a href="#idp2921760">2.3 Kademilia protocol</a></span></dt></dl></dd></dl></div><div class="sect1" title="1 Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp105440"></a>1 Introduction</h2></div></div></div><p>Participating computers each have a node ID in the 160-bit key space.</p><p>&lt;key, value&gt; pairs are stored on nodes with IDs "close" to the key for some 
+			notion of closeness.</p></div><div class="sect1" title="2 System description"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp107136"></a>2 System description</h2></div></div></div><p>Kademilia effectively treats nodes as leaves in a binary tree.</p><p>For any given node, we divide the binary tree into a series of successively
+			lower subtrees that <span class="emphasis"><em>not containing the node</em></span>.
+			The highest subtree consists of the half of the binary tree 
+			<span class="emphasis"><em>not containing the node</em></span>.
+			The next subtree consists of the half of the remaining tree 
+			<span class="emphasis"><em>not containing the node</em></span>, and so the forth.
+			</p><div class="sect2" title="2.1 XOR metric"><div class="titlepage"><div><div><h3 class="title"><a name="idp108776"></a>2.1 XOR metric</h3></div></div></div><p>d(x,y) = x &#8853; y</p><p>In a fully-populated binary tree of 160-bit IDs,
+				the magnitude of the distance between two IDs is
+				<span class="emphasis"><em>the height of the smallest subtree containing them both.</em></span></p></div><div class="sect2" title="2.2 Node state"><div class="titlepage"><div><div><h3 class="title"><a name="idp1540696"></a>2.2 Node state</h3></div></div></div><p>For each 0 &#8804; i &lt; 160, every node keeps 
 				a list of &lt;IP address, UDP port, Node ID&gt;
 				triples for nodes of distance between 
 				2<sup>i</sup> and 2<sup>i+1</sup>
-				from itself. We call these lists k-buckets.</p><p>Form each node in i-th bucket, the high (159 - i) bits of its Node ID is same with
-				the host node. In another words, they all in a subtree of host node.</p><p>Each k-bucket is kept sorted by time last seen.</p></div><div class="sect2" title="2.3 Kademilia protocol"><div class="titlepage"><div><div><h3 class="title"><a name="idp1291048"></a>2.3 Kademilia protocol</h3></div></div></div><p></p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">PING
-					<p>The PING RPC probes a node to see if it is online.</p></li><li class="listitem">STORE
-					<p>STORE instructs a node to store a &lt;key, value&gt;
-						pair for later retrieval.</p></li><li class="listitem">FIND_NODE
-					<p>FIND_NODE takes a 160-bit ID as an argument.</p><p>The recipient of the RPC returns 
-						&lt;IP address, UDP port, Node ID&gt;
-						triples for the k nodes it knows about closest to the target ID.</p></li><li class="listitem">FIND_VALUE
-					<p>FIND_VALUE behaves like FIND_NODE--returning
-						&lt;IP address, UDP port, Node ID&gt;
-						triples--with one exception. If the RPC recopient has received 
-						a STORE RPC for the key, it just returns the stored value.</p></li></ul></div></div></div></div></body></html>
+				from itself. We call these lists k-buckets because the lists can
+				grow up tp size k, where k is a system-wide replication parameter.</p><p>Form each node in i-th bucket, the high (159 - i) bits of its Node ID is same with
+				the host node. In other words, they all in a subtree of host node.</p><p>Each k-bucket is kept sorted by time last seen.
+				Least-recently seen node at tail.</p><p>When a Kademlia node receives any message (request or reply)
+				from another node, it updates the appropriate k-bucket,
+				for the sender's node ID.</p><p>If the k-bucket is full, ping the least-recently seen node.
+				If it fails to response, it is evicted from the k-bucket and
+				new node inserted at the tail.</p><p>Because the longer a node has been up, the more likely it is
+				to remain up another hour.</p><p>So Kademlia nodes will only insert the new nodes in the k-bucket 
+				when old nodes leave the system.</p></div><div class="sect2" title="2.3 Kademilia protocol"><div class="titlepage"><div><div><h3 class="title"><a name="idp2921760"></a>2.3 Kademilia protocol</h3></div></div></div><div class="sect3" title="2.3.1 4 RPCs"><div class="titlepage"><div><div><h4 class="title"><a name="idp2396464"></a>2.3.1 4 RPCs</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">PING
+							<p>The PING RPC probes a node to see if it is online.</p></li><li class="listitem">STORE
+							<p>STORE instructs a node to store a &lt;key, value&gt;
+								pair for later retrieval.</p></li><li class="listitem">FIND_NODE
+							<p>FIND_NODE takes a 160-bit ID as an argument.</p><p>The recipient of the RPC returns 
+								&lt;IP address, UDP port, Node ID&gt;
+								triples for the k nodes it knows about closest to the target ID.</p></li><li class="listitem">FIND_VALUE
+							<p>FIND_VALUE behaves like FIND_NODE--returning
+								&lt;IP address, UDP port, Node ID&gt;
+								triples--with one exception. If the RPC recopient has received 
+								a STORE RPC for the key, it just returns the stored value.</p></li></ul></div></div><div class="sect3" title="2.3.2 Node Lookup"><div class="titlepage"><div><div><h4 class="title"><a name="idp2307856"></a>2.3.2 Node Lookup</h4></div></div></div><div class="procedure" title="Procedure 1. Lookup algorithm"><a name="idp2840336"></a><p class="title"><b>Procedure 1. Lookup algorithm</b></p><ol class="procedure" type="1"><li class="step" title="Step 1">The lookup initiator starts by picking &#945; nodes
+							from its closest non-empty k-bucket.</li><li class="step" title="Step 2">The initiator then sends parallel asynchronous FIND_NODE RPCs
+							to the &#945; nodes it has chosen.</li><li class="step" title="Step 3">In the recursive step, the initiator resends the FIND_NODE
+							to nodes it has learned about from previous RPCs.</li><li class="step" title="Step 4">The lookup terminates when the initiator has queried and gotten
+							response from the k closest node it has seen.</li></ol></div><div class="itemizedlist" title="Some operation"><p class="title"><b>Some operation</b></p><ul class="itemizedlist" type="disc"><li class="listitem">To store a &lt;key, value&gt;	
+							<p>A participant locates the k closet nodes to the key
+								and sends them STORE RPCs.</p></li><li class="listitem">To Find a &lt;key, value&gt;
+							<p>Use FIND_VALUE RPCs in lookup procedure.</p></li><li class="listitem">To avoid "over-caching"
+							<p></p></li><li class="listitem">To refresh k-bucket 
+							<p></p></li><li class="listitem">To join the network 
+							<p>Lookup its own node ID.</p></li></ul></div></div></div></div></div></body></html>

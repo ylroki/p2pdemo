@@ -16,11 +16,21 @@
 
 	<sect1>
 		<title>2 System description</title>
-		<para>Kademilia effectively treats nodes as leaves in a binary tree</para>
+		<para>Kademilia effectively treats nodes as leaves in a binary tree.</para>
+		<para>For any given node, we divide the binary tree into a series of successively
+			lower subtrees that <emphasis>not containing the node</emphasis>.
+			The highest subtree consists of the half of the binary tree 
+			<emphasis>not containing the node</emphasis>.
+			The next subtree consists of the half of the remaining tree 
+			<emphasis>not containing the node</emphasis>, and so the forth.
+			</para>
 
 		<sect2>
 			<title>2.1 XOR metric</title>
 			<para>d(x,y) = x &oplus; y</para>
+			<para>In a fully-populated binary tree of 160-bit IDs,
+				the magnitude of the distance between two IDs is
+				<emphasis>the height of the smallest subtree containing them both.</emphasis></para>
 		</sect2>
 
 		<sect2>
@@ -29,36 +39,85 @@
 				a list of &lt;IP address, UDP port, Node ID&gt;
 				triples for nodes of distance between 
 				2<superscript>i</superscript> and 2<superscript>i+1</superscript>
-				from itself. We call these lists k-buckets.</para>
+				from itself. We call these lists k-buckets because the lists can
+				grow up tp size k, where k is a system-wide replication parameter.</para>
 			<para>Form each node in i-th bucket, the high (159 - i) bits of its Node ID is same with
-				the host node. In another words, they all in a subtree of host node.</para>
-			<para>Each k-bucket is kept sorted by time last seen.</para>
+				the host node. In other words, they all in a subtree of host node.</para>
+			<para>Each k-bucket is kept sorted by time last seen.
+				Least-recently seen node at tail.</para>
+			<para>When a Kademlia node receives any message (request or reply)
+				from another node, it updates the appropriate k-bucket,
+				for the sender's node ID.</para>
+			<para>If the k-bucket is full, ping the least-recently seen node.
+				If it fails to response, it is evicted from the k-bucket and
+				new node inserted at the tail.</para>
+			<para>Because the longer a node has been up, the more likely it is
+				to remain up another hour.</para>
+			<para>So Kademlia nodes will only insert the new nodes in the k-bucket 
+				when old nodes leave the system.</para>
 		</sect2>
 
 		<sect2>
 			<title>2.3 Kademilia protocol</title>
-			<para></para>
-			<itemizedlist>
-				<listitem>PING
-					<para>The PING RPC probes a node to see if it is online.</para>
-				</listitem>
-				<listitem>STORE
-					<para>STORE instructs a node to store a &lt;key, value&gt;
-						pair for later retrieval.</para>
-				</listitem>
-				<listitem>FIND_NODE
-					<para>FIND_NODE takes a 160-bit ID as an argument.</para>
-					<para>The recipient of the RPC returns 
-						&lt;IP address, UDP port, Node ID&gt;
-						triples for the k nodes it knows about closest to the target ID.</para>
-				</listitem>
-				<listitem>FIND_VALUE
-					<para>FIND_VALUE behaves like FIND_NODE--returning
-						&lt;IP address, UDP port, Node ID&gt;
-						triples--with one exception. If the RPC recopient has received 
-						a STORE RPC for the key, it just returns the stored value.</para>
-				</listitem>
-			</itemizedlist>
+				<sect3>
+					<title>2.3.1 4 RPCs</title>
+					<itemizedlist>
+						<listitem>PING
+							<para>The PING RPC probes a node to see if it is online.</para>
+						</listitem>
+						<listitem>STORE
+							<para>STORE instructs a node to store a &lt;key, value&gt;
+								pair for later retrieval.</para>
+						</listitem>
+						<listitem>FIND_NODE
+							<para>FIND_NODE takes a 160-bit ID as an argument.</para>
+							<para>The recipient of the RPC returns 
+								&lt;IP address, UDP port, Node ID&gt;
+								triples for the k nodes it knows about closest to the target ID.</para>
+						</listitem>
+						<listitem>FIND_VALUE
+							<para>FIND_VALUE behaves like FIND_NODE--returning
+								&lt;IP address, UDP port, Node ID&gt;
+								triples--with one exception. If the RPC recopient has received 
+								a STORE RPC for the key, it just returns the stored value.</para>
+						</listitem>
+					</itemizedlist>
+				</sect3>
+
+				<sect3>
+					<title>2.3.2 Node Lookup</title>
+					<procedure>
+						<title>Lookup algorithm</title>
+						<step>The lookup initiator starts by picking &alpha; nodes
+							from its closest non-empty k-bucket.</step>
+						<step>The initiator then sends parallel asynchronous FIND_NODE RPCs
+							to the &alpha; nodes it has chosen.</step>
+						<step>In the recursive step, the initiator resends the FIND_NODE
+							to nodes it has learned about from previous RPCs.</step>
+						<step>The lookup terminates when the initiator has queried and gotten
+							response from the k closest node it has seen.</step>
+					</procedure>
+
+					<itemizedlist>
+						<title>Some operation</title>
+						<listitem>To store a &lt;key, value&gt;	
+							<para>A participant locates the k closet nodes to the key
+								and sends them STORE RPCs.</para>
+						</listitem>
+						<listitem>To Find a &lt;key, value&gt;
+							<para>Use FIND_VALUE RPCs in lookup procedure.</para>
+						</listitem>
+						<listitem>To avoid "over-caching"
+							<para></para>
+						</listitem>
+						<listitem>To refresh k-bucket 
+							<para></para>
+						</listitem>
+						<listitem>To join the network 
+							<para>Lookup its own node ID.</para>
+						</listitem>
+					</itemizedlist>
+				</sect3>
 		</sect2>
 	</sect1>
 
