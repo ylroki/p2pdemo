@@ -231,7 +231,188 @@
 </node>
 </node>
 </node>
-<node CREATED="1333608501060" ID="ID_367242997" MODIFIED="1333608506491" TEXT="distributed"/>
+<node CREATED="1333608501060" ID="ID_367242997" MODIFIED="1333608506491" TEXT="distributed">
+<node CREATED="1333966381550" ID="ID_161383535" MODIFIED="1333966429655" TEXT="PING">
+<node CREATED="1333966431524" ID="ID_591167117" MODIFIED="1333967249518" TEXT="0x40 request">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      char|1|0x40
+    </p>
+    <p>
+      unsigned char*|16|node id
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+<node CREATED="1333966634285" ID="ID_1197635002" MODIFIED="1333967264887" TEXT="0x41 response">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      char|1|0x41
+    </p>
+    <p>
+      unsigned char*|16|node id
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+</node>
+<node CREATED="1333966717270" ID="ID_248471927" MODIFIED="1333966721170" TEXT="STORE">
+<node CREATED="1333966752097" ID="ID_1751865941" MODIFIED="1333967317026" TEXT="0x42 request">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      char|1|0x42
+    </p>
+    <p>
+      unsigned char*|16|key
+    </p>
+    <p>
+      char|1|bytes of value n
+    </p>
+    <p>
+      char*|n|value
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+</node>
+<node CREATED="1333966946247" ID="ID_1345643335" MODIFIED="1333966953194" TEXT="FIND_NODE">
+<node CREATED="1333966954623" ID="ID_1805642487" MODIFIED="1333967466614" TEXT="0x44 reuqest">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      char|1|0x44
+    </p>
+    <p>
+      unsigned char*|16|node id
+    </p>
+    <p>
+      unsigned long|4|rpc id
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+<node CREATED="1333967008624" ID="ID_1178483210" MODIFIED="1333968096922" TEXT="0x45 response">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      char|1|0x45
+    </p>
+    <p>
+      unsigned char*|16|node id
+    </p>
+    <p>
+      unsigned long|4|rpc id
+    </p>
+    <p>
+      char|1|number of node info
+    </p>
+    <p>
+      node info|n|nodes
+    </p>
+    <p>
+      
+    </p>
+    <p>
+      for each node
+    </p>
+    <p>
+      unsigned logn|4|ip
+    </p>
+    <p>
+      unsgned short|2|port
+    </p>
+    <p>
+      unsigned char*|16|node id
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+</node>
+<node CREATED="1333967637033" ID="ID_742590445" MODIFIED="1333967642332" TEXT="FIND_VALUE">
+<node CREATED="1333967656632" ID="ID_1908773177" MODIFIED="1333967678403" TEXT="0x46 request">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      char|1|0x46
+    </p>
+    <p>
+      unsigned char*|16|key
+    </p>
+    <p>
+      unsigned long|4|rpc id
+    </p>
+    <p>
+      
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+<node CREATED="1333967683517" ID="ID_1202478694" MODIFIED="1333968169235" TEXT="0x47 response">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      char|1|0x47
+    </p>
+    <p>
+      unsigned char*|16|key
+    </p>
+    <p>
+      unsigned long|4|rpc id
+    </p>
+    <p>
+      char|1|bytes of value n
+    </p>
+    <p>
+      char*|n|value
+    </p>
+    <p>
+      
+    </p>
+    <p>
+      note: if recipient doesn't have &lt;key, value&gt;, response 0x45 instead.
+    </p>
+    <p>
+      
+    </p>
+    <p>
+      
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+</node>
+</node>
 </node>
 <node CREATED="1333608346431" ID="ID_811177061" MODIFIED="1333608430149" POSITION="right" TEXT="centralized">
 <node CREATED="1331718349073" ID="ID_818234251" MODIFIED="1331718360754" TEXT="clientd">
@@ -358,10 +539,12 @@
 <node CREATED="1333608931103" ID="ID_933237317" MODIFIED="1333932733215" TEXT="a thread run Work()">
 <node CREATED="1333932867015" HGAP="27" ID="ID_147024293" MODIFIED="1333965123119" TEXT="a thread run Listen()" VSHIFT="-3">
 <node CREATED="1333932884044" ID="ID_118984156" MODIFIED="1333932895375" TEXT="loop while !m_Stopped">
-<node CREATED="1333932905139" ID="ID_842618828" MODIFIED="1333932909699" TEXT="Recv()"/>
+<node CREATED="1333932905139" ID="ID_842618828" MODIFIED="1333932909699" TEXT="Recv()">
+<node CREATED="1333965996349" ID="ID_89908484" MODIFIED="1333966018360" TEXT="a kad protocol to resolve"/>
 </node>
 </node>
-<node CREATED="1333857065456" ID="ID_810058114" MODIFIED="1333932746683" TEXT="Join()"/>
+</node>
+<node CREATED="1333857065456" ID="ID_810058114" MODIFIED="1333965912290" TEXT="JoinKad()"/>
 <node CREATED="1333857086971" ID="ID_408650764" MODIFIED="1333932771452" TEXT="loop while !m_Stopped">
 <node CREATED="1333932774772" ID="ID_1770515548" MODIFIED="1333932822913" TEXT="publish &lt;key, value&gt;"/>
 <node CREATED="1333932829636" ID="ID_775369101" MODIFIED="1333932853914" TEXT="refresh k-bucket"/>
