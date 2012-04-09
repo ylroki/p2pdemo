@@ -26,10 +26,10 @@ KDownStatus CDownloadFile::GetStatus()
 
 bool CDownloadFile::Start(CConfig* config)
 {
-	m_Config = config;
-	m_Protocol = new CProtocolManager(config);
 	if (m_Status == DS_RUNNING)
 		return true;
+	m_Config = config;
+	m_Protocol = new CProtocolManager(config);
 	m_Status = DS_RUNNING;
 	if (0 == pthread_create(&m_Thread, NULL, ThreadFunc, this))
 		return true;		

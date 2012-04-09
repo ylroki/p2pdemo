@@ -49,6 +49,11 @@ test_advanced_file:
 		test/test_advanced_file.cpp $(SHARE_CPP) p2p_class/advanced_file.cpp \
 		-o bin/test_advanced_file -lpthread -lsqlite3 -lcrypto
 
+test_kad:
+	g++ -g -Iinclude -Ip2p_class -Ikad -I$(SSL_INCLUDE) -L$(SSL_LIB)\
+		test/test_kad.cpp $(SHARE_CPP) kad/kad.cpp \
+		-o bin/test_kad -lpthread -lsqlite3 -lcrypto
+
 doc_test:
 	xsltproc \
 	-o docs/test.html \
@@ -60,3 +65,5 @@ doc_kad:
 	-o docs/kad.html \
 	/home/ylroki/project/docbook/xsl/html/docbook.xsl \
 	docs/kad.xml
+
+
