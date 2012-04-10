@@ -57,6 +57,14 @@ void Hex2MD5(const unsigned char* hex, char* md5)
 	}
 }
 
+std::string Hex2MD5String(const unsigned char* hex)
+{
+	char md5[33];
+	md5[32] = 0;
+	Hex2MD5(hex, md5);
+	return md5;
+}
+
 bool MD5IsSame2Hex(const char* md5, const unsigned char* hexHash)
 {
 	unsigned char hash[16];

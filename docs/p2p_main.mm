@@ -246,8 +246,7 @@
       unsigned char*|16|node id
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1333966634285" ID="ID_1197635002" MODIFIED="1333967264887" TEXT="0x41 response">
 <richcontent TYPE="NOTE"><html>
@@ -262,8 +261,7 @@
       unsigned char*|16|node id
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1333966717270" ID="ID_248471927" MODIFIED="1333966721170" TEXT="STORE">
@@ -286,8 +284,7 @@
       char*|n|value
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1333966946247" ID="ID_1345643335" MODIFIED="1333966953194" TEXT="FIND_NODE">
@@ -307,8 +304,7 @@
       unsigned long|4|rpc id
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1333967008624" ID="ID_1178483210" MODIFIED="1333968096922" TEXT="0x45 response">
 <richcontent TYPE="NOTE"><html>
@@ -347,8 +343,7 @@
       unsigned char*|16|node id
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1333967637033" ID="ID_742590445" MODIFIED="1333967642332" TEXT="FIND_VALUE">
@@ -371,8 +366,7 @@
       
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1333967683517" ID="ID_1202478694" MODIFIED="1333968169235" TEXT="0x47 response">
 <richcontent TYPE="NOTE"><html>
@@ -408,8 +402,7 @@
       
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 </node>
@@ -546,11 +539,19 @@
 </node>
 <node CREATED="1333857065456" ID="ID_810058114" MODIFIED="1333965912290" TEXT="JoinKad()"/>
 <node CREATED="1333857086971" ID="ID_408650764" MODIFIED="1333932771452" TEXT="loop while !m_Stopped">
+<node CREATED="1334041632835" ID="ID_1990086799" MODIFIED="1334042024276" TEXT="find value of key"/>
 <node CREATED="1333932774772" ID="ID_1770515548" MODIFIED="1333932822913" TEXT="publish &lt;key, value&gt;"/>
 <node CREATED="1333932829636" ID="ID_775369101" MODIFIED="1333932853914" TEXT="refresh k-bucket"/>
 </node>
 </node>
-<node CREATED="1333932992803" ID="ID_396502490" MODIFIED="1333933013261" TEXT="some interface for invoking"/>
+<node CREATED="1333932992803" ID="ID_396502490" MODIFIED="1333933013261" TEXT="some interface for invoking">
+<node CREATED="1334039800832" ID="ID_200148782" MODIFIED="1334044659552" TEXT="FindSource">
+<node CREATED="1334040159891" ID="ID_152044803" MODIFIED="1334040187979" TEXT="if key is in local database">
+<node CREATED="1334040188699" ID="ID_128180783" MODIFIED="1334040203607" TEXT="yes: return value"/>
+<node CREATED="1334040204368" ID="ID_1348277534" MODIFIED="1334044771369" TEXT="no: Add key in a queue for later  sending FIND_VALUE rpc, but the function return directly"/>
+</node>
+</node>
+</node>
 </node>
 </node>
 </node>

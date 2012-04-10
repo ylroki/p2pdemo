@@ -11,5 +11,7 @@ void MD52Hex(const char* md5, unsigned char* hex);
 
 void Hex2MD5(const unsigned char* hex, char* md5);
 
+std::string Hex2MD5String(const unsigned char* hex);
+
 bool MD5IsSame2Hex(const char* md5, const unsigned char* hexHash);
 #endif

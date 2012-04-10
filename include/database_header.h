@@ -11,7 +11,7 @@ public:
 	CDatabase();
 	~CDatabase();
 	bool Open(const char* filename);
-	bool Open(const std::string);
+	bool Open(const std::string filename);
 	bool Execute(const char* sql, ExecuteCallback func = NULL, void* arg = NULL);
 	bool GetTable(const char* sql, char*** result, int* nRow, int* nCol);
 	bool CreateTable(const char* tbName, const char* colDef);
