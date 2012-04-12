@@ -16,6 +16,7 @@
 #include <string.h>
 #include <vector>
 #include <queue>
+#include <list>
 #include <dirent.h>
 #include <stdarg.h>
 

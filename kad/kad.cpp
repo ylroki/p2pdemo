@@ -6,7 +6,9 @@ CKad::CKad(CConfig* config)
 	m_WorkThread(THREAD_ERROR),
 	m_ListenThread(THREAD_ERROR),
 	m_KeyLock(),
-	m_Database()
+	m_Database(),
+	m_RouteTable(NULL),
+	m_ClientID()
 {
 	while (!m_QuePendingKeys.empty())
 		m_QuePendingKeys.pop();
@@ -22,6 +24,7 @@ bool CKad::Start()
 	m_Database.Open("cache/kad_keyvalue.db");
 	m_Database.CreateTable("hash", "(md5 TEXT, ipv4 INTEGER, port INTEGER, primary key(md5,ipv4,port))");
 	m_Database.CreateTable("filesize", "(md5 TEXT primary key, size INTEGER)");
+	m_RouteTable = new CRouteTable();
 	m_Stopped = false;
 	if (0 == pthread_create(&m_WorkThread, NULL, WorkThread, this))
 		return true;
@@ -34,6 +37,8 @@ void CKad::Stop()
 	m_Stopped = true;
 	if (m_WorkThread != THREAD_ERROR)
 		pthread_join(m_WorkThread, NULL);
+	if (m_RouteTable)
+		delete m_RouteTable;
 	m_Database.Close();
 }
 
@@ -48,6 +53,7 @@ void CKad::Work()
 {
 	if (pthread_create(&m_ListenThread, NULL, ListenThread, this))
 		return;
+	m_ClientID = CalculateClientID();
 	JoinKad();
 	while (!m_Stopped)
 	{
@@ -78,7 +84,11 @@ void CKad::Listen()
 }
 
 void CKad::JoinKad()
-{}
+{
+	m_RouteTable->SetClientID(m_ClientID);
+	m_RouteTable->InitTable("config/kad_init_node.conf");
+	// TODO: Find its own node id.
+}
 
 void CKad::FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source)
 {
@@ -119,4 +129,15 @@ int CKad::DealEachSource(void* arg, int nCol, char** result, char** name)
 	peer.Port = atoi(result[1]);
 	source->push_back(peer);
 	return 0;
+}
+
+CUInt128 CKad::CalculateClientID()
+{
+	CUInt128 id;
+	return id;
+}
+
+bool CKad::Ping(const TNode& node)
+{
+	return true;
 }

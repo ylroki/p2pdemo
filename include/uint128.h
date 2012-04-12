@@ -12,6 +12,7 @@ public:
 	static CUInt128 FromMD5(const char* md5);
 	static CUInt128 FromInteger(UInt64 high, UInt64 low);
 	static CUInt128 FromHex(const unsigned char* hex);
+	bool EqualTo(const CUInt128& other);
 	void Print();
 
 private:

@@ -59,6 +59,11 @@ test_uint128:
 		test/test_uint128.cpp $(SHARE_CPP) \
 		-o bin/test_uint128 -lcrypto -lsqlite3
 
+test_route_table:
+	g++ -g -Iinclude -Ip2p_class -Ikad -I$(SSL_INCLUDE) -L$(SSL_LIB)\
+		test/test_route_table.cpp kad/*.cpp $(SHARE_CPP) \
+		-o bin/test_route_table -lcrypto -lsqlite3 -lpthread
+
 doc_test:
 	xsltproc \
 	-o docs/test.html \

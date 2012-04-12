@@ -57,3 +57,10 @@ CUInt128 CUInt128::FromInteger(UInt64 high, UInt64 low)
 	ret.m_Low = low;
 	return ret;
 }
+
+bool CUInt128::EqualTo(const CUInt128& other)
+{
+	if (m_High == other.m_High && m_Low == other.m_Low)
+		return true;
+	return false;
+}
