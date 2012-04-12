@@ -22,6 +22,7 @@
 #define BUF_SIZE 1024
 #define THREAD_ERROR -1
 typedef long long Int64;
+typedef unsigned long long UInt64;
 // Some functions.
 #define Min(a,b) a<b?a:b
 #define Max(a,b) a>b?a:b

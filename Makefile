@@ -54,6 +54,11 @@ test_kad:
 		test/test_kad.cpp $(SHARE_CPP) kad/kad.cpp \
 		-o bin/test_kad -lpthread -lsqlite3 -lcrypto
 
+test_uint128:
+	g++ -g -Iinclude -I$(SSL_INCLUDE) -L$(SSL_LIB)\
+		test/test_uint128.cpp $(SHARE_CPP) \
+		-o bin/test_uint128 -lcrypto -lsqlite3
+
 doc_test:
 	xsltproc \
 	-o docs/test.html \
