@@ -5,6 +5,11 @@ SSL_DIR = /usr/local/ssl
 SSL_INCLUDE = $(SSL_DIR)/include
 SSL_LIB = $(SSL_DIR)/lib
 
+edit_help:
+	find . -name "*.h" -o -name "*.cpp" > cscope.files
+	cscope -bkq -i cscope.files
+	ctags -R --fields=+lS
+
 p2p_clientc:	
 	g++ -g -Iinclude -Ip2p_class -I$(SSL_INCLUDE) -L$(SSL_LIB) -D__DEBUG__ \
 		p2p_class/command.cpp p2p_class/config.cpp $(SHARE_CPP) client/clientc.cpp\

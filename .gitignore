@@ -5,4 +5,6 @@ bin
 res
 cache
 temp
+cscope*
+tags
 
