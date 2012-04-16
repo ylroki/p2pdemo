@@ -2,9 +2,7 @@
 #define __KAD_ROUTE_TABLE_H__
 #include "linux_header.h"
 #include "uint128.h"
-#include "kad.h"
-
-const int g_LimitK = 4;
+#include "define.h"
 
 struct TNode
 {
@@ -16,18 +14,24 @@ struct TNode
 class CRouteTable
 {
 public:
-	CRouteTable();
+	CRouteTable(CRouteTable* parent, CUInt128 id, short depth, bool has);
 	~CRouteTable();
-	void SetClientID(CUInt128 id);
 	void InitTable(const char* filename);
-	void GetCloseTo(CUInt128 id, std::list<TNode>* closeNode);
-	void TryToInsert(TNode* newNode, void* arg);
+	// shouldn't return pointer to TNode.
+	void GetCloseTo(CUInt128 id, std::list<TNode>* closeNode, int number = KAD_LIMIT_K);
 	void Insert(TNode* newNode);
+	bool TryToSplit();
 	void Print();
 
 private:
-	std::list<TNode> m_Bucket[128];
 	CUInt128 m_ClientID;
+	bool m_HasClient;
+	short m_Depth;
+	CRouteTable* m_Child[2];
+	CRouteTable* m_Parent;
+	bool m_IsLeaf;
+	// I don't know how large bucket will be, so use pointer of node from new operation.
+	std::list<TNode*> m_Bucket;
 };
 
 #endif

@@ -64,3 +64,27 @@ bool CUInt128::EqualTo(const CUInt128& other)
 		return true;
 	return false;
 }
+
+short CUInt128::GetBit(short bit)
+{
+	if (bit >= 0 && bit < 128)
+	{
+		if (bit >= 64)
+		{
+			bit -= 64;
+			if ((m_High&(1LL<<bit)) == 0)
+				return 0;
+			else
+				return 1;
+		}
+		else
+		{
+			if ((m_Low&(1LL<<bit)) == 0)
+				return 0;
+			else
+				return 1;
+
+		}
+	}
+	return -1;
+}

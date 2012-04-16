@@ -9,6 +9,7 @@ public:
 	~CUInt128();
 	short FirstOneBit();
 	CUInt128 XOR(const CUInt128& num);
+	short GetBit(short bit);
 	static CUInt128 FromMD5(const char* md5);
 	static CUInt128 FromInteger(UInt64 high, UInt64 low);
 	static CUInt128 FromHex(const unsigned char* hex);
