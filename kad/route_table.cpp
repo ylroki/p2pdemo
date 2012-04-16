@@ -78,6 +78,10 @@ void CRouteTable::Insert(TNode* newNode)
 	}
 	else
 	{
+		std::list<TNode*>::iterator it;
+		for (it = m_Bucket.begin(); it != m_Bucket.end(); ++it)
+			if ((*it)->NodeID.EqualTo(newNode->NodeID))
+				return ;
 		if (m_Bucket.size() < KAD_LIMIT_K)
 		{
 			// Bucket is not full.
@@ -86,12 +90,7 @@ void CRouteTable::Insert(TNode* newNode)
 		else
 		{
 			if (TryToSplit() == true)
-			{
-				std::list<TNode*>::iterator it;
-				for (it = m_Bucket.begin(); it != m_Bucket.end(); ++it)
-					m_Child[(*it)->NodeID.GetBit(127 - m_Depth)]->Insert(*it);
-				m_Bucket.clear();
-			}
+				Insert(newNode);
 		}
 	}
 }
@@ -100,14 +99,14 @@ void CRouteTable::Print()
 {
 	if (m_IsLeaf)
 	{
-		printf("depth %hd\n", m_Depth);
+		printf("leaf depth %hd\n", m_Depth);
 		std::list<TNode*>::iterator it;
 		for (it = m_Bucket.begin(); it != m_Bucket.end(); ++it)
 			(*it)->NodeID.Print();
 	}
 	else
 	{
-		printf("depth %hd\n", m_Depth);
+		printf("inner depth %hd\n", m_Depth);
 		m_Child[0]->Print();
 		m_Child[1]->Print();
 	}
@@ -122,6 +121,10 @@ bool CRouteTable::TryToSplit()
 		m_Child[1] = new CRouteTable(this, m_ClientID, m_Depth + 1, 
 			m_HasClient&&(m_ClientID.GetBit(127 - m_Depth) == 1));
 		m_IsLeaf = false;
+		std::list<TNode*>::iterator it;
+		for (it = m_Bucket.begin(); it != m_Bucket.end(); ++it)
+			m_Child[(*it)->NodeID.GetBit(127 - m_Depth)]->Insert(*it);
+		m_Bucket.clear();
 		return true;
 	}
 	return false;
