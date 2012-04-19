@@ -8,6 +8,8 @@
 #include "database_header.h"
 #include "command.h"
 #include "route_table.h"
+#include "define.h"
+#include "task_manager.h"
 struct TNode;
 class CRouteTable;
 
@@ -19,7 +21,6 @@ public:
 	bool Start();
 	void Stop();
 	void FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source);
-	bool Ping(const TNode& node);
 
 private:
 	static void* WorkThread(void* arg);
@@ -27,8 +28,11 @@ private:
 	static void* ListenThread(void* arg);
 	void Listen();
 	void JoinKad();
+	void Republish();
+	void Refresh();
 	unsigned long GetFileSize(CDatabase database, const char* md5);
 	static int DealEachSource(void* arg, int nCol, char** result, char** name);
+	static int RepublishHelper(void* arg, int nCol, char** result, char** name);
 	CUInt128 CalculateClientID();
 
 	CConfig* m_Config;
@@ -40,5 +44,8 @@ private:
 	CDatabase m_Database;
 	CRouteTable* m_RouteTable;
 	CUInt128 m_ClientID;
+	time_t m_LastRepublish;
+	time_t m_LastRefresh;
+	CTaskManager* m_TaskManager;
 };
 #endif

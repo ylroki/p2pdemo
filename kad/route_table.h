@@ -3,6 +3,7 @@
 #include "linux_header.h"
 #include "uint128.h"
 #include "define.h"
+#include "uint128.h"
 
 struct TNode
 {
@@ -19,7 +20,9 @@ public:
 	void InitTable(const char* filename);
 	// shouldn't return pointer to TNode.
 	void GetCloseTo(CUInt128 id, std::list<TNode>* closeNode, int number = KAD_LIMIT_K);
+	void GetAll(std::list<TNode>* nodes);
 	void Insert(TNode* newNode);
+	void Delete(CUInt128 id);
 	bool TryToSplit();
 	void Print();
 

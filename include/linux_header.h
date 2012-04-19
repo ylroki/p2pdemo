@@ -19,6 +19,7 @@
 #include <list>
 #include <dirent.h>
 #include <stdarg.h>
+#include <sys/time.h>
 
 #define BUF_SIZE 1024
 #define THREAD_ERROR -1

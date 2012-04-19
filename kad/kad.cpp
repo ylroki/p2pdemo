@@ -8,14 +8,21 @@ CKad::CKad(CConfig* config)
 	m_KeyLock(),
 	m_Database(),
 	m_RouteTable(NULL),
-	m_ClientID()
+	m_ClientID(),
+	m_LastRepublish(0),
+	m_LastRefresh(0),
+	m_TaskManager(NULL)
 {
+	m_TaskManager = new CTaskManager();
 	while (!m_QuePendingKeys.empty())
 		m_QuePendingKeys.pop();
 }
 
 CKad::~CKad()
-{}
+{
+	if (m_TaskManager)
+		delete m_TaskManager;
+}
 
 bool CKad::Start()
 {
@@ -24,7 +31,8 @@ bool CKad::Start()
 	m_Database.Open("cache/kad_keyvalue.db");
 	m_Database.CreateTable("hash", "(md5 TEXT, ipv4 INTEGER, port INTEGER, primary key(md5,ipv4,port))");
 	m_Database.CreateTable("filesize", "(md5 TEXT primary key, size INTEGER)");
-	m_RouteTable = new CRouteTable();
+	m_ClientID = CalculateClientID();
+	m_RouteTable = new CRouteTable(NULL, m_ClientID, 0, true);
 	m_Stopped = false;
 	if (0 == pthread_create(&m_WorkThread, NULL, WorkThread, this))
 		return true;
@@ -53,16 +61,27 @@ void CKad::Work()
 {
 	if (pthread_create(&m_ListenThread, NULL, ListenThread, this))
 		return;
-	m_ClientID = CalculateClientID();
 	JoinKad();
 	while (!m_Stopped)
 	{
-		// TODO
-		printf("work thread\n");
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		time_t nowSec = tv.tv_sec;
+		if (nowSec > m_LastRefresh && nowSec - m_LastRefresh > KAD_PERIOD_REFRESH*3600)
+		{
+			Refresh();
+			m_LastRefresh = nowSec;
+		}
+		if (nowSec > m_LastRepublish && nowSec - m_LastRepublish > KAD_PERIOD_REPUBLISH*3600)
+		{
+			Republish();
+			m_LastRepublish = nowSec;
+		}
+		m_TaskManager->Update();
+		Sleep(100);
 	}
 	if (m_ListenThread != THREAD_ERROR)
 		pthread_join(m_ListenThread, NULL);
-	printf("stop working\n");
 }
 
 void* CKad::ListenThread(void* arg)
@@ -78,21 +97,19 @@ void CKad::Listen()
 	{
 		// TODO
 		printf("listen thread\n");
-		Sleep(1);
+		Sleep(100);
 	}
 	printf("stop listening\n");
 }
 
 void CKad::JoinKad()
 {
-	m_RouteTable->SetClientID(m_ClientID);
 	m_RouteTable->InitTable("config/kad_init_node.conf");
 	// TODO: Find its own node id.
 }
 
 void CKad::FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source)
 {
-	// TODO: Try to find key in local db.
 	std::string md5 = Hex2MD5String(key);
 	*filesize = GetFileSize(m_Database, md5.c_str());
 	char sql[BUF_SIZE];
@@ -131,13 +148,41 @@ int CKad::DealEachSource(void* arg, int nCol, char** result, char** name)
 	return 0;
 }
 
+int CKad::RepublishHelper(void* arg, int nCol, char** result, char** name)
+{
+	CTaskManager* manager = static_cast<CTaskManager*>(arg);
+	std::string md5 = result[0];
+	unsigned long ip = atoi(result[1]);
+	unsigned short port = atoi(result[2]);
+	CTask* task = new CTaskSimpleStore(md5, ip, port);
+	manager->Add(task);
+	return 0;
+}
+
 CUInt128 CKad::CalculateClientID()
 {
 	CUInt128 id;
+	// TODO
 	return id;
 }
 
-bool CKad::Ping(const TNode& node)
+void CKad::Republish()
 {
-	return true;
+	printf("republish\n");
+	char sql[BUF_SIZE];
+	sprintf(sql, "select * from hash");
+	m_Database.Execute(sql, RepublishHelper, m_TaskManager);
+}
+
+void CKad::Refresh()
+{
+	printf("refresh\n");
+	std::list<TNode> nodes;
+	m_RouteTable->GetAll(&nodes);
+	std::list<TNode>::iterator it;
+	for (it = nodes.begin(); it != nodes.end(); ++it)
+	{
+		CTask* task = new CTaskPing(*it);
+		m_TaskManager->Add(task);
+	}
 }

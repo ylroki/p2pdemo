@@ -50,6 +50,21 @@ void CRouteTable::GetCloseTo(CUInt128 id, std::list<TNode>* closeNode, int numbe
 	}
 }
 
+void CRouteTable::GetAll(std::list<TNode>* nodes)
+{
+	if (m_IsLeaf)
+	{
+		std::list<TNode*>::iterator it;
+		for (it = m_Bucket.begin(); it != m_Bucket.end(); ++it)
+			nodes->push_back(**it);
+	}
+	else
+	{
+		m_Child[0]->GetAll(nodes);
+		m_Child[1]->GetAll(nodes);
+	}
+}
+
 void CRouteTable::InitTable(const char* filename)
 {
 	FILE* file = fopen(filename, "r");
@@ -92,6 +107,24 @@ void CRouteTable::Insert(TNode* newNode)
 			if (TryToSplit() == true)
 				Insert(newNode);
 		}
+	}
+}
+
+void CRouteTable::Delete(CUInt128 id)
+{
+	if (m_IsLeaf)
+	{
+		std::list<TNode*>::iterator it;
+		for (it = m_Bucket.begin(); it != m_Bucket.end(); ++it)
+			if ((*it)->NodeID.EqualTo(id))
+			{
+				m_Bucket.erase(it);
+				break;
+			}
+	}
+	else
+	{
+		m_Child[id.GetBit(127 - m_Depth)]->Delete(id);
 	}
 }
 
