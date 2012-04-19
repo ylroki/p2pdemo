@@ -8,7 +8,7 @@ public:
 	CTask();
 	virtual ~CTask();
 	virtual void Update() = 0;
-	void SetTimeout(time_t microsec);
+	void SetTimeout(time_t millisec);
 private:
 	time_t m_Timeout;
 };
@@ -33,6 +33,26 @@ public:
 	virtual void Update();
 private:
 	TNode* m_Node;
+};
+
+class CTaskFindNode: public CTask
+{
+public:
+	CTaskFindNode(CUInt128 id);
+	virtual ~CTaskFindNode();
+	virtual void Update();
+private:
+	CUInt128 m_NodeID;
+};
+
+class CTaskFindValue: public CTask
+{
+public:
+	CTaskFindValue(CUInt128 key);
+	virtual ~CTaskFindValue();
+	virtual void Update();
+private:
+	CUInt128 m_Key;
 };
 
 class CTaskManager

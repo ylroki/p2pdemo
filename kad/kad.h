@@ -22,7 +22,6 @@ public:
 	bool Start();
 	void Stop();
 	void FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source);
-	void UpdateSelfKey();
 
 private:
 	static void* WorkThread(void* arg);
@@ -36,12 +35,12 @@ private:
 	static int DealEachSource(void* arg, int nCol, char** result, char** name);
 	static int RepublishHelper(void* arg, int nCol, char** result, char** name);
 	CUInt128 CalculateClientID();
+	void UpdateSelfKey();
 
 	CConfig* m_Config;
 	bool m_Stopped;
 	pthread_t m_WorkThread;
 	pthread_t m_ListenThread;
-	std::queue<std::string> m_QuePendingKeys;
 	CLock m_KeyLock;
 	CDatabase m_Database;
 	CRouteTable* m_RouteTable;

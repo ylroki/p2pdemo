@@ -3,7 +3,7 @@
 CConfig::CConfig()
 	:m_LocalIP(),
 	m_LocalPort(0),
-	m_PeerIP(),
+	m_PeerIP("127.0.0.1"),
 	m_PeerPort(0),
 	m_MinPort(9000),
 	m_MaxPort(9100),

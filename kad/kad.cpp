@@ -15,8 +15,6 @@ CKad::CKad(CConfig* config, CFileSystem* filesystem)
 	m_TaskManager(NULL)
 {
 	m_TaskManager = new CTaskManager();
-	while (!m_QuePendingKeys.empty())
-		m_QuePendingKeys.pop();
 }
 
 CKad::~CKad()
@@ -106,7 +104,8 @@ void CKad::Listen()
 void CKad::JoinKad()
 {
 	m_RouteTable->InitTable("config/kad_init_node.conf");
-	// TODO: Find its own node id.
+	CTask* task = new CTaskFindNode(m_ClientID);
+	m_TaskManager->Add(task);
 }
 
 void CKad::FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source)
@@ -121,7 +120,8 @@ void CKad::FindSource(const unsigned char* key, unsigned long* filesize, std::ve
 
 	// Failed to find key in local db, should lock.
 	CAutoLock lock(&m_KeyLock);
-	m_QuePendingKeys.push(md5);
+	CTask* task = new CTaskFindValue(CUInt128::FromMD5(md5.c_str()));
+	m_TaskManager->Add(task);
 }
 
 unsigned long CKad::GetFileSize(CDatabase database, const char* md5)
@@ -162,14 +162,15 @@ int CKad::RepublishHelper(void* arg, int nCol, char** result, char** name)
 
 CUInt128 CKad::CalculateClientID()
 {
-	CUInt128 id;
-	// TODO
+	CUInt128 id = CUInt128::FromInteger(IPString2Long(m_Config->GetPeerIP().c_str()), 
+		m_Config->GetKadPort());
 	return id;
 }
 
 void CKad::Republish()
 {
 	printf("republish\n");
+	UpdateSelfKey();
 	char sql[BUF_SIZE];
 	sprintf(sql, "select * from hash");
 	m_Database.Execute(sql, RepublishHelper, m_TaskManager);
@@ -178,13 +179,13 @@ void CKad::Republish()
 void CKad::Refresh()
 {
 	printf("refresh\n");
-	UpdateSelfKey();
 	std::list<TNode> nodes;
 	m_RouteTable->GetAll(&nodes);
 	std::list<TNode>::iterator it;
 	for (it = nodes.begin(); it != nodes.end(); ++it)
 	{
 		CTask* task = new CTaskPing(*it);
+		task->SetTimeout(3000);
 		m_TaskManager->Add(task);
 	}
 }

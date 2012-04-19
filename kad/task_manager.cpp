@@ -6,9 +6,9 @@ CTask::CTask()
 CTask::~CTask()
 {}
 
-void CTask::SetTimeout(time_t microsec)
+void CTask::SetTimeout(time_t millisec)
 {
-	m_Timeout = microsec;
+	m_Timeout = millisec;
 }
 
 CTaskSimpleStore::CTaskSimpleStore(std::string md5, unsigned long ip, unsigned short port)
@@ -48,6 +48,32 @@ void CTaskPing::Update()
 	printf("ping\n");
 }
 
+CTaskFindNode::CTaskFindNode(CUInt128 id)
+	:m_NodeID(id)
+{
+}
+
+CTaskFindNode::~CTaskFindNode()
+{}
+
+void CTaskFindNode::Update()
+{
+	//TODO
+	printf("find node\n");
+}
+
+CTaskFindValue::CTaskFindValue(CUInt128 key)
+	:m_Key(key)
+{}
+
+CTaskFindValue::~CTaskFindValue()
+{}
+
+void CTaskFindValue::Update()
+{
+	//TODO
+	printf("find value\n");
+}
 
 CTaskManager::CTaskManager()
 {
