@@ -29,8 +29,8 @@ bool CKad::Start()
 	if (!m_Stopped)
 		return true;
 	m_Database.Open("cache/kad_keyvalue.db");
-	m_Database.CreateTable("hash", "(md5 TEXT, ipv4 INTEGER, port INTEGER, primary key(md5,ipv4,port))");
-	m_Database.CreateTable("filesize", "(md5 TEXT primary key, size INTEGER)");
+	m_Database.CreateTable("hash", "(md5 TEXT, ipv4 INTEGER, port INTEGER, size INTEGER,\
+		primary key(md5,ipv4,port))");
 	m_ClientID = CalculateClientID();
 	m_RouteTable = new CRouteTable(NULL, m_ClientID, 0, true);
 	m_Stopped = false;
@@ -126,7 +126,7 @@ void CKad::FindSource(const unsigned char* key, unsigned long* filesize, std::ve
 unsigned long CKad::GetFileSize(CDatabase database, const char* md5)
 {
 	char sql[BUF_SIZE];
-	sprintf(sql, "select size from filesize where md5='%s'", md5);
+	sprintf(sql, "select size from hash where md5='%s'", md5);
 	char** res;
 	int nRow = 0;
 	int nCol = 0;
