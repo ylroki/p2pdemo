@@ -1,6 +1,8 @@
 #include "task_manager.h"
 CTask::CTask()
-	:m_Timeout(600000)//10 min
+	:m_Timeout(600000),//10 min
+	m_TaskID(-1),
+	m_IsStopped(false)
 {}
 
 CTask::~CTask()
@@ -9,6 +11,21 @@ CTask::~CTask()
 void CTask::SetTimeout(time_t millisec)
 {
 	m_Timeout = millisec;
+}
+
+void CTask::SetTaskID(short id)
+{
+	m_TaskID = id;
+}
+
+short CTask::GetTaskID()
+{
+	return m_TaskID;
+}
+
+bool CTask::IsStopped()
+{
+	return m_IsStopped;
 }
 
 CTaskSimpleStore::CTaskSimpleStore(std::string md5, unsigned long ip, unsigned short port)
@@ -76,28 +93,43 @@ void CTaskFindValue::Update()
 }
 
 CTaskManager::CTaskManager()
+	:m_TaskID()
 {
-	m_VecTask.clear();
+	m_ListTask.clear();
 }
 
 CTaskManager::~CTaskManager()
 {
-	for (size_t i = 0; i < m_VecTask.size(); ++i)
-		delete m_VecTask[i];
+	std::list<CTask*>::iterator it;
+	for (it = m_ListTask.begin(); it != m_ListTask.end(); ++it)
+		delete (*it);
 }
 
 void CTaskManager::Add(CTask* task)
 {
-	printf("Add\n");
-	m_VecTask.push_back(task);
+	short taskID = m_TaskID.New();
+	if (taskID < 0)
+		return;
+	task->SetTaskID(taskID);
+	m_ListTask.push_back(task);
 }
 
 void CTaskManager::Update()
 {
-	printf("manager update\n");
-	printf("size: %d\n", m_VecTask.size());
-	for (size_t i = 0; i < m_VecTask.size(); ++i)
-		m_VecTask[i]->Update();
+	std::list<CTask*>::iterator it;
+	for (it = m_ListTask.begin(); it != m_ListTask.end();)
+	{
+		if ((*it)->IsStopped())
+		{
+			m_TaskID.Delete((*it)->GetTaskID());
+			it = m_ListTask.erase(it);
+		}
+		else
+		{
+			(*it)->Update();
+			++it;
+		}
+	}
 }
 
 

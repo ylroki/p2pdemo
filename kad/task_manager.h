@@ -2,6 +2,7 @@
 #define __KAD_TASK_MANAGER_H__
 #include "linux_header.h"
 #include "route_table.h"
+#include "id_helper.h"
 class CTask
 {
 public:
@@ -9,8 +10,14 @@ public:
 	virtual ~CTask();
 	virtual void Update() = 0;
 	void SetTimeout(time_t millisec);
+	void SetTaskID(short id);
+	short GetTaskID();
+	bool IsStopped();
+
 private:
 	time_t m_Timeout;
+	short m_TaskID;
+	bool m_IsStopped;
 };
 
 class CTaskSimpleStore: public CTask
@@ -64,7 +71,8 @@ public:
 	void Update();
 
 private:
-	std::vector<CTask*> m_VecTask;
+	std::list<CTask*> m_ListTask;
+	CIDHelper m_TaskID;
 };
 
 
