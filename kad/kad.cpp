@@ -1,7 +1,8 @@
 #include "kad.h"
 
-CKad::CKad(CConfig* config)
+CKad::CKad(CConfig* config, CFileSystem* filesystem)
 	:m_Config(config),
+	m_FileSystem(filesystem),
 	m_Stopped(true),
 	m_WorkThread(THREAD_ERROR),
 	m_ListenThread(THREAD_ERROR),
@@ -177,6 +178,7 @@ void CKad::Republish()
 void CKad::Refresh()
 {
 	printf("refresh\n");
+	UpdateSelfKey();
 	std::list<TNode> nodes;
 	m_RouteTable->GetAll(&nodes);
 	std::list<TNode>::iterator it;
@@ -184,5 +186,23 @@ void CKad::Refresh()
 	{
 		CTask* task = new CTaskPing(*it);
 		m_TaskManager->Add(task);
+	}
+}
+
+void CKad::UpdateSelfKey()
+{
+	unsigned long ip = IPString2Long(m_Config->GetPeerIP().c_str());
+	unsigned short port = m_Config->GetKadPort();
+	std::map<std::string, unsigned long>keys;
+	m_FileSystem->GetAllHashes(&keys);
+	std::map<std::string, unsigned long>::iterator it;
+	for (it = keys.begin(); it != keys.end(); ++it)
+	{
+		std::string md5 = it->first;
+		unsigned long size = it->second;
+		char sql[BUF_SIZE];
+		sprintf(sql, "insert into hash values('%s', %lu, %hu, %lu)",
+			md5.c_str(), ip, port, size);
+		m_Database.Execute(sql);
 	}
 }

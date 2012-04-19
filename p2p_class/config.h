@@ -20,6 +20,7 @@ public:
 	std::string GetCacheDir();
 	std::string GetServerIP();
 	unsigned short GetServerPort();
+	unsigned short GetKadPort();
 
 private:
 	std::string m_LocalIP;
@@ -33,6 +34,7 @@ private:
 	std::string m_CacheDir;
 	std::string m_ServerIP;
 	unsigned short m_ServerPort;
+	unsigned short m_KadPort;
 };
 
 #endif

@@ -18,9 +18,11 @@ public:
 	unsigned long GetFileSize(const unsigned char* hexHash);
 	std::string GetPath(const char* md5);
 	std::string GetPath(const unsigned char* hexHash);
+	void GetAllHashes(std::map<std::string, unsigned long>* keys);
 
 private:
 	static void* ThreadFunc(void* arg);
+	static int GetAllHashesHelper(void* arg, int nCol, char** result, char** name);
 	void Work();
 	void FindResources();
 	void DealFile(const std::string file, CProtocolManager* protocol);

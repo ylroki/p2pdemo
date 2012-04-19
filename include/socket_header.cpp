@@ -55,3 +55,10 @@ bool SendTo(int sockfd, const char* buf, int size, const char* ipString, const i
 		return false;
 	return true;
 }
+
+unsigned long IPString2Long(const char* ipString)
+{
+	struct in_addr addr;
+	inet_pton(AF_INET, ipString, &addr);
+	return ntohl(addr.s_addr);
+}

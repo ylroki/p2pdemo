@@ -10,17 +10,19 @@
 #include "route_table.h"
 #include "define.h"
 #include "task_manager.h"
+#include "file_system.h"
 struct TNode;
 class CRouteTable;
 
 class CKad
 {
 public:
-	CKad(CConfig* config);
+	CKad(CConfig* config, CFileSystem* filesystem);
 	~CKad();
 	bool Start();
 	void Stop();
 	void FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source);
+	void UpdateSelfKey();
 
 private:
 	static void* WorkThread(void* arg);
@@ -47,5 +49,6 @@ private:
 	time_t m_LastRepublish;
 	time_t m_LastRefresh;
 	CTaskManager* m_TaskManager;
+	CFileSystem* m_FileSystem;
 };
 #endif

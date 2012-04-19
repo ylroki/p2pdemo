@@ -9,7 +9,8 @@ CConfig::CConfig()
 	m_MaxPort(9100),
 	m_UpdatePeriod(30),
 	m_ServerIP(),
-	m_ServerPort(0)
+	m_ServerPort(0),
+	m_KadPort(0)
 {
 }
 
@@ -49,6 +50,8 @@ bool CConfig::Init(const char* filename)
 				m_ServerIP = value;
 			else if (name == "server port")
 				m_ServerPort = atoi(value.c_str());
+			else if (name == "kad port")
+				m_KadPort = atoi(value.c_str());
 		}
 	}
 	fclose(file);
@@ -108,4 +111,9 @@ std::string CConfig::GetServerIP()
 unsigned short CConfig::GetServerPort()
 {
 	return m_ServerPort;
+}
+
+unsigned short CConfig::GetKadPort()
+{
+	return m_KadPort;
 }

@@ -170,3 +170,29 @@ unsigned long CFileSystem::GetFileSize(const unsigned char* hexHash)
 	}
 	return 0;
 }
+
+void CFileSystem::GetAllHashes(std::map<std::string, unsigned long>* keys)
+{	
+	char sql[BUF_SIZE];
+	sprintf(sql, "select * from hash");
+	m_Database.Execute(sql, GetAllHashesHelper, keys);
+}
+
+int CFileSystem::GetAllHashesHelper(void* arg, int nCol, char** result, char** name)
+{
+	std::map<std::string, unsigned long>* keys = 
+		static_cast<std::map<std::string, unsigned long>*>(arg);
+	std::string md5 = result[0];
+	std::string pathname = result[1];
+	if (pathname != "")
+	{
+		struct stat st;
+		stat(pathname.c_str(), &st);
+		keys->insert(make_pair(md5, st.st_size));
+	}
+	else
+	{
+		keys->insert(make_pair(md5, 0));
+	}
+	return 0;
+}

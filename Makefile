@@ -57,7 +57,7 @@ test_advanced_file:
 
 test_kad:
 	g++ -g -Iinclude -Ip2p_class -Ikad -I$(SSL_INCLUDE) -L$(SSL_LIB)\
-		test/test_kad.cpp $(SHARE_CPP) kad/*.cpp \
+		test/test_kad.cpp $(SHARE_CPP) kad/*.cpp $(P2P_CLASS_CPP)\
 		-o bin/test_kad -lpthread -lsqlite3 -lcrypto
 
 test_uint128:
