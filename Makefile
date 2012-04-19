@@ -70,6 +70,11 @@ test_route_table:
 		test/test_route_table.cpp kad/route_table.cpp $(SHARE_CPP) \
 		-o bin/test_route_table -lcrypto -lsqlite3 -lpthread
 
+test_id_helper:
+	g++ -g -Iinclude \
+		test/test_id_helper.cpp include/id_helper.cpp include/auto_lock.cpp \
+		-o bin/test_id_helper -lpthread
+
 doc_test:
 	xsltproc \
 	-o docs/test.html \
