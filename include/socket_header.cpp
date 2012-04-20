@@ -62,3 +62,10 @@ unsigned long IPString2Long(const char* ipString)
 	inet_pton(AF_INET, ipString, &addr);
 	return ntohl(addr.s_addr);
 }
+
+std::string IPLong2String(unsigned long ip)// in host byte order
+{
+	struct in_addr ia;
+	ia.s_addr = htonl(ip);
+	return inet_ntoa(ia);
+}

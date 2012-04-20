@@ -74,6 +74,11 @@ test_id_helper:
 	g++ -g -Iinclude \
 		test/test_id_helper.cpp include/id_helper.cpp include/auto_lock.cpp \
 		-o bin/test_id_helper -lpthread
+	
+test_socket:
+	g++ -g -Iinclude \
+		test/test_socket.cpp include/socket_header.cpp \
+		-o bin/test_socket
 
 doc_test:
 	xsltproc \

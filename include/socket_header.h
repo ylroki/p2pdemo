@@ -19,4 +19,6 @@ bool SendTo(int sockfd, const char* buf, int size, const char* ipString, const i
 bool SendTo(int sockfd, const std::string buf, const char* ipString, const int port);
 
 unsigned long IPString2Long(const char* ipString);
+
+std::string IPLong2String(unsigned long ip);
 #endif

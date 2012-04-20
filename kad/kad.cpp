@@ -12,8 +12,11 @@ CKad::CKad(CConfig* config, CFileSystem* filesystem)
 	m_ClientID(),
 	m_LastRepublish(0),
 	m_LastRefresh(0),
-	m_TaskManager(NULL)
+	m_TaskManager(NULL),
+	m_Socket(SOCKET_ERROR),
+	m_Protocol(NULL)
 {
+	m_Protocol = new CKadProtocol(this);
 	m_TaskManager = new CTaskManager();
 }
 
@@ -21,6 +24,22 @@ CKad::~CKad()
 {
 	if (m_TaskManager)
 		delete m_TaskManager;
+	if (m_Protocol)
+		delete m_Protocol;
+}
+
+bool CKad::InitSocket()
+{
+	int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sockfd)
+	{
+		if (Bind(sockfd, NULL, m_Config->GetKadPort()))
+		{
+			m_Socket = sockfd;
+			return true;
+		}
+	}
+	return false;
 }
 
 bool CKad::Start()
@@ -32,6 +51,8 @@ bool CKad::Start()
 		primary key(md5,ipv4,port))");
 	m_ClientID = CalculateClientID();
 	m_RouteTable = new CRouteTable(NULL, m_ClientID, 0, true);
+	if (InitSocket() == false)
+		return false;
 	m_Stopped = false;
 	if (0 == pthread_create(&m_WorkThread, NULL, WorkThread, this))
 		return true;
@@ -42,6 +63,8 @@ bool CKad::Start()
 void CKad::Stop()
 {
 	m_Stopped = true;
+	if (m_Socket != SOCKET_ERROR)
+		close(m_Socket);
 	if (m_WorkThread != THREAD_ERROR)
 		pthread_join(m_WorkThread, NULL);
 	if (m_RouteTable)
@@ -58,8 +81,6 @@ void* CKad::WorkThread(void* arg)
 
 void CKad::Work()
 {
-	if (pthread_create(&m_ListenThread, NULL, ListenThread, this))
-		return;
 	JoinKad();
 	while (!m_Stopped)
 	{
@@ -77,28 +98,23 @@ void CKad::Work()
 			m_LastRepublish = nowSec;
 		}
 		m_TaskManager->Update();
+		SelectSocket();
 		Sleep(100);
 	}
-	if (m_ListenThread != THREAD_ERROR)
-		pthread_join(m_ListenThread, NULL);
 }
 
-void* CKad::ListenThread(void* arg)
+void CKad::SelectSocket()
 {
-	CKad* kad = static_cast<CKad*>(arg);
-	kad->Listen();
-	return ((void*)0);
-}
-
-void CKad::Listen()
-{
-	while (!m_Stopped)
-	{
-		// TODO
-		printf("listen thread\n");
-		Sleep(100);
-	}
-	printf("stop listening\n");
+	// TODO
+	fd_set rSet;
+	FD_ZERO(&rSet);
+	FD_SET(m_Socket, &rSet);
+	struct timeval t;
+	t.tv_sec = 0;
+	t.tv_usec = 100;
+	if (select(m_Socket + 1, &rSet, NULL, NULL, &t) > 0)
+		if (FD_ISSET(m_Socket, &rSet))
+			m_Protocol->RecvMessage(m_Socket);	
 }
 
 void CKad::JoinKad()
@@ -206,4 +222,13 @@ void CKad::UpdateSelfKey()
 			md5.c_str(), ip, port, size);
 		m_Database.Execute(sql);
 	}
+}
+
+void CKad::AddNode(CUInt128 remoteID, unsigned long remoteIP, unsigned short remotePort)
+{
+	TNode* node = new TNode;
+	node->NodeID = remoteID;
+	node->IPv4 = IPLong2String(remoteIP);
+	node->Port = remotePort;
+	m_RouteTable->Insert(node);
 }

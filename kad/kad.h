@@ -11,6 +11,8 @@
 #include "define.h"
 #include "task_manager.h"
 #include "file_system.h"
+#include "kad_protocol.h"
+class CKadProtocol;
 struct TNode;
 class CRouteTable;
 
@@ -22,12 +24,13 @@ public:
 	bool Start();
 	void Stop();
 	void FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source);
+	void AddNode(CUInt128 remoteID, unsigned long remoteIP, unsigned short remotePort);
 
 private:
 	static void* WorkThread(void* arg);
 	void Work();
-	static void* ListenThread(void* arg);
-	void Listen();
+	bool InitSocket();
+	void SelectSocket();
 	void JoinKad();
 	void Republish();
 	void Refresh();
@@ -49,5 +52,7 @@ private:
 	time_t m_LastRefresh;
 	CTaskManager* m_TaskManager;
 	CFileSystem* m_FileSystem;
+	int m_Socket;	
+	CKadProtocol* m_Protocol;
 };
 #endif

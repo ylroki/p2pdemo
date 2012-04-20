@@ -233,7 +233,7 @@
 </node>
 <node CREATED="1333608501060" ID="ID_367242997" MODIFIED="1333608506491" TEXT="distributed">
 <node CREATED="1333966381550" ID="ID_161383535" MODIFIED="1333966429655" TEXT="PING">
-<node CREATED="1333966431524" ID="ID_591167117" MODIFIED="1333967249518" TEXT="0x40 request">
+<node CREATED="1333966431524" ID="ID_591167117" MODIFIED="1334906411743" TEXT="0x40 request">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -243,12 +243,16 @@
       char|1|0x40
     </p>
     <p>
-      unsigned char*|16|node id
+      unsigned char*|16|self node id
+    </p>
+    <p>
+      short|2|task id
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
-<node CREATED="1333966634285" ID="ID_1197635002" MODIFIED="1333967264887" TEXT="0x41 response">
+<node CREATED="1333966634285" ID="ID_1197635002" MODIFIED="1334906397173" TEXT="0x41 response">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -258,10 +262,14 @@
       char|1|0x41
     </p>
     <p>
-      unsigned char*|16|node id
+      unsigned char*|16|self id
+    </p>
+    <p>
+      short|2|task id
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node CREATED="1333966717270" ID="ID_248471927" MODIFIED="1333966721170" TEXT="STORE">
@@ -531,13 +539,6 @@
 <node CREATED="1333608547261" ID="ID_1309283155" MODIFIED="1333608554418" TEXT="client">
 <node CREATED="1334840166853" ID="ID_156987318" MODIFIED="1334840176728" TEXT="CalculateClientID()"/>
 <node CREATED="1333608931103" ID="ID_933237317" MODIFIED="1333932733215" TEXT="a thread run Work()">
-<node CREATED="1333932867015" HGAP="27" ID="ID_147024293" MODIFIED="1333965123119" TEXT="a thread run Listen()" VSHIFT="-3">
-<node CREATED="1333932884044" ID="ID_118984156" MODIFIED="1333932895375" TEXT="loop while !m_Stopped">
-<node CREATED="1333932905139" ID="ID_842618828" MODIFIED="1333932909699" TEXT="Recv()">
-<node CREATED="1333965996349" ID="ID_89908484" MODIFIED="1333966018360" TEXT="a kad protocol to resolve"/>
-</node>
-</node>
-</node>
 <node CREATED="1333857065456" ID="ID_810058114" MODIFIED="1333965912290" TEXT="JoinKad()">
 <node CREATED="1334160185359" ID="ID_1360847760" MODIFIED="1334160197785" TEXT="InitTable()"/>
 <node CREATED="1334839040226" ID="ID_714234791" MODIFIED="1334840103810" TEXT="Add task:find node"/>
@@ -545,22 +546,23 @@
 <node CREATED="1333857086971" ID="ID_408650764" MODIFIED="1333932771452" TEXT="loop while !m_Stopped">
 <node CREATED="1333932774772" ID="ID_1770515548" MODIFIED="1334811679570" TEXT="Republish()">
 <node CREATED="1334811682226" ID="ID_1203529276" MODIFIED="1334811717660" TEXT="for each key,vaue in database, RepublishHelper()">
-<node CREATED="1334811730880" ID="ID_207510756" MODIFIED="1334811755055" TEXT="Add simple store task"/>
+<node CREATED="1334811730880" ID="ID_207510756" MODIFIED="1334901422547" TEXT="Add task:simple store"/>
 </node>
 </node>
 <node CREATED="1333932829636" ID="ID_775369101" MODIFIED="1334811765738" TEXT="Refresh()">
-<node CREATED="1334811800632" ID="ID_1406382781" MODIFIED="1334811916245" TEXT="for each node in k-bucket, Add ping task"/>
+<node CREATED="1334811800632" ID="ID_1406382781" MODIFIED="1334901408781" TEXT="for each node in k-bucket, Add task:ping"/>
 </node>
 <node CREATED="1334811328631" ID="ID_497397113" MODIFIED="1334812077661" TEXT="CTaskManager::Update()">
 <node CREATED="1334812079344" ID="ID_722324577" MODIFIED="1334812090552" TEXT="for each task, Update()"/>
 </node>
+<node CREATED="1334911018357" ID="ID_883586064" MODIFIED="1334911030632" TEXT="SelectSocket()"/>
 </node>
 </node>
 <node CREATED="1333932992803" ID="ID_396502490" MODIFIED="1333933013261" TEXT="some interface for invoking">
 <node CREATED="1334039800832" ID="ID_200148782" MODIFIED="1334044659552" TEXT="FindSource">
 <node CREATED="1334040159891" ID="ID_152044803" MODIFIED="1334040187979" TEXT="if key is in local database">
 <node CREATED="1334040188699" ID="ID_128180783" MODIFIED="1334040203607" TEXT="yes: return value"/>
-<node CREATED="1334040204368" ID="ID_1348277534" MODIFIED="1334044771369" TEXT="no: Add key in a queue for later  sending FIND_VALUE rpc, but the function return directly"/>
+<node CREATED="1334040204368" ID="ID_1348277534" MODIFIED="1334901395959" TEXT="no: Add task:find value, but the function return directly"/>
 </node>
 </node>
 </node>

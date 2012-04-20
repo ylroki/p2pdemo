@@ -98,7 +98,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 	int n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen);
 	if (n > 0)
 	{
-		CMemoryStream reader(buf, n, BUF_SIZE * 2);
+		CMemoryStream reader(buf, n, BUF_SIZE * 8);
 		char id = reader.ReadInteger<char>();
 		switch (id)
 		{
@@ -114,7 +114,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 					unsigned long ip = reader.ReadInteger<unsigned long>();
 					unsigned short port = reader.ReadInteger<unsigned short>();
 					struct in_addr ia;
-					ia.s_addr= ip;
+					ia.s_addr = ip;
 					struct TPeer peer;
 					peer.IPv4 = inet_ntoa(ia);
 					peer.Port = ntohs(port);
