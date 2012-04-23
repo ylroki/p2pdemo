@@ -2,7 +2,6 @@
 #define __KAD_PROTOCOL_H__
 #include "linux_header.h"
 #include "socket_header.h"
-#include "kad.h"
 class CKad;
 
 class CKadProtocol

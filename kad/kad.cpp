@@ -1,4 +1,12 @@
 #include "kad.h"
+#include "kad_protocol.h"
+#include "task.h"
+#include "task_ping.h"
+#include "task_find_node.h"
+#include "task_find_value.h"
+#include "task_simple_store.h"
+#include "task_manager.h"
+#include "route_table.h"
 
 CKad::CKad(CConfig* config, CFileSystem* filesystem)
 	:m_Config(config),
@@ -84,9 +92,7 @@ void CKad::Work()
 	JoinKad();
 	while (!m_Stopped)
 	{
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-		time_t nowSec = tv.tv_sec;
+		time_t nowSec = GetNowSeconds();
 		if (nowSec > m_LastRefresh && nowSec - m_LastRefresh > KAD_PERIOD_REFRESH*3600)
 		{
 			Refresh();
@@ -119,7 +125,7 @@ void CKad::SelectSocket()
 void CKad::JoinKad()
 {
 	m_RouteTable->InitTable("config/kad_init_node.conf");
-	CTask* task = new CTaskFindNode(m_ClientID);
+	CTask* task = new CTaskFindNode(this, m_ClientID);
 	m_TaskManager->Add(task);
 }
 
@@ -135,7 +141,7 @@ void CKad::FindSource(const unsigned char* key, unsigned long* filesize, std::ve
 
 	// Failed to find key in local db, should lock.
 	CAutoLock lock(&m_KeyLock);
-	CTask* task = new CTaskFindValue(CUInt128::FromMD5(md5.c_str()));
+	CTask* task = new CTaskFindValue(this, CUInt128::FromMD5(md5.c_str()));
 	m_TaskManager->Add(task);
 }
 
@@ -166,11 +172,12 @@ int CKad::DealEachSource(void* arg, int nCol, char** result, char** name)
 
 int CKad::RepublishHelper(void* arg, int nCol, char** result, char** name)
 {
-	CTaskManager* manager = static_cast<CTaskManager*>(arg);
+	CKad* kad = static_cast<CKad*>(arg);
+	CTaskManager* manager = kad->GetTaskManager();
 	std::string md5 = result[0];
 	unsigned long ip = atoi(result[1]);
 	unsigned short port = atoi(result[2]);
-	CTask* task = new CTaskSimpleStore(md5, ip, port);
+	CTask* task = new CTaskSimpleStore(kad, md5, ip, port);
 	manager->Add(task);
 	return 0;
 }
@@ -188,7 +195,7 @@ void CKad::Republish()
 	UpdateSelfKey();
 	char sql[BUF_SIZE];
 	sprintf(sql, "select * from hash");
-	m_Database.Execute(sql, RepublishHelper, m_TaskManager);
+	m_Database.Execute(sql, RepublishHelper, this);
 }
 
 void CKad::Refresh()
@@ -199,8 +206,8 @@ void CKad::Refresh()
 	std::list<TNode>::iterator it;
 	for (it = nodes.begin(); it != nodes.end(); ++it)
 	{
-		CTask* task = new CTaskPing(*it);
-		task->SetTimeout(3000);
+		CTask* task = new CTaskPing(this, *it);
+		task->SetTimeout(3);
 		m_TaskManager->Add(task);
 	}
 }
@@ -230,4 +237,24 @@ void CKad::AddNode(CUInt128 remoteID, unsigned long remoteIP, unsigned short rem
 	node->IPv4 = IPLong2String(remoteIP);
 	node->Port = remotePort;
 	m_RouteTable->Insert(node);
+}
+
+CTaskManager* CKad::GetTaskManager()
+{
+	return m_TaskManager;
+}
+
+void CKad::GetClientIDHex(unsigned char* hex)
+{
+	m_ClientID.ToHex(hex);
+}
+
+CRouteTable* CKad::GetRouteTable()
+{
+	return m_RouteTable;
+}
+
+int CKad::GetSocket()
+{
+	return m_Socket;
 }

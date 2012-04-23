@@ -89,3 +89,10 @@ int Kbhit()
 	else
 		return -1;
 }
+
+time_t GetNowSeconds()
+{
+	struct timeval t;
+	gettimeofday(&t, NULL);
+	return t.tv_sec;
+}

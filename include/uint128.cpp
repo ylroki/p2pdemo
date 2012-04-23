@@ -88,3 +88,11 @@ short CUInt128::GetBit(short bit)
 	}
 	return -1;
 }
+
+void CUInt128::ToHex(unsigned char* hex)
+{
+	for (int i = 0; i < 8; ++i)
+		hex[i] = ((m_High>>(56-i*8)) & 255LL);
+	for (int i = 8; i < 16; ++i)
+		hex[i] = ((m_Low>>(120-i*8)) & 255LL);
+}

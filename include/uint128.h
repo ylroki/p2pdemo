@@ -15,6 +15,7 @@ public:
 	static CUInt128 FromHex(const unsigned char* hex);
 	bool EqualTo(const CUInt128& other);
 	void Print();
+	void ToHex(unsigned char* hex);
 
 private:
 	UInt64 m_High;

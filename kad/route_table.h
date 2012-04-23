@@ -1,7 +1,6 @@
 #ifndef __KAD_ROUTE_TABLE_H__
 #define __KAD_ROUTE_TABLE_H__
 #include "linux_header.h"
-#include "uint128.h"
 #include "define.h"
 #include "uint128.h"
 

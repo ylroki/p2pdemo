@@ -7,14 +7,13 @@
 #include "md5_header.h"
 #include "database_header.h"
 #include "command.h"
-#include "route_table.h"
 #include "define.h"
-#include "task_manager.h"
 #include "file_system.h"
-#include "kad_protocol.h"
+#include "uint128.h"
 class CKadProtocol;
-struct TNode;
+class CTaskManager;
 class CRouteTable;
+struct TNode;
 
 class CKad
 {
@@ -25,6 +24,10 @@ public:
 	void Stop();
 	void FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source);
 	void AddNode(CUInt128 remoteID, unsigned long remoteIP, unsigned short remotePort);
+	CTaskManager* GetTaskManager();
+	void GetClientIDHex(unsigned char* hex);
+	CRouteTable* GetRouteTable();
+	int GetSocket();
 
 private:
 	static void* WorkThread(void* arg);

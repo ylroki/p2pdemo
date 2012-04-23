@@ -249,8 +249,7 @@
       short|2|task id
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1333966634285" ID="ID_1197635002" MODIFIED="1334906397173" TEXT="0x41 response">
 <richcontent TYPE="NOTE"><html>
@@ -268,8 +267,7 @@
       short|2|task id
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1333966717270" ID="ID_248471927" MODIFIED="1333966721170" TEXT="STORE">
@@ -565,6 +563,20 @@
 <node CREATED="1334040204368" ID="ID_1348277534" MODIFIED="1334901395959" TEXT="no: Add task:find value, but the function return directly"/>
 </node>
 </node>
+</node>
+</node>
+</node>
+<node CREATED="1335164922112" ID="ID_1201415244" MODIFIED="1335164931387" POSITION="left" TEXT="CTask">
+<node CREATED="1335164933265" ID="ID_1963770320" MODIFIED="1335164944615" TEXT="CTaskPing">
+<node CREATED="1335164977081" ID="ID_1297411720" MODIFIED="1335164988162" TEXT="PS_INIT">
+<node CREATED="1335171111200" ID="ID_62513496" MODIFIED="1335171147747" TEXT="send PING request, then turn to PS_WAIT"/>
+</node>
+<node CREATED="1335164989586" ID="ID_139994708" MODIFIED="1335164997356" TEXT="PS_WAIT">
+<node CREATED="1335171150570" ID="ID_109561565" MODIFIED="1335171177095" TEXT="if time out, delete node and turn to PS_END"/>
+<node CREATED="1335171179193" ID="ID_114703693" MODIFIED="1335171209769" TEXT="Process() will also turn status into PS_END"/>
+</node>
+<node CREATED="1335165006006" ID="ID_1604653739" MODIFIED="1335165010805" TEXT="PS_END">
+<node CREATED="1335171212627" ID="ID_853909633" MODIFIED="1335171228323" TEXT="set m_IsStopped true"/>
 </node>
 </node>
 </node>
