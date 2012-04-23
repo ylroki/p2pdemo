@@ -105,7 +105,6 @@ void CKad::Work()
 
 void CKad::SelectSocket()
 {
-	// TODO
 	fd_set rSet;
 	FD_ZERO(&rSet);
 	FD_SET(m_Socket, &rSet);

@@ -93,9 +93,11 @@ void CTaskFindValue::Update()
 }
 
 CTaskManager::CTaskManager()
-	:m_TaskID()
+	:m_TaskID(),
+	m_Lock()
 {
 	m_ListTask.clear();
+	m_ListPending.clear();
 }
 
 CTaskManager::~CTaskManager()
@@ -103,19 +105,37 @@ CTaskManager::~CTaskManager()
 	std::list<CTask*>::iterator it;
 	for (it = m_ListTask.begin(); it != m_ListTask.end(); ++it)
 		delete (*it);
+	for (it = m_ListPending.begin(); it != m_ListPending.end(); ++it)
+		delete (*it);
 }
 
 void CTaskManager::Add(CTask* task)
 {
+	CAutoLock autolock(&m_Lock);
 	short taskID = m_TaskID.New();
 	if (taskID < 0)
+	{
+		m_ListPending.push_back(task);
 		return;
+	}
 	task->SetTaskID(taskID);
 	m_ListTask.push_back(task);
 }
 
 void CTaskManager::Update()
 {
+	CAutoLock autolock(&m_Lock);
+	while (m_ListPending.size() > 0)
+	{
+		short taskID = m_TaskID.New();
+		if (taskID < 0)
+			break;
+		CTask* task = m_ListPending.front();
+		m_ListPending.pop_front();
+		task->SetTaskID(taskID);
+		m_ListTask.push_back(task);
+	}
+	
 	std::list<CTask*>::iterator it;
 	for (it = m_ListTask.begin(); it != m_ListTask.end();)
 	{

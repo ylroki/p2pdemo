@@ -3,6 +3,7 @@
 #include "linux_header.h"
 #include "route_table.h"
 #include "id_helper.h"
+#include "auto_lock.h"
 class CTask
 {
 public:
@@ -72,6 +73,8 @@ public:
 
 private:
 	std::list<CTask*> m_ListTask;
+	std::list<CTask*> m_ListPending;
+	CLock m_Lock;
 	CIDHelper m_TaskID;
 };
 
