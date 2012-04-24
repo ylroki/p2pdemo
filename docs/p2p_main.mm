@@ -271,7 +271,7 @@
 </node>
 </node>
 <node CREATED="1333966717270" ID="ID_248471927" MODIFIED="1333966721170" TEXT="STORE">
-<node CREATED="1333966752097" ID="ID_1751865941" MODIFIED="1333967317026" TEXT="0x42 request">
+<node CREATED="1333966752097" ID="ID_1751865941" MODIFIED="1335241164192" TEXT="0x42 request">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -281,16 +281,20 @@
       char|1|0x42
     </p>
     <p>
+      unsigned char*|16|self id
+    </p>
+    <p>
       unsigned char*|16|key
     </p>
     <p>
-      char|1|bytes of value n
+      unsigned long|4|ip
     </p>
     <p>
-      char*|n|value
+      unsigned short|2|port|
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node CREATED="1333966946247" ID="ID_1345643335" MODIFIED="1333966953194" TEXT="FIND_NODE">
@@ -577,6 +581,18 @@
 </node>
 <node CREATED="1335165006006" ID="ID_1604653739" MODIFIED="1335165010805" TEXT="PS_END">
 <node CREATED="1335171212627" ID="ID_853909633" MODIFIED="1335171228323" TEXT="set m_IsStopped true"/>
+</node>
+</node>
+<node CREATED="1335241172654" ID="ID_810835212" MODIFIED="1335241182130" TEXT="CTaskSimpleStore">
+<node CREATED="1335241183272" ID="ID_1396852826" MODIFIED="1335241190246" TEXT="SSS_INIT">
+<node CREATED="1335241191915" ID="ID_704242458" MODIFIED="1335241216435" TEXT="get nodes close to key, put then into a list"/>
+</node>
+<node CREATED="1335241218184" ID="ID_1589845868" MODIFIED="1335241223067" TEXT="SSS_UPDATE">
+<node CREATED="1335241228617" ID="ID_1300046581" MODIFIED="1335241284752" TEXT="if list is not empty, send STORE to a node, and remove it from list"/>
+<node CREATED="1335241287797" ID="ID_406694814" MODIFIED="1335241310633" TEXT="if list is empty, turn status into SSS_END"/>
+</node>
+<node CREATED="1335241313157" ID="ID_1974541349" MODIFIED="1335241316080" TEXT="SSS_END">
+<node CREATED="1335241318202" ID="ID_1193685391" MODIFIED="1335241331639" TEXT="set m_IsStopped true"/>
 </node>
 </node>
 </node>
