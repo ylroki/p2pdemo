@@ -293,8 +293,7 @@
       unsigned short|2|port|
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1333966946247" ID="ID_1345643335" MODIFIED="1333966953194" TEXT="FIND_NODE">
@@ -594,6 +593,29 @@
 <node CREATED="1335241313157" ID="ID_1974541349" MODIFIED="1335241316080" TEXT="SSS_END">
 <node CREATED="1335241318202" ID="ID_1193685391" MODIFIED="1335241331639" TEXT="set m_IsStopped true"/>
 </node>
+</node>
+<node CREATED="1335249808410" ID="ID_767781031" MODIFIED="1335249816186" TEXT="CTaskFindNode">
+<node CREATED="1335249817459" ID="ID_1524553008" MODIFIED="1335249832324" TEXT="FNS_INIT">
+<node CREATED="1335249834126" ID="ID_1899946601" MODIFIED="1335249863424" TEXT="get nodes close to given node id, put them into a list"/>
+</node>
+<node CREATED="1335249880131" ID="ID_1657926674" MODIFIED="1335249888945" TEXT="FNS_UPDATE">
+<node CREATED="1335249908726" ID="ID_355032684" MODIFIED="1335249933885" TEXT="send FIND_NODE to some nodes"/>
+<node CREATED="1335249935209" ID="ID_1029005831" MODIFIED="1335252755166" TEXT="if Process(), refresh list">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      for remote node, when it receive FIND_NODE, it response nodes closer to nodeid then itself.
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+<node CREATED="1335249955455" ID="ID_1709765240" MODIFIED="1335249990941" TEXT="if first k nodes is requested, turn status into FNS_END"/>
+</node>
+<node CREATED="1335249993147" ID="ID_517301643" MODIFIED="1335249993147" TEXT=""/>
 </node>
 </node>
 </node>

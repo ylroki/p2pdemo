@@ -20,5 +20,12 @@ int main()
 	x.Print();
 	x.ToHex(hex);
 	printf("%s\n", Hex2MD5String(hex).c_str());
+
+	CUInt128 y = CUInt128::FromInteger(1LL, 1LL);
+	CUInt128 z = CUInt128::FromInteger(1LL, 0LL);
+	printf("y == z:%d\n",y==z);
+	printf("y == y:%d\n",y==y);
+	printf("y < z:%d\n",y<z);
+	printf("z < y:%d\n",z<y);
 	return 0;
 }

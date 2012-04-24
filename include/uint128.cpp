@@ -96,3 +96,38 @@ void CUInt128::ToHex(unsigned char* hex)
 	for (int i = 8; i < 16; ++i)
 		hex[i] = ((m_Low>>(120-i*8)) & 255LL);
 }
+
+bool operator==(const CUInt128& op1, const CUInt128& op2)
+{
+	if (op1.m_High == op2.m_High && op1.m_Low == op2.m_Low)
+		return true;
+	return false;
+}
+
+bool operator<(const CUInt128& op1, const CUInt128& op2)
+{
+	if (op1.m_High < op2.m_High ||
+		(op1.m_High == op2.m_High && op1.m_Low < op2.m_Low))
+		return true;
+	return false;
+}
+
+bool operator>(const CUInt128& op1, const CUInt128& op2)
+{
+	return (op2 > op1);
+}
+
+bool operator<=(const CUInt128& op1, const CUInt128& op2)
+{
+	return (op1 < op2 || op1 == op2);
+}
+
+bool operator>=(const CUInt128& op1, const CUInt128& op2)
+{
+	return (op2 <= op1);
+}
+
+bool operator!=(const CUInt128& op1, const CUInt128& op2)
+{
+	return !(op1 == op2);
+}

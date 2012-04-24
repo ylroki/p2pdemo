@@ -16,6 +16,12 @@ public:
 	bool EqualTo(const CUInt128& other);
 	void Print();
 	void ToHex(unsigned char* hex);
+	friend bool operator==(const CUInt128& op1, const CUInt128& op2);
+	friend bool operator<(const CUInt128& op1, const CUInt128& op2);
+	friend bool operator>(const CUInt128& op1, const CUInt128& op2);
+	friend bool operator<=(const CUInt128& op1, const CUInt128& op2);
+	friend bool operator>=(const CUInt128& op1, const CUInt128& op2);
+	friend bool operator!=(const CUInt128& op1, const CUInt128& op2);
 
 private:
 	UInt64 m_High;
