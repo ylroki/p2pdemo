@@ -15,7 +15,8 @@ enum KSimpleStoreStatus
 class CTaskSimpleStore: public CTask
 {
 public:
-	CTaskSimpleStore(CKad* kad, std::string md5, unsigned long ip, unsigned short port);
+	CTaskSimpleStore(CKad* kad, std::string md5, 
+		unsigned long ip, unsigned short port, unsigned long size);
 	virtual ~CTaskSimpleStore();
 	virtual void Update();
 	virtual void Process(void* arg);
@@ -23,6 +24,7 @@ private:
 	CUInt128 m_Key;
 	unsigned long m_IPv4;
 	unsigned short m_Port;
+	unsigned long m_Size;
 	KSimpleStoreStatus m_Status;
 	std::list<TNode> m_CloseNode;
 };

@@ -97,6 +97,13 @@ void CUInt128::ToHex(unsigned char* hex)
 		hex[i] = ((m_Low>>(120-i*8)) & 255LL);
 }
 
+std::string CUInt128::ToMD5()
+{
+	unsigned char hex[16];
+	this->ToHex(hex);
+	return Hex2MD5String(hex);
+}
+
 bool operator==(const CUInt128& op1, const CUInt128& op2)
 {
 	if (op1.m_High == op2.m_High && op1.m_Low == op2.m_Low)
@@ -130,4 +137,19 @@ bool operator>=(const CUInt128& op1, const CUInt128& op2)
 bool operator!=(const CUInt128& op1, const CUInt128& op2)
 {
 	return !(op1 == op2);
+}
+
+CUInt128 operator^(const CUInt128& op1, const CUInt128& op2)
+{
+	CUInt128 ret;
+	ret.m_High = (op1.m_High ^ op2.m_High);
+	ret.m_Low = (op1.m_Low ^ op2.m_Low);
+	return ret;
+}
+
+CUInt128& CUInt128::operator=(const CUInt128& op)
+{
+	this->m_High = op.m_High;
+	this->m_Low = op.m_Low;
+	return *this;
 }

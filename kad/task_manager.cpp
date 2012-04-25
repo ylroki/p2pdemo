@@ -62,14 +62,14 @@ void CTaskManager::Update()
 	}
 }
 
-void CTaskManager::ProcessPingResponse(short taskID)
+void CTaskManager::Process(short taskID, void* arg)
 {
 	CAutoLock autolock(&m_Lock);
 	std::list<CTask*>::iterator it;
 	for (it = m_ListTask.begin(); it != m_ListTask.end(); ++it)
 		if ((*it)->GetTaskID() == taskID)
 		{
-			(*it)->Process(NULL);
+			(*it)->Process(arg);
 			break;
 		}
 }

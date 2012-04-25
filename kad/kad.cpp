@@ -177,7 +177,8 @@ int CKad::RepublishHelper(void* arg, int nCol, char** result, char** name)
 	std::string md5 = result[0];
 	unsigned long ip = atoi(result[1]);
 	unsigned short port = atoi(result[2]);
-	CTask* task = new CTaskSimpleStore(kad, md5, ip, port);
+	unsigned long size = atoi(result[3]);
+	CTask* task = new CTaskSimpleStore(kad, md5, ip, port, size);
 	manager->Add(task);
 	return 0;
 }
@@ -257,4 +258,17 @@ CRouteTable* CKad::GetRouteTable()
 int CKad::GetSocket()
 {
 	return m_Socket;
+}
+
+CUInt128 CKad::GetClientID()
+{
+	return m_ClientID;
+}
+
+void CKad::AddKeyValue(CUInt128 key, unsigned long ip, unsigned short port, unsigned long size)
+{
+	char sql[BUF_SIZE];
+	sprintf(sql, "insert into hash values('%s', %lu, %hu, %lu)",
+		key.ToMD5().c_str(), ip, port, size);
+	m_Database.Execute(sql);
 }

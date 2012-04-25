@@ -26,8 +26,10 @@ public:
 	void AddNode(CUInt128 remoteID, unsigned long remoteIP, unsigned short remotePort);
 	CTaskManager* GetTaskManager();
 	void GetClientIDHex(unsigned char* hex);
+	CUInt128 GetClientID();
 	CRouteTable* GetRouteTable();
 	int GetSocket();
+	void AddKeyValue(CUInt128 key, unsigned long ip, unsigned short port, unsigned long size);
 
 private:
 	static void* WorkThread(void* arg);

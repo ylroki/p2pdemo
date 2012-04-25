@@ -12,7 +12,7 @@ public:
 	~CTaskManager();
 	void Add(CTask* task);
 	void Update();
-	void ProcessPingResponse(short taskID);
+	void Process(short taskID, void* arg = NULL);
 
 private:
 	std::list<CTask*> m_ListTask;

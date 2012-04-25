@@ -1,6 +1,7 @@
 #include "kad_protocol.h"
 #include "kad.h"
 #include "task_manager.h"
+#include "route_table.h"
 
 CKadProtocol::CKadProtocol(CKad* kad)
 	:m_Kad(kad)
@@ -49,7 +50,77 @@ void CKadProtocol::RecvMessage(int sockfd)
 		case 0x41:// ping response
 			{
 				short taskID = ntohs(reader.ReadInteger<short>());
-				m_Kad->GetTaskManager()->ProcessPingResponse(taskID);
+				m_Kad->GetTaskManager()->Process(taskID);
+				break;
+			}
+		case 0x42://store request
+			{
+				unsigned char keyHex[16];
+				reader.ReadBuffer(keyHex, 16);
+				CUInt128 key = CUInt128::FromHex(keyHex);
+				unsigned long ip = ntohl(reader.ReadInteger<unsigned long>());
+				unsigned short port = ntohs(reader.ReadInteger<unsigned short>());
+				unsigned long size = ntohl(reader.ReadInteger<unsigned long>());
+				m_Kad->AddKeyValue(key, ip, port, size);
+				break;
+			}
+		case 0x44://find node request
+			{
+				short taskID = ntohs(reader.ReadInteger<short>());
+				unsigned char targetHex[16];
+				reader.ReadBuffer(targetHex, 16);
+				CUInt128 target = CUInt128::FromHex(targetHex);
+				std::list<TNode> closeNode;
+				m_Kad->GetRouteTable()->GetCloseTo(target, &closeNode);
+				
+				// remove nodes which is more far from target then client.
+				char sendBuf[BUF_SIZE];
+				CMemoryStream sender(sendBuf, 0, BUF_SIZE);
+				sender.WriteInteger<char>(0x45);
+				sender.WriteBuffer(selfID, 16);
+				sender.WriteInteger<short>(htons(taskID));
+
+				std::list<TNode>::iterator it;
+				CUInt128 distance = m_Kad->GetClientID() ^ target;
+				for (it = closeNode.begin(); it != closeNode.end();)
+				{
+					if ((it->NodeID^target) > distance)
+						it = closeNode.erase(it);
+					else
+						++it;
+				}
+				sender.WriteInteger<char>(closeNode.size());
+				for (it = closeNode.begin(); it != closeNode.end(); ++it)
+				{
+					unsigned long ip = IPString2Long(it->IPv4.c_str());
+					unsigned short port = it->Port;
+					unsigned char hex[16];
+					it->NodeID.ToHex(hex);
+					sender.WriteInteger<unsigned long>(htonl(ip));
+					sender.WriteInteger<unsigned short>(htons(port));
+				}
+				sendto(sockfd, sendBuf, sender.GetSize(), 0, (struct sockaddr*)abuf, alen);
+				break;
+			}
+		case 0x45://find node response
+			{
+				short taskID = ntohs(reader.ReadInteger<short>());
+				size_t number = reader.ReadInteger<char>();
+				std::list<TNode> nodes;
+				while (number--)
+				{
+					TNode node;
+					node.IPv4 = IPLong2String(ntohl(reader.ReadInteger<unsigned long>()));
+					node.Port = ntohs(reader.ReadInteger<unsigned short>());
+					unsigned char hex[16];
+					reader.ReadBuffer(hex, 16);
+					node.NodeID = CUInt128::FromHex(hex);
+				}
+				//Insert remote node at the front of list.
+				TNode node;
+				node.NodeID = remoteID;//just ID is OK.
+				nodes.push_front(node);
+				m_Kad->GetTaskManager()->Process(taskID, &nodes);
 				break;
 			}
 		default:

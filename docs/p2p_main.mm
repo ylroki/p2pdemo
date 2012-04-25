@@ -271,7 +271,7 @@
 </node>
 </node>
 <node CREATED="1333966717270" ID="ID_248471927" MODIFIED="1333966721170" TEXT="STORE">
-<node CREATED="1333966752097" ID="ID_1751865941" MODIFIED="1335241164192" TEXT="0x42 request">
+<node CREATED="1333966752097" ID="ID_1751865941" MODIFIED="1335333073966" TEXT="0x42 request">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -292,12 +292,16 @@
     <p>
       unsigned short|2|port|
     </p>
+    <p>
+      unsigned long|4|size
+    </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node CREATED="1333966946247" ID="ID_1345643335" MODIFIED="1333966953194" TEXT="FIND_NODE">
-<node CREATED="1333966954623" ID="ID_1805642487" MODIFIED="1333967466614" TEXT="0x44 reuqest">
+<node CREATED="1333966954623" ID="ID_1805642487" MODIFIED="1335330513456" TEXT="0x44 reuqest">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -307,15 +311,19 @@
       char|1|0x44
     </p>
     <p>
-      unsigned char*|16|node id
+      unsigned char*|16|self id
     </p>
     <p>
-      unsigned long|4|rpc id
+      short|2|task id
+    </p>
+    <p>
+      unsigned char*|16|node id
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
-<node CREATED="1333967008624" ID="ID_1178483210" MODIFIED="1333968096922" TEXT="0x45 response">
+<node CREATED="1333967008624" ID="ID_1178483210" MODIFIED="1335330539140" TEXT="0x45 response">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -325,10 +333,10 @@
       char|1|0x45
     </p>
     <p>
-      unsigned char*|16|node id
+      unsigned char*|16|self id
     </p>
     <p>
-      unsigned long|4|rpc id
+      short|2|task id
     </p>
     <p>
       char|1|number of node info
@@ -352,7 +360,8 @@
       unsigned char*|16|node id
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node CREATED="1333967637033" ID="ID_742590445" MODIFIED="1333967642332" TEXT="FIND_VALUE">
@@ -610,8 +619,7 @@
       for remote node, when it receive FIND_NODE, it response nodes closer to nodeid then itself.
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1335249955455" ID="ID_1709765240" MODIFIED="1335249990941" TEXT="if first k nodes is requested, turn status into FNS_END"/>
 </node>

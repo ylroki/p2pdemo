@@ -2,10 +2,12 @@
 #include "task.h"
 #include "kad.h"
 #include "route_table.h"
-CTaskSimpleStore::CTaskSimpleStore(CKad* kad, std::string md5, unsigned long ip, unsigned short port)
+CTaskSimpleStore::CTaskSimpleStore(CKad* kad, std::string md5, 
+	unsigned long ip, unsigned short port, unsigned long size)
 	:CTask(kad),
 	m_IPv4(ip),
 	m_Port(port),
+	m_Size(size),
 	m_Status(SSS_INIT)
 {
 	m_Key = CUInt128::FromMD5(md5.c_str());
@@ -41,6 +43,7 @@ void CTaskSimpleStore::Update()
 				sender.WriteBuffer(hex, 16);
 				sender.WriteInteger<unsigned long>(htonl(m_IPv4));
 				sender.WriteInteger<unsigned short>(htons(m_Port));
+				sender.WriteInteger<unsigned long>(htonl(m_Size));
 
 				SendTo(m_Kad->GetSocket(), buf, sender.GetSize(), node.IPv4.c_str(), node.Port);
 			}
