@@ -296,8 +296,7 @@
       unsigned long|4|size
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1333966946247" ID="ID_1345643335" MODIFIED="1333966953194" TEXT="FIND_NODE">
@@ -320,8 +319,7 @@
       unsigned char*|16|node id
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1333967008624" ID="ID_1178483210" MODIFIED="1335330539140" TEXT="0x45 response">
 <richcontent TYPE="NOTE"><html>
@@ -360,8 +358,7 @@
       unsigned char*|16|node id
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1333967637033" ID="ID_742590445" MODIFIED="1333967642332" TEXT="FIND_VALUE">
@@ -621,9 +618,11 @@
   </body>
 </html></richcontent>
 </node>
-<node CREATED="1335249955455" ID="ID_1709765240" MODIFIED="1335249990941" TEXT="if first k nodes is requested, turn status into FNS_END"/>
+<node CREATED="1335249955455" ID="ID_1709765240" MODIFIED="1335421384401" TEXT="if all possible nodes is requested, turn status into FNS_END"/>
 </node>
-<node CREATED="1335249993147" ID="ID_517301643" MODIFIED="1335249993147" TEXT=""/>
+<node CREATED="1335249993147" ID="ID_517301643" MODIFIED="1335421395106" TEXT="FNS_END">
+<node CREATED="1335241318202" ID="ID_524500271" MODIFIED="1335241331639" TEXT="set m_IsStopped true"/>
+</node>
 </node>
 </node>
 </node>

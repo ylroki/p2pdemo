@@ -37,7 +37,8 @@ void CTaskFindNode::Update()
 		{
 			if (CheckStatus() == true)//if all ok, CheckStatus() return true.
 			{
-				//TODO
+				if (m_CallbackFunc)
+					m_CallbackFunc(m_Caller, m_CallbackArg);
 				m_Status = FNS_END;
 				break;
 			}
@@ -131,5 +132,19 @@ bool CTaskFindNode::CheckStatus()
 
 void CTaskFindNode::SendMessage(CUInt128 distance)
 {
-	//TODO
+	std::map<CUInt128, TNode>::iterator it = m_Possible.find(distance);
+	if (it != m_Possible.end())
+	{
+		TNode node = it->second;
+		char buf[BUF_SIZE];
+		CMemoryStream sender(buf, 0, BUF_SIZE);
+		sender.WriteInteger<char>(0x44);
+		unsigned char hex[16];
+		m_Kad->GetClientIDHex(hex);
+		sender.WriteBuffer(hex, 16);
+		sender.WriteInteger<short>(htons(m_TaskID));
+		node.NodeID.ToHex(hex);
+		sender.WriteBuffer(hex, 16);
+		SendTo(m_Kad->GetSocket(), buf, sender.GetSize(), node.IPv4.c_str(), node.Port);
+	}
 }
