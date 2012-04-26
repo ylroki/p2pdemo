@@ -129,7 +129,8 @@ void CKad::JoinKad()
 	m_TaskManager->Add(task);
 }
 
-void CKad::FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source)
+bool CKad::FindSource(const unsigned char* key, 
+	unsigned long* filesize, std::vector<TPeer>* source, bool addTask)
 {
 	std::string md5 = Hex2MD5String(key);
 	*filesize = GetFileSize(m_Database, md5.c_str());
@@ -137,12 +138,15 @@ void CKad::FindSource(const unsigned char* key, unsigned long* filesize, std::ve
 	sprintf(sql, "select ipv4,port from hash where md5='%s'", md5.c_str());
 	m_Database.Execute(sql, DealEachSource, source);
 	if (source->size())
-		return;
+		return true;
 
-	// Failed to find key in local db, should lock.
-	CAutoLock lock(&m_KeyLock);
-	CTask* task = new CTaskFindValue(this, CUInt128::FromMD5(md5.c_str()));
-	m_TaskManager->Add(task);
+	// Failed to find key in local db.
+	if (addTask)
+	{
+		CTask* task = new CTaskFindValue(this, CUInt128::FromMD5(md5.c_str()));
+		m_TaskManager->Add(task);
+	}
+	return false;
 }
 
 unsigned long CKad::GetFileSize(CDatabase database, const char* md5)

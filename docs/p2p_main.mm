@@ -271,7 +271,7 @@
 </node>
 </node>
 <node CREATED="1333966717270" ID="ID_248471927" MODIFIED="1333966721170" TEXT="STORE">
-<node CREATED="1333966752097" ID="ID_1751865941" MODIFIED="1335333073966" TEXT="0x42 request">
+<node CREATED="1333966752097" ID="ID_1751865941" MODIFIED="1335432689675" TEXT="0x42 request">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -282,6 +282,9 @@
     </p>
     <p>
       unsigned char*|16|self id
+    </p>
+    <p>
+      short|2|task id
     </p>
     <p>
       unsigned char*|16|key
@@ -296,11 +299,12 @@
       unsigned long|4|size
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node CREATED="1333966946247" ID="ID_1345643335" MODIFIED="1333966953194" TEXT="FIND_NODE">
-<node CREATED="1333966954623" ID="ID_1805642487" MODIFIED="1335330513456" TEXT="0x44 reuqest">
+<node CREATED="1333966954623" ID="ID_1805642487" MODIFIED="1335432670784" TEXT="0x44 reuqest">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -319,7 +323,8 @@
       unsigned char*|16|node id
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 <node CREATED="1333967008624" ID="ID_1178483210" MODIFIED="1335330539140" TEXT="0x45 response">
 <richcontent TYPE="NOTE"><html>
@@ -384,7 +389,7 @@
 </html>
 </richcontent>
 </node>
-<node CREATED="1333967683517" ID="ID_1202478694" MODIFIED="1333968169235" TEXT="0x47 response">
+<node CREATED="1333967683517" ID="ID_1202478694" MODIFIED="1335432515022" TEXT="0x47 response">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -394,16 +399,34 @@
       char|1|0x47
     </p>
     <p>
-      unsigned char*|16|key
+      unsigned char*|16|self id
     </p>
     <p>
-      unsigned long|4|rpc id
+      unsigned long|4|task id
+    </p>
+    <p>
+      unsigned char*|16|key
     </p>
     <p>
       char|1|bytes of value n
     </p>
     <p>
+      unsigned long|4|filesize
+    </p>
+    <p>
       char*|n|value
+    </p>
+    <p>
+      
+    </p>
+    <p>
+      each value:
+    </p>
+    <p>
+      unsigned long|4|ip
+    </p>
+    <p>
+      unsigned short|2|port
     </p>
     <p>
       
@@ -414,11 +437,9 @@
     <p>
       
     </p>
-    <p>
-      
-    </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 </node>
@@ -623,6 +644,31 @@
 </node>
 <node CREATED="1335249993147" ID="ID_517301643" MODIFIED="1335421395106" TEXT="FNS_END">
 <node CREATED="1335241318202" ID="ID_524500271" MODIFIED="1335241331639" TEXT="set m_IsStopped true"/>
+</node>
+</node>
+<node CREATED="1335429207107" HGAP="40" ID="ID_1027126562" MODIFIED="1335429325545" TEXT="CTaskFindValue" VSHIFT="14">
+<node CREATED="1335429216850" ID="ID_929466821" MODIFIED="1335429223158" TEXT="FVS_INIT">
+<node CREATED="1335249834126" ID="ID_486239590" MODIFIED="1335249863424" TEXT="get nodes close to given node id, put them into a list"/>
+</node>
+<node CREATED="1335429230840" ID="ID_874353625" MODIFIED="1335429235089" TEXT="FVS_UPDATE">
+<node CREATED="1335249908726" ID="ID_1086338013" MODIFIED="1335429260392" TEXT="send FIND_VALUE to some nodes"/>
+<node CREATED="1335249935209" ID="ID_1606844835" MODIFIED="1335429297909" TEXT="if ProcessNodes(), refresh list">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      for remote node, when it receive FIND_NODE, it response nodes closer to nodeid then itself.
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node CREATED="1335429300068" ID="ID_567918569" MODIFIED="1335429313397" TEXT="if ProcessValue(), end"/>
+<node CREATED="1335249955455" ID="ID_544650279" MODIFIED="1335421384401" TEXT="if all possible nodes is requested, turn status into FNS_END"/>
+</node>
+<node CREATED="1335249993147" ID="ID_1783607823" MODIFIED="1335429337327" TEXT="FVS_END">
+<node CREATED="1335241318202" ID="ID_1117311161" MODIFIED="1335241331639" TEXT="set m_IsStopped true"/>
 </node>
 </node>
 </node>

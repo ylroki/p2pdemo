@@ -22,7 +22,8 @@ public:
 	~CKad();
 	bool Start();
 	void Stop();
-	void FindSource(const unsigned char* key, unsigned long* filesize, std::vector<TPeer>* source);
+	bool FindSource(const unsigned char* key, 
+		unsigned long* filesize, std::vector<TPeer>* source, bool addTask);
 	void AddNode(CUInt128 remoteID, unsigned long remoteIP, unsigned short remotePort);
 	CTaskManager* GetTaskManager();
 	void GetClientIDHex(unsigned char* hex);

@@ -31,7 +31,7 @@ void CLookup::Init()
 	}
 }
 
-bool CLookup::CheckStatus()
+bool CLookup::CheckStatus(char cmd)
 {
 	std::map<CUInt128, KRemoteNodeStatus>::iterator it;
 	int nTry = 0;
@@ -46,7 +46,7 @@ bool CLookup::CheckStatus()
 				time_t now = GetNowSeconds();
 				m_Trying.insert(std::make_pair(it->first, now+10));
 				it->second = RNS_TRYING;
-				SendMessage(it->first);
+				SendMessage(cmd, it->first);
 				++nTry;
 				if (nTry >= KAD_ALPHA)
 					return false;
@@ -84,7 +84,7 @@ bool CLookup::CheckStatus()
 	return allOK;
 }
 
-void CLookup::SendMessage(CUInt128 distance)
+void CLookup::SendMessage(char cmd, CUInt128 distance)
 {
 	std::map<CUInt128, TNode>::iterator it = m_Possible.find(distance);
 	if (it != m_Possible.end())
@@ -92,12 +92,12 @@ void CLookup::SendMessage(CUInt128 distance)
 		TNode node = it->second;
 		char buf[BUF_SIZE];
 		CMemoryStream sender(buf, 0, BUF_SIZE);
-		sender.WriteInteger<char>(0x44);
+		sender.WriteInteger<char>(cmd);
 		unsigned char hex[16];
 		m_Kad->GetClientIDHex(hex);
 		sender.WriteBuffer(hex, 16);
 		sender.WriteInteger<short>(htons(m_Task->GetTaskID()));
-		node.NodeID.ToHex(hex);
+		m_Target.ToHex(hex);//node id or key
 		sender.WriteBuffer(hex, 16);
 		SendTo(m_Kad->GetSocket(), buf, sender.GetSize(), node.IPv4.c_str(), node.Port);
 	}

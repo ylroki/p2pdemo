@@ -22,8 +22,6 @@ public:
 	virtual void Update();
 	virtual void Process(void* arg);
 private:
-	bool CheckStatus();
-	void SendMessage(CUInt128 distance);
 
 	CLookup* m_Lookup;
 	CUInt128 m_NodeID;

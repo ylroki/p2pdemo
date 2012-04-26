@@ -27,7 +27,7 @@ void CTaskFindNode::Update()
 		}
 	case FNS_UPDATE:
 		{
-			if (m_Lookup->CheckStatus() == true)//if all ok, CheckStatus() return true.
+			if (m_Lookup->CheckStatus(0x44) == true)//if all ok, CheckStatus() return true.
 			{
 				if (m_CallbackFunc)
 					m_CallbackFunc(m_Caller, m_CallbackArg);

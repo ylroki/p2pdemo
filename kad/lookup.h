@@ -18,9 +18,9 @@ public:
 	CLookup(CKad* kad, CUInt128 target, CTask* task);
 	~CLookup();
 	void Init();
-	void SendMessage(CUInt128 distance);
+	void SendMessage(char cmd, CUInt128 distance);
 	void ProcessNodes(std::list<TNode>* nodes);
-	bool CheckStatus();
+	bool CheckStatus(char cmd);
 
 private:
 	CKad* m_Kad;
