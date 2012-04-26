@@ -2,15 +2,10 @@
 #define __KAD_TASK_FIND_NODE_H__
 #include "uint128.h"
 #include "task.h"
+class CLookup;
 class CKad;
 struct TNode;
-enum KRemoteNodeStatus
-{
-	RNS_PENDING,
-	RNS_TRYING,
-	RNS_OK,
-	RNS_TIMEOUT
-};
+
 
 enum KFindNodeStatus
 {
@@ -30,12 +25,9 @@ private:
 	bool CheckStatus();
 	void SendMessage(CUInt128 distance);
 
+	CLookup* m_Lookup;
 	CUInt128 m_NodeID;
 	KFindNodeStatus m_Status;
-	//first is distance
-	std::map<CUInt128, TNode> m_Possible;
-	std::map<CUInt128, KRemoteNodeStatus> m_PossibleStatus;
-	std::map<CUInt128, time_t> m_Trying;
 };
 
 #endif

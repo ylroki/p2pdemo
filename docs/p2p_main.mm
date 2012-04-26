@@ -362,7 +362,7 @@
 </node>
 </node>
 <node CREATED="1333967637033" ID="ID_742590445" MODIFIED="1333967642332" TEXT="FIND_VALUE">
-<node CREATED="1333967656632" ID="ID_1908773177" MODIFIED="1333967678403" TEXT="0x46 request">
+<node CREATED="1333967656632" ID="ID_1908773177" MODIFIED="1335422632409" TEXT="0x46 request">
 <richcontent TYPE="NOTE"><html>
   <head>
     
@@ -372,16 +372,17 @@
       char|1|0x46
     </p>
     <p>
+      unsigned char*|16|self id
+    </p>
+    <p>
+      short|2|task id
+    </p>
+    <p>
       unsigned char*|16|key
     </p>
-    <p>
-      unsigned long|4|rpc id
-    </p>
-    <p>
-      
-    </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 <node CREATED="1333967683517" ID="ID_1202478694" MODIFIED="1333968169235" TEXT="0x47 response">
 <richcontent TYPE="NOTE"><html>
