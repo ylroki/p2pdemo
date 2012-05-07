@@ -17,6 +17,16 @@ CAdvancedFile::CAdvancedFile(const char* filename, Int64 size)
 	{
 		m_FileStream = new CFileStream(m_Filename.c_str(), O_RDWR);
 		m_BlockStream = new CFileStream(m_BlockFilename.c_str(), O_RDWR);
+		char buf[BUF_SIZE];
+		int n = 0;
+		Int64 off = 0LL;
+		while ((n = m_BlockStream->Read(off, buf, BUF_SIZE)) > 0)
+		{
+			for (int i = 0; i < n; ++i)
+				if (buf[i] != 0)
+					++m_BlockOk;
+			off += n;
+		}
 	}
 	else
 	{
@@ -53,6 +63,7 @@ void CAdvancedFile::InitBlockFile()
 {
 	for (Int64 i = 0; i < m_BlockNum; ++i)
 		m_BlockStream->WriteInteger<char>(i, 0);
+	m_BlockOk = 0LL;
 }
 
 Int64 CAdvancedFile::Write(Int64 offset, const void* src, Int64 size)
@@ -65,6 +76,7 @@ Int64 CAdvancedFile::Write(Int64 offset, const void* src, Int64 size)
 void CAdvancedFile::SetBlock(Int64 offset)
 {
 	m_BlockStream->WriteInteger<char>(offset, 0x01);
+	++m_BlockOk;
 }
 
 Int64 CAdvancedFile::Read(Int64 offset, void* dst, Int64 size)
@@ -81,3 +93,10 @@ void CAdvancedFile::PrintBlock()
 		printf("%02x", buf);
 	}
 }
+
+char CAdvancedFile::GetPercent()
+{
+	Int64 percent = m_BlockOk * 100 / m_BlockNum;
+	return (char)percent;
+}
+

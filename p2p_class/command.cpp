@@ -1,6 +1,6 @@
 #include "command.h"
 // Client foreground process send to Client background process.
-const char* g_LocalCommand[] = {"stop", "download"};
+const char* g_LocalCommand[] = {"stop", "download", "current"};
 
 bool IsLocalCommand(const char* command)
 {

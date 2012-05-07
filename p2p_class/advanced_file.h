@@ -11,6 +11,7 @@ public:
 	Int64 Write(Int64 offset, const void* src, Int64 size);
 	Int64 Read(Int64 offset, void* dst, Int64 size);
 	void PrintBlock();
+	char GetPercent();
 
 private:
 	void InitBlockFile();
@@ -22,6 +23,7 @@ private:
 	CFileStream* m_BlockStream;
 	Int64 m_Size;
 	Int64 m_BlockNum;
+	Int64 m_BlockOk;
 };
 
 #endif

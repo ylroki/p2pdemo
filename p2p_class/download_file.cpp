@@ -1,4 +1,6 @@
 #include "download_file.h"
+#include "kad.h"
+#include "protocol_manager.h"
 
 CDownloadFile::CDownloadFile(const char* md5)
 	:m_Status(DS_WAIT),
@@ -7,16 +9,17 @@ CDownloadFile::CDownloadFile(const char* md5)
 	m_Config(NULL),
 	m_MD5(md5),
 	m_Protocol(NULL),
-	m_AdFile(NULL)
+	m_AdFile(NULL),
+	m_Kad(NULL)
 {
 	m_VecSource.clear();	
-	m_VecWorkSource.clear();
+	m_WorkSource.clear();
 }
 
 CDownloadFile::~CDownloadFile()
 {
 	m_VecSource.clear();	
-	m_VecWorkSource.clear();
+	m_WorkSource.clear();
 }
 
 KDownStatus CDownloadFile::GetStatus()
@@ -81,12 +84,23 @@ void CDownloadFile::RequestSources()
 		MD52Hex(m_MD5.c_str(), hexHash);
 		stream.WriteBuffer(hexHash, 16);
 		SendTo(m_Socket, buf, stream.GetSize(), m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
+
+		//kad
+		if (m_Kad)
+		{
+			std::vector<TPeer> source;
+			unsigned long filesize;
+			unsigned char key[16];
+			MD52Hex(m_MD5.c_str(), key);
+			if (m_Kad->FindSource(key, &filesize, &source, true) == true)
+				DealSourceResponse(key, filesize, &source);
+		}
 	}
 }
 const int g_NWork = 1;
 void CDownloadFile::UpdateSources()
 {
-	if (g_NWork > m_VecWorkSource.size())
+	if (g_NWork > m_WorkSource.size())
 	{
 		for (size_t i = 0; i < m_VecSource.size(); ++i)		
 		{
@@ -96,9 +110,12 @@ void CDownloadFile::UpdateSources()
 	}
 
 	// TEST: just use a source
-	if (m_VecWorkSource.size() >= 1)
+	if (m_WorkSource.size() >= 1)
 	{
-		RequestFileData(m_VecWorkSource[0]);	
+		TPeer peer = m_WorkSource.front();
+		RequestFileData(peer);
+		m_WorkSource.pop_front();
+		m_WorkSource.push_back(peer);
 	}
 }
 
@@ -154,7 +171,7 @@ void CDownloadFile::DealCheckResult(const unsigned char* hexHash, unsigned long 
 		if (m_VecSource[i].SessionID == sessionID)
 		{
 			if (status)
-				m_VecWorkSource.push_back(m_VecSource[i]);
+				m_WorkSource.push_back(m_VecSource[i]);
 			m_VecSource[i] = m_VecSource[m_VecSource.size() - 1];
 			m_VecSource.pop_back();
 			break;
@@ -180,4 +197,19 @@ void CDownloadFile::DealFileData(const unsigned char* hexHash,
 		return ;
 	if (m_AdFile)
 		m_AdFile->Write(offset, src, size);
+}
+
+void CDownloadFile::SetKad(CKad* kad)
+{
+	m_Kad = kad;
+}
+
+void CDownloadFile::GetDetail(KDownStatus& status, char& percent, std::string& md5)
+{
+	status = m_Status;
+	if (m_AdFile)
+		percent = m_AdFile->GetPercent();
+	else
+		percent = 0;
+	md5 = m_MD5;
 }

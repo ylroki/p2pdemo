@@ -1,14 +1,14 @@
 #include "config.h"
 
 CConfig::CConfig()
-	:m_LocalIP(),
+	:m_LocalIP("127.0.0.1"),
 	m_LocalPort(0),
 	m_PeerIP("127.0.0.1"),
 	m_PeerPort(0),
 	m_MinPort(9000),
 	m_MaxPort(9100),
 	m_UpdatePeriod(30),
-	m_ServerIP(),
+	m_ServerIP("127.0.0.1"),
 	m_ServerPort(0),
 	m_KadPort(0)
 {

@@ -17,8 +17,8 @@ p2p_clientc:
 		-o bin/clientc -lpthread -lcrypto -lsqlite3
 	
 p2p_clientd_debug:
-	g++ -g -Iinclude -Ip2p_class -I$(SSL_INCLUDE) -L$(SSL_LIB) -D__DEBUG__ \
-		$(P2P_CLASS_CPP) $(SHARE_CPP) client/clientd.cpp \
+	g++ -g -Iinclude -Ip2p_class -Ikad -I$(SSL_INCLUDE) -L$(SSL_LIB) -D__DEBUG__ \
+		$(P2P_CLASS_CPP) $(SHARE_CPP) kad/*.cpp client/clientd.cpp \
 		-o bin/clientd -lpthread -lcrypto -lsqlite3
 
 p2p_client_debug:

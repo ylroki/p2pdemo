@@ -6,10 +6,10 @@
 #include "stream.h"
 #include "md5_header.h"
 #include "command.h"
-#include "protocol_manager.h"
 #include "advanced_file.h"
 
 class CProtocolManager;
+class CKad;
 
 enum KDownStatus
 {
@@ -34,7 +34,8 @@ public:
 	void DealCheckResult(const unsigned char* hexHash, unsigned long sessionID, char status);
 	void DealFileData(const unsigned char* hexHash,
 		unsigned long offset, const char* src, unsigned long size);
-	
+	void SetKad(CKad* kad);
+	void GetDetail(KDownStatus& status, char& percent, std::string& md5);
 
 private:
 	static void* ThreadFunc(void* arg);
@@ -51,10 +52,11 @@ private:
 	pthread_t m_Thread;
 	int m_Socket;
 	std::vector<TPeer> m_VecSource;
-	std::vector<TPeer> m_VecWorkSource;
+	std::list<TPeer> m_WorkSource;
 	CConfig* m_Config;
 	CProtocolManager* m_Protocol;
 	CAdvancedFile* m_AdFile;
+	CKad* m_Kad;
 };
 
 #endif
