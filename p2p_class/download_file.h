@@ -57,6 +57,8 @@ private:
 	CProtocolManager* m_Protocol;
 	CAdvancedFile* m_AdFile;
 	CKad* m_Kad;
+	std::map<unsigned long, time_t> m_Ticker;
+	std::map<unsigned long, time_t> m_Session;
 };
 
 #endif

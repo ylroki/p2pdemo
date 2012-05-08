@@ -14,6 +14,8 @@ CDownloadFile::CDownloadFile(const char* md5)
 {
 	m_VecSource.clear();	
 	m_WorkSource.clear();
+	m_Ticker.clear();
+	m_Session.clear();
 }
 
 CDownloadFile::~CDownloadFile()
@@ -69,7 +71,7 @@ void CDownloadFile::Work()
 		RequestSources();
 		UpdateSources();
 		SelectSocket();
-		Sleep(100);
+		Sleep(1);
 	}
 }
 const int g_LowerBoundOfSources = 1;
@@ -105,6 +107,14 @@ void CDownloadFile::UpdateSources()
 		for (size_t i = 0; i < m_VecSource.size(); ++i)		
 		{
 			TPeer peer = m_VecSource[i];
+			time_t now = GetNowSeconds();
+			std::map<unsigned long, time_t>::iterator it = m_Session.find(peer.SessionID);
+			if (it != m_Session.end())
+			{
+				if (now - it->second <= 1)
+					continue;
+			}
+			m_Session[peer.SessionID] = now;
 			m_Protocol->SendCommand(0x21, m_Socket, m_MD5.c_str(), &peer);
 		}
 	}
@@ -177,6 +187,9 @@ void CDownloadFile::DealCheckResult(const unsigned char* hexHash, unsigned long 
 			break;
 		}
 	}
+	std::map<unsigned long, time_t>::iterator it = m_Session.find(sessionID);
+	if (it != m_Session.end())
+		m_Session.erase(it);
 }
 
 void CDownloadFile::RequestFileData(TPeer peer)
@@ -186,8 +199,18 @@ void CDownloadFile::RequestFileData(TPeer peer)
 	{
 		m_Status = DS_DONE; 
 		printf("File done.\n");
+		return;
 	}
-	m_Protocol->SendCommand(0x22, m_Socket, &peer, m_MD5.c_str(), offset, offset);
+
+	time_t now = GetNowSeconds();
+	std::map<unsigned long, time_t>::iterator it = m_Ticker.find(offset);
+	if (it != m_Ticker.end())
+	{
+		if (now - it->second <= 1)
+			return;
+	}
+	m_Ticker[offset] = now;
+	m_Protocol->SendCommand(0x22, m_Socket, &peer, m_MD5.c_str(), offset, offset+7);
 }
 
 void CDownloadFile::DealFileData(const unsigned char* hexHash,
@@ -197,6 +220,9 @@ void CDownloadFile::DealFileData(const unsigned char* hexHash,
 		return ;
 	if (m_AdFile)
 		m_AdFile->Write(offset, src, size);
+	std::map<unsigned long, time_t>::iterator it = m_Ticker.find(offset);
+	if (it != m_Ticker.end())
+		m_Ticker.erase(it);
 }
 
 void CDownloadFile::SetKad(CKad* kad)

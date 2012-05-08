@@ -93,12 +93,12 @@ void CProtocolManager::Response(int sockfd, void* arg)
 		return ;
 	char abuf[MAX_ADDR_SIZE];
 	socklen_t alen = MAX_ADDR_SIZE;
-	char buf[BUF_SIZE * 8];
+	char buf[BUF_SIZE * 10];
 	memset(buf, 0, sizeof(buf));
-	int n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen);
+	int n = recvfrom(sockfd, buf, BUF_SIZE*10, 0, (struct sockaddr*)abuf, &alen);
 	if (n > 0)
 	{
-		CMemoryStream reader(buf, n, BUF_SIZE * 8);
+		CMemoryStream reader(buf, n, BUF_SIZE * 10);
 		char id = reader.ReadInteger<char>();
 		switch (id)
 		{
@@ -118,7 +118,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 					struct TPeer peer;
 					peer.IPv4 = inet_ntoa(ia);
 					peer.Port = ntohs(port);
-					peer.SessionID = ntohl(ip);
+					peer.SessionID = ntohl(ip*port);
 					vecSource.push_back(peer);
 					printf("request result, Source:%s, %hu\n", peer.IPv4.c_str(), peer.Port);
 				}

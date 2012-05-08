@@ -70,7 +70,11 @@ void CAdvancedFile::InitBlockFile()
 Int64 CAdvancedFile::Write(Int64 offset, const void* src, Int64 size)
 {
 	Int64 ret = m_FileStream->Write(offset*BLOCK_SIZE, src, size);
-	SetBlock(offset);
+	int nBlock = size / BLOCK_SIZE;
+	if (size % BLOCK_SIZE)
+		++nBlock;
+	for (Int64 i = offset; i < offset + nBlock; ++i)
+		SetBlock(i);
 	return ret;
 }
 
