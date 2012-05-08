@@ -28,7 +28,7 @@ int DealEachSource(void* arg, int nCol, char** result, char** name)
 	if (stream->GetSize() + 6 <= stream->GetMaxSize())
 	{
 		printf("%s:%s\n", result[0], result[1]);
-		unsigned long ipv4 = atoi(result[0]);
+		unsigned long ipv4 = strtoul(result[0], NULL, 10);
 		unsigned short port = atoi(result[1]);
 		stream->WriteInteger<unsigned long>(htonl(ipv4));
 		stream->WriteInteger<unsigned short>(htons(port));
