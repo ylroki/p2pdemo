@@ -4,7 +4,8 @@ CAdvancedFile::CAdvancedFile(const char* filename, Int64 size)
 	:m_Filename(filename),
 	m_FileStream(NULL),
 	m_BlockStream(NULL),
-	m_Size(size)
+	m_Size(size),
+	m_BlockOk(0LL)
 {
 	m_BlockNum = m_Size / BLOCK_SIZE;
 	if (m_Size % BLOCK_SIZE)
@@ -75,8 +76,12 @@ Int64 CAdvancedFile::Write(Int64 offset, const void* src, Int64 size)
 
 void CAdvancedFile::SetBlock(Int64 offset)
 {
-	m_BlockStream->WriteInteger<char>(offset, 0x01);
-	++m_BlockOk;
+	char flag = m_BlockStream->ReadInteger<char>(offset);
+	if (flag == 0)
+	{
+		m_BlockStream->WriteInteger<char>(offset, 0x01);
+		++m_BlockOk;
+	}
 }
 
 Int64 CAdvancedFile::Read(Int64 offset, void* dst, Int64 size)
@@ -96,7 +101,7 @@ void CAdvancedFile::PrintBlock()
 
 char CAdvancedFile::GetPercent()
 {
-	Int64 percent = m_BlockOk * 100 / m_BlockNum;
-	return (char)percent;
+	Int64 percent = m_BlockOk * 100LL / m_BlockNum;
+	return static_cast<int>(percent);
 }
 

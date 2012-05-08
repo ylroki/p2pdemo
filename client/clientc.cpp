@@ -22,14 +22,10 @@ int main(int argc, char* argv[])
 			configName = argv[1];
 		if (argc < 4)
 			ErrorQuit("No Command.");
-		if (!IsLocalCommand(argv[3]))
-			ErrorQuit("Invalid Command.");
 		cmd = argv[3];
 	}
 	else
 	{
-		if (!IsLocalCommand(argv[1]))
-			ErrorQuit("Invalid command.");
 		cmd = argv[1];
 	}
 	// Get network configuration.

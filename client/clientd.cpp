@@ -43,6 +43,13 @@ void DealLocalCommand(const char* command, char* response)
 			sprintf(response, "%s %d%% %d\n", md5.c_str(), percent, ds);
 		}
 	}
+	else
+	{
+		if (strlen(command) != 32)
+			return ;		
+		CDownloadFile* down = new CDownloadFile(command);
+		g_Manager.push_back(down);
+	}
 }
 
 int main(int argc, char* argv[])
@@ -104,6 +111,8 @@ int main(int argc, char* argv[])
 		}
 
 		//manager download file.
+		// 
+		int MAX_D = 3;
 		std::list<CDownloadFile*>::iterator it;
 		for (it = g_Manager.begin(); it != g_Manager.end();)
 		{
@@ -111,7 +120,14 @@ int main(int argc, char* argv[])
 			if (ds == DS_DONE || ds == DS_ERROR)	
 				it = g_Manager.erase(it);
 			else
+			{
+				if (ds == DS_WAIT)
+					if (MAX_D--)
+						(*it)->Start(&g_Config);
+				else if (ds == DS_RUNNING)
+					--MAX_D;
 				++it;
+			}
 		}
 		Sleep(100);
 		
