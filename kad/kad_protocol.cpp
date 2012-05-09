@@ -17,6 +17,7 @@ void CKadProtocol::RecvMessage(int sockfd)
 		return ;
 	char abuf[MAX_ADDR_SIZE];
 	socklen_t alen = MAX_ADDR_SIZE;
+	memset(abuf, 0 , sizeof(abuf));
 	char buf[BUF_SIZE];
 	memset(buf, 0, sizeof(buf));
 	int n = recvfrom(sockfd, buf, BUF_SIZE, 0, (struct sockaddr*)abuf, &alen);
@@ -122,7 +123,7 @@ void CKadProtocol::RecvMessage(int sockfd)
 					sender.WriteBuffer(targetHex, 16);
 					char nVal = source.size() < 50 ? source.size() : 50;
 					sender.WriteInteger<char>(nVal);
-					sender.WriteInteger<unsigned long>(filesize);
+					sender.WriteInteger<unsigned long>(htonl(filesize));
 					for (size_t i = 0; i < nVal; ++i)
 					{
 						TPeer peer = source[i];
@@ -153,7 +154,7 @@ void CKadProtocol::RecvMessage(int sockfd)
 				while (nVal--)
 				{
 					unsigned long ip = ntohl(reader.ReadInteger<unsigned long>());
-					unsigned short port = ntohl(reader.ReadInteger<unsigned short>());
+					unsigned short port = ntohs(reader.ReadInteger<unsigned short>());
 					m_Kad->AddKeyValue(key, ip, port, filesize);
 				}
 				break;

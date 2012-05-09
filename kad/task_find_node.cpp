@@ -34,6 +34,8 @@ void CTaskFindNode::Update()
 				m_Status = FNS_END;
 				break;
 			}
+			if (IsTimeout())
+				m_Status = FNS_END;
 			break;
 		}
 	case FNS_END:

@@ -56,6 +56,8 @@ Int64 CAdvancedFile::FirstBlock()
 			if (buf[i] == 0)
 				return (ret + i);
 		ret += n;
+		if (ret >= m_BlockNum)
+			return -1;
 	}
 	return -1;
 }

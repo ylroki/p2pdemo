@@ -145,6 +145,7 @@ bool CKad::FindSource(const unsigned char* key,
 	if (addTask)
 	{
 		CTask* task = new CTaskFindValue(this, CUInt128::FromMD5(md5.c_str()));
+		task->SetTimeout(10);
 		m_TaskManager->Add(task);
 	}
 	return false;
@@ -169,7 +170,7 @@ int CKad::DealEachSource(void* arg, int nCol, char** result, char** name)
 {
 	std::vector<TPeer>* source = static_cast<std::vector<TPeer>*>(arg);
 	TPeer peer;
-	peer.IPv4 = atoi(result[0]);
+	peer.IPv4 = IPLong2String(strtoul(result[0], NULL, 10));
 	peer.Port = atoi(result[1]);
 	source->push_back(peer);
 	return 0;
@@ -180,9 +181,9 @@ int CKad::RepublishHelper(void* arg, int nCol, char** result, char** name)
 	CKad* kad = static_cast<CKad*>(arg);
 	CTaskManager* manager = kad->GetTaskManager();
 	std::string md5 = result[0];
-	unsigned long ip = atoi(result[1]);
+	unsigned long ip = strtoul(result[1], NULL, 10);
 	unsigned short port = atoi(result[2]);
-	unsigned long size = atoi(result[3]);
+	unsigned long size = strtoul(result[3], NULL, 10);
 	CTask* task = new CTaskSimpleStore(kad, md5, ip, port, size);
 	manager->Add(task);
 	return 0;
@@ -221,7 +222,7 @@ void CKad::Refresh()
 void CKad::UpdateSelfKey()
 {
 	unsigned long ip = IPString2Long(m_Config->GetPeerIP().c_str());
-	unsigned short port = m_Config->GetKadPort();
+	unsigned short port = m_Config->GetPeerPort();
 	std::map<std::string, unsigned long>keys;
 	m_FileSystem->GetAllHashes(&keys);
 	std::map<std::string, unsigned long>::iterator it;

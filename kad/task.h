@@ -15,6 +15,7 @@ public:
 	short GetTaskID();
 	bool IsStopped();
 	void SetCallback(TaskCallback func, void* caller, void* arg);
+	bool IsTimeout();
 
 protected:
 	time_t m_Timeout;//seccond

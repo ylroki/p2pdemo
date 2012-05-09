@@ -9,7 +9,7 @@ CTaskPing::CTaskPing(CKad* kad, TNode& node)
 	:CTask(kad),
 	m_Status(PS_INIT)
 {
-	TNode* m_Node = new TNode;
+	m_Node = new TNode;
 	m_Node->NodeID = node.NodeID;
 	m_Node->IPv4 = node.IPv4;
 	m_Node->Port = node.Port;
@@ -23,6 +23,7 @@ CTaskPing::~CTaskPing()
 
 void CTaskPing::Update()
 {
+	static int nTry = 3;
 	switch (m_Status)
 	{
 	case PS_INIT:
@@ -33,7 +34,7 @@ void CTaskPing::Update()
 			unsigned char hex[16];
 			m_Kad->GetClientIDHex(hex);
 			sender.WriteBuffer(hex, 16);
-			sender.WriteInteger<short>(m_TaskID);
+			sender.WriteInteger<short>(htons(m_TaskID));
 			SendTo(m_Kad->GetSocket(), buf, sender.GetSize(), m_Node->IPv4.c_str(), m_Node->Port);
 			m_Status = PS_WAIT;
 			break;
@@ -45,7 +46,10 @@ void CTaskPing::Update()
 			{
 				// time out.
 				m_Kad->GetRouteTable()->Delete(m_Node->NodeID);
-				m_Status = PS_END;
+				if (nTry--)
+					m_Status = PS_INIT;
+				else
+					m_Status = PS_END;
 			}
 			break;
 		}

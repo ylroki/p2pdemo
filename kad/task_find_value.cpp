@@ -4,11 +4,16 @@
 
 CTaskFindValue::CTaskFindValue(CKad* kad, CUInt128 key)
 	:CTask(kad),
-	m_Key(key)
-{}
+	m_Key(key),
+	m_Status(FVS_INIT)
+{
+	m_Lookup = new CLookup(kad, key, this);
+}
 
 CTaskFindValue::~CTaskFindValue()
-{}
+{
+	delete m_Lookup;	
+}
 
 void CTaskFindValue::Update()
 {
@@ -27,6 +32,8 @@ void CTaskFindValue::Update()
 				m_Status = FVS_END;
 				break;
 			}
+			if (IsTimeout())
+				m_Status = FVS_END;
 			break;
 		}
 	case FVS_END:

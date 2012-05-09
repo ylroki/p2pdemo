@@ -6,7 +6,8 @@ CTask::CTask(CKad* kad)
 	m_Kad(kad),
 	m_CallbackFunc(NULL),
 	m_Caller(NULL),
-	m_CallbackArg(NULL)
+	m_CallbackArg(NULL),
+	m_Start(0)
 {}
 
 CTask::~CTask()
@@ -21,6 +22,16 @@ void CTask::SetTaskID(short id)
 {
 	m_TaskID = id;
 	m_Start = GetNowSeconds();
+}
+
+bool CTask::IsTimeout()
+{
+	if (m_Start == 0)
+		return false;
+	time_t now = GetNowSeconds();
+	if (now - m_Start >= m_Timeout)
+		return true;
+	return false;
 }
 
 short CTask::GetTaskID()

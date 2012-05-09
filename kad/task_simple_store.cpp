@@ -39,6 +39,7 @@ void CTaskSimpleStore::Update()
 				unsigned char hex[16];
 				m_Kad->GetClientIDHex(hex);
 				sender.WriteBuffer(hex, 16);
+				sender.WriteInteger<unsigned short>(htons(m_TaskID));
 				m_Key.ToHex(hex);
 				sender.WriteBuffer(hex, 16);
 				sender.WriteInteger<unsigned long>(htonl(m_IPv4));

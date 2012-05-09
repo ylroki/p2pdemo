@@ -121,7 +121,7 @@ bool operator<(const CUInt128& op1, const CUInt128& op2)
 
 bool operator>(const CUInt128& op1, const CUInt128& op2)
 {
-	return (op2 > op1);
+	return !(op2 < op1);
 }
 
 bool operator<=(const CUInt128& op1, const CUInt128& op2)

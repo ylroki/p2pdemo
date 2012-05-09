@@ -28,6 +28,7 @@ void CTaskManager::Add(CTask* task)
 		m_ListPending.push_back(task);
 		return;
 	}
+	printf("start task %hd\n", taskID);
 	task->SetTaskID(taskID);
 	m_ListTask.push_back(task);
 }
@@ -42,6 +43,7 @@ void CTaskManager::Update()
 			break;
 		CTask* task = m_ListPending.front();
 		m_ListPending.pop_front();
+		printf("start task %hd\n", taskID);
 		task->SetTaskID(taskID);
 		m_ListTask.push_back(task);
 	}
@@ -65,6 +67,7 @@ void CTaskManager::Update()
 void CTaskManager::Process(short taskID, void* arg)
 {
 	CAutoLock autolock(&m_Lock);
+	printf("process task %hd\n", taskID);
 	std::list<CTask*>::iterator it;
 	for (it = m_ListTask.begin(); it != m_ListTask.end(); ++it)
 		if ((*it)->GetTaskID() == taskID)

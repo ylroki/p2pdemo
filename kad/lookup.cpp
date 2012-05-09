@@ -118,6 +118,8 @@ void CLookup::ProcessNodes(std::list<TNode>* nodes)
 	for (it = nodes->begin(); it != nodes->end(); ++it)
 	{
 		CUInt128 distance = it->NodeID ^ m_Target;
+		if (m_Possible.find(distance) != m_Possible.end())
+			continue;
 		m_Possible.insert(std::make_pair(distance, *it));
 		m_PossibleStatus.insert(std::make_pair(distance, RNS_PENDING));
 	}

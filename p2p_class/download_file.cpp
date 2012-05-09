@@ -105,13 +105,21 @@ void CDownloadFile::RequestSources()
 		SendTo(m_Socket, buf, stream.GetSize(), m_Config->GetServerIP().c_str(), m_Config->GetServerPort());
 
 		//kad
+		static time_t kadTime = 0;
 		if (m_Kad)
 		{
 			std::vector<TPeer> source;
 			unsigned long filesize;
 			unsigned char key[16];
 			MD52Hex(m_MD5.c_str(), key);
-			if (m_Kad->FindSource(key, &filesize, &source, true) == true)
+			bool flag = false;
+			time_t now = GetNowSeconds();
+			if (now - kadTime > 10)
+			{
+				kadTime = now;
+				flag = true;
+			}
+			if (m_Kad->FindSource(key, &filesize, &source, flag) == true)
 				DealSourceResponse(key, filesize, &source);
 		}
 	}

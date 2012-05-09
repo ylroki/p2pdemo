@@ -55,6 +55,7 @@ void DealLocalCommand(const char* command, char* response)
 		if (strlen(command) != 32)
 			return ;		
 		CDownloadFile* down = new CDownloadFile(command);
+		down->SetKad(g_Kad);
 		g_Manager.push_back(down);
 	}
 }

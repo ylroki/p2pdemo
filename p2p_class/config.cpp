@@ -5,8 +5,8 @@ CConfig::CConfig()
 	m_LocalPort(0),
 	m_PeerIP("127.0.0.1"),
 	m_PeerPort(0),
-	m_MinPort(9000),
-	m_MaxPort(9100),
+	m_MinPort(7000),
+	m_MaxPort(7100),
 	m_UpdatePeriod(30),
 	m_ServerIP("127.0.0.1"),
 	m_ServerPort(0),
@@ -38,6 +38,8 @@ bool CConfig::Init(const char* filename)
 			//printf("%s:%s\n", name.c_str(), value.c_str());
 			if (name == "local port")
 				m_LocalPort = atoi(value.c_str());
+			else if (name == "peer ip")
+				m_PeerIP = value;
 			else if (name == "peer port")
 				m_PeerPort = atoi(value.c_str());
 			else if (name == "update period")
