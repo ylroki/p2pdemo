@@ -35,7 +35,8 @@ public:
 	void DealFileData(const unsigned char* hexHash,
 		unsigned long offset, const char* src, unsigned long size);
 	void SetKad(CKad* kad);
-	void GetDetail(KDownStatus& status, char& percent, std::string& md5);
+	void GetDetail(KDownStatus& status, char& percent, std::string& md5,
+		time_t& past, unsigned short& speed);
 
 private:
 	static void* ThreadFunc(void* arg);
@@ -59,6 +60,12 @@ private:
 	CKad* m_Kad;
 	std::map<unsigned long, time_t> m_Ticker;
 	std::map<unsigned long, time_t> m_Session;
+
+	unsigned short m_Speed;
+	time_t m_StartTime;
+	time_t m_PastTime;
+	time_t m_Clock;
+	unsigned long m_LastSecBlock;
 };
 
 #endif

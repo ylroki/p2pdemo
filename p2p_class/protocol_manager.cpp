@@ -120,7 +120,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 					peer.Port = ntohs(port);
 					peer.SessionID = ntohl(ip*port);
 					vecSource.push_back(peer);
-					printf("request result, Source:%s, %hu\n", peer.IPv4.c_str(), peer.Port);
+					//printf("request result, Source:%s, %hu\n", peer.IPv4.c_str(), peer.Port);
 				}
 				CDownloadFile* down = static_cast<CDownloadFile*>(arg);
 				down->DealSourceResponse(hexHash, filesize, &vecSource);
@@ -157,7 +157,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 				unsigned long size = (ed_blk - st_blk + 1) * BLOCK_SIZE;
 				char* dataBuf = new char[size];
 				unsigned long fSize = upload->GetFileData(hexHash, offset, size, dataBuf);
-				printf("get file data, byte offset:%lu byte size:%lu\n", offset, size);
+				//printf("get file data, byte offset:%lu byte size:%lu\n", offset, size);
 
 				char* sendBuf = new char[size + BUF_SIZE];
 				CMemoryStream sender(sendBuf, 0, size+ BUF_SIZE);
@@ -192,7 +192,7 @@ void CProtocolManager::Response(int sockfd, void* arg)
 				reader.ReadBuffer(hexHash, 16);
 				unsigned long offset = ntohl(reader.ReadInteger<unsigned long>());
 				unsigned long size = ntohl(reader.ReadInteger<unsigned long>());
-				printf("file data, block offset:%lu byte size:%lu\n", offset, size);
+				//printf("file data, block offset:%lu byte size:%lu\n", offset, size);
 				char* dataBuf = new char[size];
 				reader.ReadBuffer(dataBuf, size);
 				CDownloadFile* down = static_cast<CDownloadFile*>(arg);

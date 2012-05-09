@@ -36,6 +36,7 @@ void CKadProtocol::RecvMessage(int sockfd)
 		// Get self ID.
 		unsigned char selfID[16];
 		m_Kad->GetClientIDHex(selfID);
+		printf("kad recv %d\n", cmd);
 		switch (cmd)
 		{
 		case 0x40://ping request

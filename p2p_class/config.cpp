@@ -35,7 +35,7 @@ bool CConfig::Init(const char* filename)
 		{
 			std::string name = equ.substr(0, pos);
 			std::string value = equ.substr(pos + 1, equ.size() - pos - 1);
-			printf("%s:%s\n", name.c_str(), value.c_str());
+			//printf("%s:%s\n", name.c_str(), value.c_str());
 			if (name == "local port")
 				m_LocalPort = atoi(value.c_str());
 			else if (name == "peer port")

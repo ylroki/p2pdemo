@@ -32,15 +32,22 @@ void DealLocalCommand(const char* command, char* response)
 		KDownStatus ds;
 		char percent;
 		std::string md5;
+		time_t past;
+		unsigned short speed;
 
-		g_DownloadFile.GetDetail(ds, percent, md5);
-		sprintf(response, "%s %d%% %d\n", md5.c_str(), percent, ds);
+		int offset = 0;
+		g_DownloadFile.GetDetail(ds, percent, md5, past, speed);
+		sprintf(response+offset, "%s %d%% %d %lds %huk\n", 
+			md5.c_str(), percent, ds, past, speed);
+		offset = strlen(response);
 
 		std::list<CDownloadFile*>::iterator it;
 		for (it = g_Manager.begin(); it != g_Manager.end(); ++it)
 		{
-			(*it)->GetDetail(ds, percent, md5);
-			sprintf(response, "%s %d%% %d\n", md5.c_str(), percent, ds);
+			(*it)->GetDetail(ds, percent, md5, past, speed);
+			sprintf(response+offset, "%s %d%% %d %lds %huk\n", 
+				md5.c_str(), percent, ds, past, speed);
+			offset = strlen(response);
 		}
 	}
 	else
@@ -81,6 +88,7 @@ int main(int argc, char* argv[])
 	g_UploadFile.Start(&g_Config);
 	g_UploadFile.SetFileSystem(&g_FileSystem);
 	g_Kad = new CKad(&g_Config, &g_FileSystem);
+	g_Kad->Start();
 	g_Manager.clear();
 
 	g_DaemonStopped = false;
@@ -141,6 +149,7 @@ int main(int argc, char* argv[])
 		delete (*it);
 	}
 	g_Manager.clear();
+	g_Kad->Stop();
 	delete g_Kad;
 	g_UploadFile.Stop();
 	g_FileSystem.Stop();

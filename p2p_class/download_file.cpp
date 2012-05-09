@@ -10,7 +10,12 @@ CDownloadFile::CDownloadFile(const char* md5)
 	m_MD5(md5),
 	m_Protocol(NULL),
 	m_AdFile(NULL),
-	m_Kad(NULL)
+	m_Kad(NULL),
+	m_Speed(0),
+	m_Clock(0),
+	m_StartTime(0),
+	m_PastTime(0),
+	m_LastSecBlock(0)
 {
 	m_VecSource.clear();	
 	m_WorkSource.clear();
@@ -33,6 +38,7 @@ bool CDownloadFile::Start(CConfig* config)
 {
 	if (m_Status == DS_RUNNING)
 		return true;
+	m_StartTime = GetNowSeconds();
 	m_Config = config;
 	m_Protocol = new CProtocolManager(config);
 	m_Status = DS_RUNNING;
@@ -68,6 +74,17 @@ void CDownloadFile::Work()
 		m_Status = DS_ERROR;	
 	while (m_Status == DS_RUNNING)	
 	{
+		time_t now = GetNowSeconds();
+		m_PastTime = now - m_StartTime;
+		if (now - m_Clock >= 1)
+		{
+			if (m_AdFile)
+			{
+				m_Speed = m_AdFile->GetBlockOk() - m_LastSecBlock;
+				m_LastSecBlock += m_Speed;
+			}
+			m_Clock = now;
+		}
 		RequestSources();
 		UpdateSources();
 		SelectSocket();
@@ -230,7 +247,8 @@ void CDownloadFile::SetKad(CKad* kad)
 	m_Kad = kad;
 }
 
-void CDownloadFile::GetDetail(KDownStatus& status, char& percent, std::string& md5)
+void CDownloadFile::GetDetail(KDownStatus& status, char& percent, std::string& md5, 
+	time_t& past, unsigned short& speed)
 {
 	status = m_Status;
 	if (m_AdFile)
@@ -238,4 +256,6 @@ void CDownloadFile::GetDetail(KDownStatus& status, char& percent, std::string& m
 	else
 		percent = 0;
 	md5 = m_MD5;
+	past = m_PastTime;
+	speed = m_Speed;
 }

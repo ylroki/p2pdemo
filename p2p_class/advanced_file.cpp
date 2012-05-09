@@ -109,3 +109,7 @@ char CAdvancedFile::GetPercent()
 	return static_cast<int>(percent);
 }
 
+Int64 CAdvancedFile::GetBlockOk()
+{
+	return m_BlockOk;
+}

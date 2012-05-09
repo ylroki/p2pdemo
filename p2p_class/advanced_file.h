@@ -12,6 +12,7 @@ public:
 	Int64 Read(Int64 offset, void* dst, Int64 size);
 	void PrintBlock();
 	char GetPercent();
+	Int64 GetBlockOk();
 
 private:
 	void InitBlockFile();

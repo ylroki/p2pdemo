@@ -58,6 +58,7 @@ bool CKad::Start()
 	m_Database.CreateTable("hash", "(md5 TEXT, ipv4 INTEGER, port INTEGER, size INTEGER,\
 		primary key(md5,ipv4,port))");
 	m_ClientID = CalculateClientID();
+	printf("kad id: %s\n", m_ClientID.ToMD5().c_str());
 	m_RouteTable = new CRouteTable(NULL, m_ClientID, 0, true);
 	if (InitSocket() == false)
 		return false;
