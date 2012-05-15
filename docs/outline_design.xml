@@ -1,0 +1,258 @@
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" 
+	"/home/ylroki/project/docbook/dtd/4.5/docbookx.dtd">
+
+<article>
+	<articleinfo>
+		<title>概要设计</title>
+	</articleinfo>
+
+	<sect1>
+		<title>1 总体设计</title>
+		<para>本P2P系统旨在实现局域网的文件共享功能，文件信息以种子文件形式
+			发布，客户端解析种子文件获取文件信息，与服务器以及局域网内其他客户端通信，
+			从而实现文件下载。</para>
+
+		<sect2>
+			<title>1.1 两种P2P网络结构</title>
+			<sect3><title>1.1.1 集中式</title>
+				<para>客户端登录时，向固定服务器提交自身信息
+					（IP地址，文件传输监听端口，自身拥有的文件的信息包括文件的MD5哈希值、文件大小等），
+					服务器在数据库中存储这些信息。</para>
+				<para>当客户端需要下载文件时，它都会需要一个种子文件，类似BT下载，
+					但是这里的种子文件信息比较简单，主要包含文件的MD5哈希值，文件大小，文件格式，文件名等，
+					客户端解析种子文件，获取该文件的MD5哈希值，向服务器请求该文件的相关信息。</para>
+				<para>服务器返回这些信息，包括文件大小，拥有该文件的客户端的信息，
+					包括IP地址，文件传输监听端口等。</para>
+				<para>我们称这些拥有文件的客户端为Peer。</para>
+				<para>而请求文件的客户端与这些Peer通信，
+					通过一定的调度策略从Peer出取得文件块，从而完成文件下载。</para>
+			</sect3>
+
+			<sect3><title>1.1.2 全分布式结构化</title>
+				<para>参考Kademlia的协议，没有客户端与服务器的概念，
+					我们称所有在Kad网络中实体为Node，当一个Node试图登录Kad网络时，
+					它必须知道一些已经在Kad网络中的Node，这可以以一个配置文件发布，
+					按照Kademlia协议与这些Node通信，把自己的信息发布到Kad网络中，
+					这些信息按照Kademlia协议存储在相应的Node中。</para>
+				<para>这里的信息主要有两类，一为Node信息，即一个三元组&lt;Node ID, IP地址, Kad网络端口&gt;
+					二为文件信息即一个四元组&lt;Key, IP地址, 端口, 文件大小&gt;，
+					其中Key为该文件的MD5哈希值，IP地址为拥有该文件的Node的IP地址，
+					端口为相应的文件传输监听端口。</para>
+				<para>当某个Node需要下载文件时，和集中式方式一样，需要一个种子文件，
+					不同的是，解析种子文件获取该文件的MD5哈希值后，向其他的Node查询文件的相关信息，
+					也就是我们Kad网络中的第二类信息，这类信息包含了文件拥有者的IP地址和文件传输监听端口，
+					之后的文件块请求以及传输和集中式的方式一致。</para>
+			</sect3>
+
+			<sect3><title>1.1.3 两种网络结构的混合</title>
+				<para>可以见得，两种网络结构的差异主要体现在查询待下载文件的相关信息的方式，
+					取得这些信息后，下载过程是一样的。</para>
+				<para>混合这两种方式是基于这样的考虑：在企业软件产品中，
+					可以布置企业自己的服务器以满足上述集中式方式的需求，
+					但随着用户增长，虽然文件传输不需要服务器参与，
+					但源源不断的查询请求依然会降低服务器性能，所以我们需要客户端分担一部分的查询。</para>
+			</sect3>
+
+			<screenshot>
+			<mediaobject>
+				<imageobject><imagedata fileref="res/login.jpeg" format="JPEG" /></imageobject>
+				<caption>
+				<para>图1：Login</para>
+				</caption>
+			</mediaobject>
+			<mediaobject>
+				<imageobject><imagedata fileref="res/download.jpeg" format="JPEG" /></imageobject>
+				<caption>
+				<para>图2：Download</para>
+				</caption>
+			</mediaobject>
+			</screenshot>
+
+		</sect2>
+	</sect1>
+
+	<sect1><title>2 服务器</title>
+		<para>读取配置文件后，采用I/O复用模型接收来自客户端的请求。</para>
+	</sect1>
+
+	<sect1><title>3 客户端</title>
+		<para>以集中式的网络结构为主体，而参考Kademlia协议的全分布式结构化网络
+			主要用来查询文件的拥有者信息，可以作为客户端的子模块。</para>
+		<para>在概要设计中，我们主要关注客户端各子模块之间的依赖关系。</para>
+		<screenshot>
+		<mediaobject>
+			<imageobject><imagedata fileref="res/module_in_client.jpeg" format="JPEG" /></imageobject>
+			<caption>
+			<para>图3：Client</para>
+			</caption>
+		</mediaobject>
+		</screenshot>
+
+		<para>本系统并不关注界面设计，采用这种前端/后端的结构，
+			后端专注于逻辑功能，运行于后台，用户交互可通过前端使用socket与后端通信。</para>
+		<para>即便是未来需要扩展界面交互，也可以只改变前端以及后端与交互相关的模块即可，
+			不会影响到其他功能模块。</para>
+
+		<sect2><title>3.1 前端</title>
+			<para>从命令行读取用户的命令，做简单的解析，通过socket将命令传输给后端，
+				接收后端的回复并输出。</para>
+		</sect2>
+
+		<sect2><title>3.2 后端</title>
+			<sect3><title>3.2.1 主模块</title>
+				<para>启动下载文件管理模块、上传文件模块、Kad网络模块、文件系统模块，
+					之后轮询接收并解析来自用户的命令，根据不同的命令做不同的操作。</para>
+				<para>Stop 停止所有启动的模块后退出
+					Current 将当前下载文件的状态传输给前端
+					*.seed 解析种子文件并开始下载文件
+					32位的MD5值 下载该MD5值的文件</para>
+			</sect3>
+
+			<sect3><title>3.2.2 文件系统模块</title>
+				<para>定期扫描给定目录下的文件，将相关消息存储至数据库，并提交至服务器。</para>
+				<para>提供文件及目录操作的一些接口。</para>
+			</sect3>
+
+			<sect3><title>3.2.3 下载文件管理模块</title>
+				<para>管理每个待下载的文件，清理下载成功或已失败的文件，
+					保证正在下载的文件不超过设定值。</para>
+				<procedure>
+					<para>每个下载文件自行控制下载流程，一直循环</para>
+					<step>更新下载状态</step>
+					<step>请求资源，即该文件的拥有者的信息，包括向服务器请求，
+						以及通过Kad网络查询拥有一定数量资源后，向各个资源验证是否拥有文件。</step>
+					<step>将验证通过的资源加入工作队列，向工作队列中得资源请求下载文件块
+						轮询socket，若有消息到来，交给协议解析模块解析，
+						该模块会根据消息内容做相应操作。</step>
+				</procedure>
+
+				<para>考虑到某些消息需要操作下载文件，下载文件应提供给协议解析模块相应的。</para>
+			</sect3>
+
+			<sect3><title>3.2.4 上传文件模块</title>
+				<para>接收来自远端的消息，交给协议解析模块解析，该模块会根据消息内容做相应操作。</para>
+				<para>考虑到某些消息需要操作上传文件模块，应提供给协议解析模块相应的回调函数。</para>
+			</sect3>
+
+			<sect3><title>3.2.5 协议解析模块</title>
+				<para>管理集中式网络相关的所有协议</para>
+				<informaltable frame="all">
+					<tgroup cols="3">
+						<thead>
+							<row><entry>首字节</entry><entry>名称</entry><entry>作用</entry></row> 
+						</thead>
+						<tbody>
+							<row><entry>0x1</entry><entry>login</entry>
+								<entry>客户端登录，告知服务器自身文件传输监听端口，
+									以及拥有的文件的信息</entry></row>
+							<row><entry>0x2</entry><entry>logout</entry>
+								<entry>客户端告知服务器自己退出</entry></row>
+							<row><entry>0x4</entry><entry>request sources</entry>
+								<entry>客户端向服务器请求给定文件的拥有者信息</entry></row>
+							<row><entry>0x14</entry><entry>request result</entry>
+								<entry>服务器收到0x4命令后，回复给定文件的拥有者信息</entry></row>
+							<row><entry>0x21</entry><entry>check</entry>
+								<entry>请求下载文件的客户端向文件拥有者验证文件是否存在</entry></row>
+							<row><entry>0x31</entry><entry>check result</entry>
+								<entry>文件拥有者收到0x21命令后，回复文件是否存在</entry></row>
+							<row><entry>0x22</entry><entry>get file data</entry>
+								<entry>请求下载文件的客户端请求文件拥有者传输
+									下载文件中得某段文件块</entry></row>
+							<row><entry>0x32</entry><entry>file data</entry>
+								<entry>文件拥有者收到0x22命令后，传输相应文件块内容</entry></row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</sect3>
+
+			<sect3><title>3.2.6 Kad网络模块</title>
+				<para>参考Kademlia协议，作适当调整。</para>
+				<sect4><title>NodeID</title>
+					<para>高64-bit数值上等于IP地址的长整型值，低64-bit数值上等于Kad网络端口的短整型值，
+						构成一个128-bit的数值。由于文件的MD5哈希值为128-bit值，这样可以保持一致。</para>
+					<para>除了bit位数不同外，这里的NodeID的意义和标注Kademlia协议中得NodeID是一致的。</para>
+				</sect4>
+				<sect4><title>4个RPC</title>
+					<para>PING，检测一个节点看它是否是Kad网络上。</para>
+					<para>STORE指示一个节点存储&lt;key, value&gt;点对，以备将来的检索。
+						key为某个文件的MD5哈希值，value是一个10-bit的值，前4-bit表示拥有者IP地址，
+						之后2-bit表示拥有者的文件传输监听端口，最后4-bit表示文件大小。
+						同一个key可以有多个value。</para>
+					<para>FIND_NODE以一个128位的ID作为参数。
+						接收方返回一系列三元组&lt;IP地址，UDP端口，节点ID&gt;， 
+						包含它知道的k个“临近”目标ID的节点。 
+						这些三元组可以从一个的k桶获得，或者，如果最“临近”目标ID的k桶不满，则从多个k桶中获得。 
+						在任何情况下，RPC接收方必须返回k项 
+						（除非所有的k桶相加也少于k个节点，在这种情况下，它返回所有节点）。</para>
+					<para>FIND_VALUE与FIND_NODE一样返回一列三元组，有一个例外是， 
+						如果RPC接收方已有关键字对应的&lt;key, value&gt;点对，那它只返回存储的value。</para>
+				</sect4>
+				<sect4><title>路由表</title>
+					<para>Kademlia的基本路由表的结构是相当简单的协议，虽然有细节之处需要处理极不平衡的树。
+						路由表是一个二叉树，其叶子是k桶。
+						每一个k桶中包含一些有共同ID前缀的节点。
+						前缀表示k桶在二叉树种的位置。
+						因此，每一个k桶，包括ID空间部分范围，
+						所有k桶一起没有重叠地覆盖了整个128位的ID空间。</para>
+
+					<para>路由树中的节点根据需要动态分配。
+						图4说明了这个过程。
+						最初，一个节点u的路由树有一个单一的节点，也就是一个K桶覆盖了整个ID空间。
+						当你获取到一个新的节点的信息后，尝试插入的该节点信息至相应的k桶。
+						如果该桶不满的，新的节点信息插入即可。
+						否则，如果k桶的范围包括自己u的节点ID，那么要分裂成两个新的k桶，
+						桶中原来的内容，加入相应的分支桶，并重新尝试插入新的节点信息。
+						如果一个不包含节点u的k桶是满的，新的节点信息就被丢弃。</para>
+
+					<para>结构极不平衡的树会引起一种复杂的情况。
+						假设节点u加入系统，并且是唯一的ID以000开始的节点。
+						进一步假设，系统已经拥有超过k个前缀为001的节点。
+						带有前缀001的每个节点将把u插入到一个空的k桶中，
+						但u的桶刷新时只会通知ķ个节点。
+						为了避免这个问题，Kademlia的节点将在一个至少有k个节点的子树中保存所有有效信息，
+						即使这需要分裂不包含u自身的桶节点。
+						图5说明这些额外的分裂。当u刷新分裂桶，前缀001的所有节点都会收到消息。</para>
+
+					<screenshot>
+					<mediaobject>
+						<imageobject><imagedata fileref="res/routetable1.jpeg" format="JPEG" /></imageobject>
+						<caption>
+						<para>图4：路由表随着时间的推移的演变。
+							最初，路由表只有一个节点，作为唯一k桶。
+							当包含自身ID的k桶满时，会持续分裂成两个K桶。</para>
+						</caption>
+					</mediaobject>
+
+					<mediaobject>
+						<imageobject><imagedata fileref="res/routetable2.jpeg" format="JPEG" /></imageobject>
+						<caption>
+						<para>图5：这个图例举了自身节点为00...00的稀疏的路由表。
+							稀疏的表有可能较小（假设常数的大小）
+							破坏分支的行为，以确保它保存至少k个节点信息的子树中的所有信息。</para>
+						</caption>
+					</mediaobject>
+					</screenshot>
+				</sect4>
+
+				<sect4><title>Kad协议</title>
+					<para>协议支持四种RPC</para>
+					<informaltable>
+						<tgroup cols="2">
+							<thead><row><entry>首字节</entry><entry>支持RPC</entry></row></thead>
+							<tbody>
+								<row><entry>0x40</entry><entry>PING request</entry></row>
+								<row><entry>0x41</entry><entry>PING response</entry></row>
+								<row><entry>0x42</entry><entry>STORE request</entry></row>
+								<row><entry>0x44</entry><entry>FIND_NODE request</entry></row>
+								<row><entry>0x45</entry><entry>FIND_NODE response</entry></row>
+								<row><entry>0x46</entry><entry>FIND_VALUE request</entry></row>
+								<row><entry>0x47</entry><entry>FIND_VALUE response</entry></row>
+							</tbody>
+						</tgroup>
+					</informaltable>
+				</sect4>
+			</sect3>
+		</sect2>
+	</sect1>
+
+</article>

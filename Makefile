@@ -92,4 +92,8 @@ doc_kad:
 	/home/ylroki/project/docbook/xsl/html/docbook.xsl \
 	docs/kad.xml
 
-
+doc_outline_design:
+	xsltproc \
+	-o docs/outline_design.html \
+	/home/ylroki/project/docbook/xsl/html/docbook.xsl \
+	docs/outline_design.xml
