@@ -97,3 +97,9 @@ doc_outline_design:
 	-o docs/outline_design.html \
 	/home/ylroki/project/docbook/xsl/html/docbook.xsl \
 	docs/outline_design.xml
+
+doc_detail_design:
+	xsltproc \
+	-o docs/detail_design.html \
+	/home/ylroki/project/docbook/xsl/html/docbook.xsl \
+	docs/detail_design.xml

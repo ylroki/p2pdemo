@@ -1,0 +1,692 @@
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" 
+	"/home/ylroki/project/docbook/dtd/4.5/docbookx.dtd">
+<article>
+	<articleinfo>
+		<title>详细设计</title>
+	</articleinfo>
+
+	<sect1><title>1 公共模块</title>
+		<sect2><title>1.1 程序描述</title>
+			<para>对系统API进行封装，提供一些通用的类。</para>
+			<informaltable>
+				<tgroup cols="2">
+					<thead><row><entry>类名</entry><entry>功能</entry></row></thead>
+					<tbody>
+						<row><entry>CAutoLock</entry>
+							<entry>作为函数中的局部对象，在生存期期间对给定互斥量加锁，
+								生存期结束后自动释放锁</entry></row>
+						<row><entry>CDatabase</entry>
+							<entry>封装sqlite3数据库的接口</entry></row>
+						<row><entry>CMemoryStream</entry>
+							<entry>封装对内存中缓冲区的读写操作</entry></row>
+						<row><entry>CFileStream</entry>
+							<entry>封装对文件的读写操作</entry></row>
+						<row><entry>CUInt128</entry>
+							<entry>实现128-bit的无符号整型数的初始化，算术运算，位运算等等</entry></row>
+						<row><entry>CIDHelper</entry>
+							<entry>实现id生成器，可以产生一个未被使用的id</entry></row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+		</sect2>
+
+		<sect2><title>1.2 设计方法</title>
+			<sect3><title>1.2.1 CAutoLock</title>
+				<para>自动加锁与释放的原理：以互斥量作为构造函数的参数，
+					构造函数调用pthread_mutex_lock()对该互斥量加锁，
+					析构函数中调用pthread_mutex_unlock()解锁。
+					在函数中生成CAutoLock的局部对象，函数将持有该互斥量，
+					函数返回后，CAutoLock的局部对象生存期结束，调用析构函数，释放互斥量。</para>
+			</sect3>
+			<sect3><title>1.2.2 CDatabase</title>
+				<para>封装sqlite3数据库的接口，将sqlite3对象指针作为CDatabase的成员变量，
+					不让其暴露在外部。</para>
+			</sect3>
+			<sect3><title>1.2.3 CMemoryStream</title>
+				<informaltable>
+				<tgroup cols="2">
+					<thead><row><entry>成员变量</entry><entry>注释</entry></row></thead>
+					<tbody>
+						<row><entry>void* m_Buffer;</entry><entry>指向缓冲区的地址</entry></row>
+						<row><entry>Int64 m_Size;</entry><entry>缓冲区中已有内容的大小</entry></row>
+						<row><entry>Int64 m_MaxSize;</entry><entry>缓冲区的范围</entry></row>
+						<row><entry>Int64 m_Pointer;</entry><entry>缓冲区正在读写的偏移量</entry></row>
+					</tbody>
+				</tgroup>
+				</informaltable>
+				<para>考虑到网络协议中传输不同的整型数据，有增加缓冲区的格式化读写，
+					利用template支持不同字节长度的整型类型数据读写。</para>
+				<screen>
+	<![CDATA[template <typename Integer>
+	inline Integer ReadInteger()
+	{
+		Integer i;
+		ReadBuffer(&i, sizeof(i));
+		return i;
+	}
+
+	bool CMemoryStream::ReadBuffer(void* buffer, Int64 size)
+	{
+		if (m_Pointer + size > m_Size)
+			return false;
+		memcpy(buffer, (char*)m_Buffer + m_Pointer, size);
+		m_Pointer += size;
+		return true;
+	}]]>
+				</screen>
+				<para>将格式化读转化为通用的内存拷贝，写操作类似。</para>
+			</sect3>
+			<sect3><title>1.2.4 CFileStream</title>
+				<para>简单封装UNIX的文件I/O读写操作，文件描述符作为CFileStream的
+					私有成员变量，不暴露给外部。</para>		
+				<para>与CMemoryStream类似，用template函数支持格式化读写。</para>
+			</sect3>
+			<sect3><title>1.2.5 CUInt128</title>
+				<informaltable>
+				<tgroup cols="2">
+					<thead><row><entry>成员变量</entry><entry>注释</entry></row></thead>
+					<tbody>
+						<row><entry>UInt64 m_High;</entry><entry>表示高64-bit的值</entry></row>
+						<row><entry>UInt64 m_Low;</entry><entry>表示低64-bit的值</entry></row>
+					</tbody>
+				</tgroup>
+				</informaltable>
+				<para>Kad网络中的NodeID，Key是128-bit数值，需要封装这样一个类
+					来支持128-bit数值的位运算、布尔运算等。</para>
+				<para>CUInt128类中包含两个无符号64-bit整型数，分别表示高64-bit以及低64-bit值。</para>
+				<para>支持CUInt128对象到MD5哈希串的互相转换。</para>
+			</sect3>
+			<sect3><title>1.2.6 CIDHelper</title>
+				<para>事务管理系统需要为各个事务分配独立的TaskID，
+					类似于UNIX系统中为打开文件分配独立的文件描述符。
+					用CIDHelper封装分配ID的方法，CIDHelper包含一个静态表成员，记录各个ID值是否
+					被占用，分配ID时从小到大扫描这个表，获得最小的未被使用的ID，
+					注意每个占用ID的对象释放时，要主动调用CIDHelper的释放ID的函数。</para>
+				<screen>
+	<![CDATA[short CIDHelper::New()
+	{
+		CAutoLock lock(&m_Lock);
+		for (short i = 0; i < MAX_ID; ++i)
+			if (m_Use[i] == false)
+			{
+				m_Use[i] = true;
+				return i;
+			}
+	}
+
+	void CIDHelper::Delete(short id)
+	{
+		CAutoLock lock(&m_Lock);
+		if (id >=0 && id < MAX_ID)	
+			m_Use[id] = false;
+	}]]>
+				</screen>
+			</sect3>
+		</sect2>
+		<sect2><title>1.3 接口</title>
+			<para>公共模块主要为其他模块提供接口，所有必要对它的接口做详细描述。</para>
+
+			<sect3><title>1.3.1 CDatabase接口</title>
+			<informaltable>
+				<tgroup cols="2">
+				<thead><row><entry>接口</entry><entry>功能</entry></row></thead>
+				<tbody>
+					<row><entry>bool Open(const char* filename);</entry>
+						<entry>打开数据库文件</entry></row>
+					<row><entry>bool Execute(const char* sql, 
+						ExecuteCallback func = NULL, void* arg = NULL);</entry>
+						<entry>执行sql语句</entry></row>
+					<row><entry>bool GetTable(const char* sql, char*** result, int* nRow, int* nCol);</entry>
+						<entry>数据库查询方法</entry></row>
+					<row><entry>bool CreateTable(const char* tbName, const char* colDef);</entry>
+						<entry>在已打开的数据库中创建表</entry></row>
+					<row><entry>void Close();</entry>
+						<entry>关闭数据库</entry></row>
+				</tbody>
+				</tgroup>
+			</informaltable>
+			</sect3>
+
+			<sect3><title>1.3.2 CUInt128接口</title>
+			<informaltable>
+				<tgroup cols="2">
+				<thead><row><entry>接口</entry><entry>功能</entry></row></thead>
+				<tbody>
+	<row><entry>short GetBit(short bit);</entry>
+		<entry>获得给定位上的值</entry></row>
+	<row><entry>static CUInt128 FromMD5(const char* md5);</entry>
+		<entry>从MD5哈希串生成CUInt128对象</entry></row>
+	<row><entry>std::string ToMD5();</entry>
+		<entry>CUInt128对象转为MD5哈希串</entry></row>
+	<row><entry><![CDATA[CUInt128& operator=(const CUInt128& op);]]></entry>
+		<entry>赋值</entry></row>
+	<row><entry><![CDATA[friend bool operator==(const CUInt128& op1, const CUInt128& op2);]]></entry>
+		<entry>布尔运算相等</entry></row>
+	<row><entry><![CDATA[friend bool operator<(const CUInt128& op1, const CUInt128& op2);]]></entry>
+		<entry>布尔运算小于</entry></row>
+	<row><entry><![CDATA[friend CUInt128 operator^(const CUInt128& op1, const CUInt128& op2);]]></entry>
+		<entry>位异或</entry></row>
+				</tbody>
+				</tgroup>
+			</informaltable>
+			</sect3>
+
+		</sect2>
+	</sect1>
+
+	<sect1><title>2 服务器模块</title>
+		<sect2><title>2.1 程序描述</title>
+			<para>服务器端接收来自客户端的请求，根据消息内容作出响应。</para>
+		</sect2>
+
+		<sect2><title>2.2 设计方法</title>
+			<para>服务器的主要逻辑就是接收客户端的请求消息再处理，
+				所以接收请求消息是一个一直循环的主导操作，
+				接收消息后分析消息内容，调用不同的函数处理不同的消息即可。
+				考虑小型局域网下，服务器端不用做得太复杂，可以牺牲一些效率，
+				用一个阻塞的接收函数就好。</para>
+		</sect2>
+		<sect2><title>2.3 流程逻辑</title>
+		<screenshot>
+		<mediaobject>
+			<imageobject><imagedata fileref="res/server.jpeg" format="JPEG" /></imageobject>
+			<caption>
+			<para>图1：Server</para>
+			</caption>
+		</mediaobject>
+		</screenshot>
+		</sect2>
+	</sect1>
+
+	<sect1><title>3 客户端前端模块</title>
+		<sect2><title>3.1 配置文件</title>
+			<para>客户端的一些参数是可配置的，我们将参数写在配置文件中，
+				由一个专门的类CConfig去解析配置文件，将参数值赋给相应的成员变量。</para>
+			<para>客户端的前端以及后端都会使用到CConfig类，由于CConfig类的实现
+				较为简单，功能独立，我们将它归为前端模块的一部分，可以更早地测试它。</para>
+			<para></para>
+			<informaltable>
+			<tgroup cols="2">
+				<thead><row><entry>成员变量</entry><entry>注释</entry></row></thead>
+				<tbody>
+					<row><entry>std::string m_LocalIP;</entry>
+						<entry>后端接收前端消息的IP地址，默认127.0.0.1</entry></row>
+					<row><entry>unsigned short m_LocalPort;</entry>
+						<entry>后端接收前端消息的端口</entry></row>
+					<row><entry>std::string m_PeerIP;</entry>
+						<entry>客户端在局域网中的IP地址</entry></row>
+					<row><entry>unsigned short m_PeerPort;</entry>
+						<entry>客户端监听文件传输的端口</entry></row>
+					<row><entry>unsigned short m_MinPort;</entry>
+						<entry>客户端下载模块端口的最小范围</entry></row>
+					<row><entry>unsigned short m_MaxPort;</entry>
+						<entry>客户端下载模块端口的最大范围</entry></row>
+					<row><entry>int m_UpdatePeriod;</entry>
+						<entry>文件系统更新的周期，单位分钟</entry></row>
+					<row><entry>std::string m_Directory;</entry>
+						<entry>资源所在目录</entry></row>
+					<row><entry>std::string m_CacheDir;</entry>
+						<entry>数据库文件存放目录</entry></row>
+					<row><entry>std::string m_ServerIP;</entry>
+						<entry>服务器IP地址</entry></row>
+					<row><entry>unsigned short m_ServerPort;</entry>
+						<entry>服务器端口</entry></row>
+					<row><entry>unsigned short m_KadPort;</entry>
+						<entry>客户端Kad网络端口</entry></row>
+				</tbody>
+			</tgroup>
+			</informaltable>
+		</sect2>
+		<sect2><title>3.2 流程逻辑</title>
+			<procedure>
+				<step>打开给定文件</step>
+				<step>对每一行内容进行解析，找出符合NAME：VALUE形式的内容</step>
+				<step>根据NAME将VALUE赋值给相应的变量</step>
+			</procedure>
+		</sect2>
+	</sect1>
+
+	<sect1><title>4 客户端后端主模块</title>
+		<sect2><title>4.1 程序描述</title>
+			<para>作为客户端程序的启动模块，使客户端后端成为守护进程，
+				在程序开始时启动下载文件管理模块、上传文件模块、Kad网络模块、文件系统模块， 
+				之后轮询接收并解析来自用户的命令，根据不同的命令做不同的操作。</para>
+		</sect2>
+		<sect2><title>4.2 设计方法</title>
+			<sect3><title>4.2.1 守护进程</title>
+				<para>可以编写一个Daemonize函数就可以使当前进程成为守护进程，
+					当然，函数的编写需要遵守一定规则。</para>
+				<procedure>
+					<step><para>调用umask将文件模式创建屏蔽字设置为0。
+						默认的屏蔽字可能屏蔽了某些权限，而守护进程需要更大的权限，
+						最好一开始就放开一切权限。</para></step>
+					<step><para>调用fork，父进程的代码调用exit执行退出，而子进程继续执行。
+						这为下面的调用setsid提供了条件，因为子进程继承了父进程的组ID，
+						同时又获得了一个新的进程ID，这保证子进程不会成为这个进程组
+						的组长进程。</para></step>
+					<step><para>调用setsid来创建一个新会话，这样我们的进程就失去了
+						控制终端，程序的输入输出也将与控制终端无关。</para></step>
+					<step><para>将当前目录更改为根目录，有时程序从一个暂时性挂载
+						的文件系统中启动，未必免该文件系统卸载后守护进程出错，
+						这是必要的步骤。</para></step>
+					<step><para>关闭不需要的文件描述符。
+						可以调用getrlimit获得最高的文件描述符值，依次关闭。
+						要注意的是，调用Daemonize之前打开的文件描述符会关闭，
+						如果后面代码依赖这些文件描述符，会出现一些困扰。
+						若想使用一些与文件描述符相关的对象，应该在调用Daemonize之后，
+						类似socket这些。</para></step>
+					<step><para>打开/dev/null使之与文件描述符0，1，2关联，
+						也就说任何与标准输入，标准输出，标准出错有关的操作都会失效。
+						这样真正使守护进程与交互用户脱离关系。</para></step>
+				</procedure>
+			</sect3>
+		</sect2>
+		<sect2><title>4.3 流程逻辑</title>
+			<procedure>
+				<step>初始化配置文件对象</step>
+				<step>调用Daemonize成为守护进程</step>
+				<step>根据配置文件中的参数，将socket绑定至给定端口</step>
+				<step>启动各种模块</step>
+				<step>若退出标志被设为true，转至step 8</step>
+				<step>阻塞片刻，判断socket是否有数据到来，若有则调用相应处理函数</step>
+				<step>操作下载文件管理模块，然后转至step 6</step>
+				<step>停止各模块，释放资源并退出</step>
+			</procedure>
+		</sect2>
+	</sect1>
+
+	<sect1><title>5 下载文件管理模块</title>
+		<sect2><title>5.1 设计方法</title>
+			<sect3><title>5.1.1 CDownloadFile</title>
+				<para>用CDownloadFile类负责每个下载文件，该类包含下载文件的必要信息，
+					用一个线程启动工作函数。</para>
+				<para>工作函数不断循环，每个周期做以下工作</para>
+				<procedure>
+					<step>请求下载资源，即文件拥有者的信息</step>
+					<step>处理已得到的下载资源，对未验证的资源发送验证请求,
+						验证成功的资源称为工作资源，对工作资源轮流请求文件块。</step>
+					<step>调用I/O复用函数select，阻塞一定时间，判断socket
+						上是否有数据到来，若有，则调用协议解析模块的接口进行处理。</step>
+				</procedure>
+				<informaltable>
+				<tgroup cols="2">
+				<thead><row><entry>数据成员</entry><entry>注释</entry></row></thead>
+				<tbody>
+					<row><entry>std::string m_MD5;</entry>
+						<entry>文件MD5哈希值</entry></row>
+					<row><entry>KDownStatus m_Status;</entry>
+						<entry>下载状态</entry></row>
+					<row><entry>pthread_t m_Thread;</entry>
+						<entry>工作线程描述符</entry></row>
+					<row><entry>int m_Socket;</entry>
+						<entry>套接字描述符</entry></row>
+					<row><entry><![CDATA[std::vector<TPeer> m_VecSource;]]></entry>
+						<entry>待验证的资源</entry></row>
+					<row><entry><![CDATA[std::list<TPeer> m_WorkSource;]]></entry>
+						<entry>工作资源</entry></row>
+					<row><entry>CConfig* m_Config;</entry>
+						<entry>配置对象的指针</entry></row>
+					<row><entry>CProtocolManager* m_Protocol;</entry>
+						<entry>协议解析对象的指针</entry></row>
+					<row><entry>CAdvancedFile* m_AdFile;</entry>
+						<entry>高级文件对象的指针</entry></row>
+					<row><entry>CKad* m_Kad;</entry>
+						<entry>Kad网络对象的指针</entry></row>
+				</tbody>
+				</tgroup>
+				</informaltable>
+			</sect3>
+			<sect3><title>5.1.2 CAdvancedFile</title>
+				<para>以固定数量（如1024）字节为单位的文件内容称为文件块，
+					CAdvancedFile类封装一系列以文件块为单位的操作。
+					为支持断点续传功能，处理文件本身之外，相应还需要一个辅助文件。
+					辅助文件中的每个字节对应自身文件的每个文件块，用以标记该文件块是否已写入。
+					也就是说对自身文件进行对操作时先得判断辅助文件相应字节的内容，
+					而对自身文件进行写操作时除了先判断辅助文件相应字节内容外，
+					完成写操作后，还应修改辅助文件相应字节内容内容。</para>
+				<informaltable>
+				<tgroup cols="2">
+				<thead><row><entry>数据成员</entry><entry>注释</entry></row></thead>
+				<tbody>
+					<row><entry>std::string m_Filename;</entry>
+						<entry>自身文件文件名</entry></row>
+					<row><entry>std::string m_BlockFilename;</entry>
+						<entry>辅助文件文件名</entry></row>
+					<row><entry>CFileStream* m_FileStream;</entry>
+						<entry>自身文件文件流对象的指针</entry></row>
+					<row><entry>CFileStream* m_BlockStream;</entry>
+						<entry>辅助文件文件流对象的指针</entry></row>
+					<row><entry>Int64 m_Size;</entry>
+						<entry>文件大小，单位为字节</entry></row>
+					<row><entry>Int64 m_BlockNum;</entry>
+						<entry>文件块数量</entry></row>
+					<row><entry>Int64 m_BlockOk;</entry>
+						<entry>已完成文件块数量</entry></row>
+				</tbody>
+				</tgroup>
+				</informaltable>
+			</sect3>
+			<sect3><title>5.1.3 对个CDownloadFile的管理</title>
+				<para>在主模块中用全局变量<![CDATA[std::vector<CDownloadFile*> g_Manager]]>
+					管理，每次循环检查每个CDownloadFile对象的状态，完成或出错的对象释放。
+					在主模块退出时，也释放所有的CDownloadFile对象。</para>
+			</sect3>
+		</sect2>
+		<sect2><title>5.2 流程逻辑</title>
+			<para>CDownloadFile的工作线程</para>
+			<procedure>
+				<step>初始化socket</step>
+				<step>若下载标志不为DS_RUNNING，则退出</step>
+				<step>更新下载文件的信息如下载速度等</step>
+				<step>请求资源</step>
+				<step>验证资源，向工作资源请求文件块</step>
+				<step>判断socket上是否有数据到来，有则调用协议解析模块的相关函数处理</step>
+				<step>转至step 2</step>
+			</procedure>
+		</sect2>
+		<sect2><title>5.3 接口</title>
+			<sect3><title>5.3.1 CDownloadFile接口</title>
+			<para>值得注意的是，CDownloadFile不负责接收以及解析消息，消息交由
+				协议解析模块处理，CDownloadFile提供回调函数作为接口，
+				让协议解析模块可以根据不同的消息内容操作CDownloadFile对象。</para>
+			<informaltable>
+				<tgroup cols="2">
+				<thead><row><entry>接口</entry><entry>功能</entry></row></thead>
+				<tbody>
+					<row><entry>bool Start(CConfig*);</entry>
+						<entry>启动</entry></row>
+					<row><entry>void Stop();</entry>
+						<entry>退出</entry></row>
+					<row><entry><![CDATA[void DealSourceResponse(const unsigned char* hexHash, 
+						unsigned long filesize, std::vector<TPeer>* vec);]]></entry>
+							<entry>回调函数，处理服务器回复的文件拥有者信息</entry></row>
+					<row><entry>void DealCheckResult(const unsigned char* hexHash, 
+						unsigned long sessionID, char status);</entry>
+							<entry>回调函数，处理验证回复</entry></row>
+					<row><entry>void DealFileData(const unsigned char* hexHash,
+						unsigned long offset, const char* src, unsigned long size);</entry>
+							<entry>回调函数，处理接收的文件块</entry></row>
+					<row><entry><![CDATA[void GetDetail(KDownStatus& status, 
+						char& percent, std::string& md5, time_t& past, unsigned short& speed);]]></entry>
+							<entry>获取下载文件的详细状态</entry></row>
+				</tbody>
+				</tgroup>
+			</informaltable>
+			</sect3>
+
+		</sect2>
+	</sect1>
+
+	<sect1><title>6 文件上传模块</title>
+		<sect2><title>6.1 流程逻辑</title>
+			<para>打开一个线程执行工作函数，用select函数判断socket上是否有数据到来，
+				若有则交给协议解析模块接收及解析。</para>
+		</sect2>
+		<sect2><title>6.2 接口</title>
+			<sect3><title>6.2.1 CUploadFile接口</title>	
+			<informaltable>
+				<tgroup cols="2">
+				<thead><row><entry>接口</entry><entry>功能</entry></row></thead>
+				<tbody>
+					<row><entry>unsigned long GetFileData(const unsigned char* hexHash, 
+						unsigned long offset, unsigned long size, char* dst);</entry>
+						<entry>获取给定文件的文件内容</entry></row>
+				</tbody>
+				</tgroup>
+			</informaltable>
+			</sect3>
+		</sect2>
+	</sect1>
+	<sect1><title>7 协议解析模块</title>
+		<para>CProtocolManager类封装了协议解析的操作，核心在于协议的定义。</para>
+		<sect2><title>7.1 协议的详细定义</title>
+			<para>消息的首字节决定了它的命令类型。下面以表格形式描述每种消息的构成。</para>
+			<informaltable frame="all">
+			<tgroup cols="2">
+				<thead><row><entry>命令类型</entry><entry>格式</entry></row></thead>
+				<tbody>
+<row><entry>0x01 login</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+			<row><entry>char</entry><entry>1</entry><entry>commandID 0x01</entry></row>
+			<row><entry>unsigned short</entry><entry>2</entry><entry>peerPort</entry></row>
+			<row><entry>unsigned long</entry><entry>4</entry><entry>文件的数量，N</entry></row>
+			<row><entry>unsigned char*</entry><entry>20</entry><entry>第1个文件的信息</entry></row>
+			<row><entry>...</entry><entry>...</entry><entry>...</entry></row>
+			<row><entry>unsigned char*</entry><entry>20</entry><entry>第N个文件的信息</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x04 request source of a hash</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>commandID 0x04</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>MD5哈希值</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x14 request result</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>commandID 0x14</entry></row>
+      <row><entry>char</entry><entry>16</entry><entry>MD5哈希值</entry></row>
+      <row><entry>unsigned long</entry><entry>4</entry><entry>文件大小</entry></row>
+	  <row><entry>char</entry><entry>1</entry><entry>文件拥有者信息的数量，N</entry></row>
+      <row><entry>long</entry><entry>4</entry><entry>IP地址</entry></row>
+      <row><entry>short</entry><entry>2</entry><entry>端口</entry></row>
+	  <row><entry>...</entry><entry>...</entry><entry>...</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x21 check</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>commandID 0x21</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>MD5哈希值</entry></row>
+      <row><entry>unsigned long</entry><entry>4</entry><entry>sessionID</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x22 get file data</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>commandID 0x22</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>MD5哈希值</entry></row>
+      <row><entry>long</entry><entry>4</entry><entry>起始文件块</entry></row>
+      <row><entry>long</entry><entry>4</entry><entry>终止文件块</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x31 check result</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>commandID 0x31</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>MD5哈希值</entry></row>
+      <row><entry>unsigned long</entry><entry>4</entry><entry>sessionID</entry></row>
+      <row><entry>char</entry><entry>1</entry><entry>验证结果</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x32 file data</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>commandID 0x32</entry></row>
+      <row><entry>unsigned c*har</entry><entry>16</entry><entry>MD5哈希值</entry></row>
+      <row><entry>long</entry><entry>4</entry><entry>起始文件块</entry></row>
+      <row><entry>long</entry><entry>4</entry><entry>文件内容大小，N</entry></row>
+      <row><entry>char*</entry><entry>N</entry><entry>文件内容</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+				</tbody>
+			</tgroup>
+			</informaltable>
+		</sect2>
+	</sect1>
+
+	<sect1><title>8 文件系统模块</title>
+		<sect2><title>8.1 设计方法</title>
+			<para>启动一个线程，周期扫描给定目录，
+				将得到的文件信息存储至数据库并以login的消息发送给服务器。</para>
+			<para>扫描目录的算法本质是广度优先搜索算法。</para>
+			<procedure>
+				<step>将给定目录加入队列</step>
+				<step>若队列为空，则退出</step>
+				<step>取出队列头元素</step>
+				<step>若该元素为文件，则搜集其信息，
+					若元素为目录，则其包含的子文件及子目录依次加入队列</step>
+				<step>转到step 2</step>
+			</procedure>
+		</sect2>
+	</sect1>
+
+	<sect1><title>9 Kad网络模块</title>
+		<sect2><title>9.1 Kad协议的详细定义</title>
+			<para>消息的首字节决定了它的命令类型。下面以表格形式描述每种消息的构成。</para>
+			<informaltable frame="all">
+			<tgroup cols="2">
+				<thead><row><entry>命令类型</entry><entry>格式</entry></row></thead>
+				<tbody>
+<row><entry>0x40 PING request</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>0x40</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>发送方的NodeID</entry></row>
+      <row><entry>short</entry><entry>2</entry><entry>发送该消息的CTask对象的TaskID</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x41 PING response</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>0x41</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>发送方的NodeID</entry></row>
+      <row><entry>short</entry><entry>2</entry><entry>发送该消息的CTask对象的TaskID</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x42 STORE request</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>0x42</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>发送方的NodeID</entry></row>
+      <row><entry>short</entry><entry>2</entry><entry>发送该消息的CTask对象的TaskID</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>key</entry></row>
+      <row><entry>unsigned long</entry><entry>4</entry><entry>IP地址</entry></row>
+      <row><entry>unsigned short</entry><entry>2</entry><entry>端口</entry></row>
+      <row><entry>unsigned long</entry><entry>4</entry><entry>文件大小</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x44 FIND_NODE reuqest</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>0x44</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>发送方的NodeID</entry></row>
+      <row><entry>short</entry><entry>2</entry><entry>发送该消息的CTask对象的TaskID</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>NodeID</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x45 FIND_NODE response</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>0x45</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>发送方的NodeID</entry></row>
+      <row><entry>short</entry><entry>2</entry><entry>发送该消息的CTask对象的TaskID</entry></row>
+      <row><entry>char</entry><entry>1</entry><entry>Node的数量，N</entry></row>
+      <row><entry>unsigned logn</entry><entry>4</entry><entry>IP地址</entry></row>
+      <row><entry>unsgned short</entry><entry>2</entry><entry>Kad端口</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>NodeID</entry></row>
+      <row><entry>...</entry><entry>...</entry><entry>...</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x46 FIND_VALUE request</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>0x46</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>发送方的NodeID</entry></row>
+      <row><entry>short</entry><entry>2</entry><entry>发送该消息的CTask对象的TaskID</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>key</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+<row><entry>0x47 FIND_VALUE response</entry>
+	<entrytbl cols="3">
+		<thead><row><entry>C++数据类型</entry>
+			<entry>字节数</entry><entry>备注</entry></row></thead>
+		<tbody>
+      <row><entry>char</entry><entry>1</entry><entry>0x47</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>发送方的NodeID</entry></row>
+      <row><entry>unsigned long</entry><entry>4</entry><entry>发送该消息的CTask对象的TaskID</entry></row>
+      <row><entry>unsigned char*</entry><entry>16</entry><entry>key</entry></row>
+      <row><entry>char</entry><entry>1</entry><entry>Value的个数</entry></row>
+      <row><entry>unsigned long</entry><entry>4</entry><entry>文件大小</entry></row>
+      <row><entry>unsigned long</entry><entry>4</entry><entry>IP地址</entry></row>
+      <row><entry>unsigned short</entry><entry>2</entry><entry>端口</entry></row>
+      <row><entry>...</entry><entry>...</entry><entry>...</entry></row>
+		</tbody>
+	</entrytbl>
+</row>
+				</tbody>
+			</tgroup>
+			</informaltable>
+		</sect2>
+		<sect2><title>9.2 设计方法</title>
+			<para>整个模块会启动一个线程执行工作函数，它将不断循环，
+				在每次循环中，更新所有任务，监听消息，还需要定期刷新路由表，重新发布信息。</para>
+			<screenshot>
+			<mediaobject>
+				<imageobject><imagedata fileref="res/kad.jpeg" format="JPEG" /></imageobject>
+				<caption>
+				<para>图2：Kad网络模块</para>
+				</caption>
+			</mediaobject>
+			</screenshot>
+
+			<sect3><title>9.2.1 CTask等</title>
+				<para>FIND_NODE 这类RPC发送后，需要接收回复再继续操作，
+					由于回复是不可预期的，不能一直阻塞在一个任务上，封装了CTaskManager
+					来管理任务，实现任务的类应该提供一个Update的函数，让CTaskManager
+					主动更新任务的状态，根据不同的状态执行不同的操作。
+					考虑到任务的种类有多种，使用多态来解决不同任务执行不同的更新操作。</para>
+				<screenshot>
+				<mediaobject>
+					<imageobject><imagedata fileref="res/task.jpeg" format="JPEG" /></imageobject>
+					<caption>
+					<para>图3：CTask等</para>
+					</caption>
+				</mediaobject>
+				</screenshot>
+			</sect3>
+		</sect2>
+	</sect1>
+</article>
+
