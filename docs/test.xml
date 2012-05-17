@@ -3,107 +3,73 @@
 
 <article>
 	<articleinfo>
-		<title>Test</title>
+		<title>测试</title>
 	</articleinfo>
+	<sect1><title>1 测试计划</title>
+		<para>整个开发过程分为两个大的阶段。
+			第一阶段目标为开发集中式网络结构的完整系统，
+			除了Kad模块外的所有模块在此阶段完成编码以及测试，
+			然后集成测试，作为系统的一个初始版本。
+			这个阶段测试的重点在文件系统模块，下载文件管理模块以及最后的集成测试。
+			第二阶段全力完成Kad模块，Kad模块本身的协议独立与其他模块，
+			加上为实现Kad网络的自组织，内部实现远比其他模块复杂，
+			必须独立一个阶段开发测试。而在第一阶段的测试基础上，
+			Kad网络模块很容易加入系统并测试。</para>
+	</sect1>
+	<sect1><title>2 文件系统模块</title>
+		<para>工作流程是否正确是第一点，文件系统模块必须周期性的执行扫描操作。</para>
+		<para>对于扫描操作，文件信息将会存储至数据库，因此数据库操作经过CDatabase类
+			的封装，其接口正确性必须经过测试，主要要考虑的接口有打开以及关闭数据库文件，
+			数据库表的建立，sql执行语句的正确性，查询操作的正确性。</para>
+		<para>数据库操作测试通过后，我们可以根据数据库的内容来判断文件扫描结果的正确性。
+			测试用的待扫描目录要考虑到完备性，应该具有多层目录。</para>
+		<para>文件系统模块还会向服务器端发送文件信息，这一点在服务器端测试中一起进行。</para>
+	</sect1>
+	<sect1><title>3 服务器端</title>
+		<para>通过测试文件系统模块发送消息的准确性测试服务器的功能。
+			重点在与消息中多字节对象的正确性，这里涉及到主机字节序与网络字节序的关系。
+			同时要注意recvfrom函数得到的远端地址的准确性。
+			数据库内容正确性也在考虑范围中。</para>
+	</sect1>
 
-	<!-- -->
-	<procedure>
-		<title>Modify</title>
-	</procedure>
-
-	<procedure>
-		<title>Make</title>
-		<step>
-			<para>make server program.</para>
-			<programlisting>
-				make p2p_server_debug
-			</programlisting>
-		</step>
-		<step>
-			<para>make client program.</para>
-			<programlisting>
-				make p2p_client_debug
-			</programlisting>
-		</step>
-	</procedure>
-
-	<!--Write least 3 config files-->
-	<procedure>
-		<title>Configure Least 3 progresses</title>
-
-		<step>
-			<para>A server</para>
-			<substeps>
-				<step>
-					<para>port:8000</para>
-				</step>
-			</substeps>
-		</step>
-
-		<step>
-			<para>A client</para>
-			<substeps>
-				<step>
-					<para>local port:31415</para>
-				</step>
-				<step>
-					<para>peer port:15926</para>
-				</step>
-			</substeps>
-		</step>
-
-		<step>
-			<para>One more client</para>
-			<substeps>
-				<step>
-					<para>local port:26535</para>
-				</step>
-				<step>
-					<para>peer port:14159</para>
-				</step>
-			</substeps>
-		</step>
-
-	</procedure>
-
-	<procedure>
-		<title>Run</title>
-		<step>
-		<programlisting>
-			./bin/server
-			./bin/clientd
-			./bin/clientd config/client2.conf
-		</programlisting>
-		</step>
-	</procedure>
-
-
-	<procedure>
-		<title>Check Output</title>
-		<para>Just run 'clientc' is enough.</para>
-		<step>
-			<para>Each clientd will output the file and hash.</para>
-			<para>Check if it will update periodically.</para>
-		</step>
-		<step>
-			<para>Server will receive the 0x01 command.</para>
-			<para>This cmd contains several hashes.</para>
-			<para>Server record (md5,ip,port) in server.db, the record should be unique.</para>
-		</step>
-		<step>
-			<para>Download.</para>
-			<programlisting>
-				./bin/clientc download
-			</programlisting>
-			<substeps>
-				<step>Client send 0x04 cmd to request sources from server.</step>
-				<step>Server response 0x14 cmd to client.</step>
-				<step>Client send 0x21 cmd to source, check if file is exist.</step>
-				<step>Source response whether file exists or not. if exists, 
-					Client adds it to workSource.</step>
-				<step>Client send 0x22 cmd to workSource, to get file data.</step>
-				<step>workSource response file data.</step>
-			</substeps>
-		</step>
-	</procedure>
+	<sect1><title>4 下载文件管理模块</title>
+		<para>下载流程涉及到与服务器交互等，留到集成测试中验证。
+			此时要测试的是CAdvancedFile的接口的正确性。
+			测试用的文件内容应该超过1024字节，同时满足文件大小非1024的整数倍。
+			这样可以验证文件块读写的正确性。</para>
+	</sect1>
+	<sect1><title>5 集中式结构</title>
+		<para>一个客户端程序中文件上传模块和下载文件管理模块是独立的，
+			因此只需一个客户端就可以完成测试，此外运行一个服务器端程序即可。</para>
+		<para>先不考虑用户交互，客户端后端运行后表现出来的文件系统模块在定期地向
+			服务器发送登录消息，这一点在之前模块测试中已测试。</para>
+		<para>考虑用户交互，注意前端与后端的通信情况，消息内容处理是否正确。
+			重点测试放在文件下载，围绕协议解析模块观察整个下载流程的情况。
+			为得到测试中后端运行的反馈信息，测试时后端不用成为守护进程。</para>
+	</sect1>
+	<sect1><title>6 Kad网络模块</title>
+		<para>Kad网络模块独立测试，流程逻辑上只能测试功能是否执行，
+			正确性留到系统测试中进行。
+			此时关注的是模块中数据结构，首先是CUInt128，要测试的是它接口的正确性
+			包括布尔运算、到其它类型数据的互相转换等。
+			其次是路由表CRouteTable的测试这是本次开发中较为复杂的数据结构，
+			涉及类似二叉树查找，插入，删除等实现，同时要考虑到节点的分裂操作，
+			测试时注意数据要考虑所有的边界。
+			感谢ACM竞赛，使得这个数据结构的实现变得毫无挑战性。</para>
+	</sect1>
+	<sect1><title>7 系统测试</title>
+		<para>在第一阶段的测试中，整个文件下载已测试通过，
+			这里要关注的是Kad网络节点的互相联系以及文件拥有者信息的传输。
+			Kad网络模块中自身的协议解析类以及CTask的各个子类的实现是
+			测试的重点。</para>
+	</sect1>
+	<sect1><title>本章小结</title>
+		<para>在开发中，测试很早就在进行，这使得开发成果在每个时间点上
+			都是比较可靠的，不会频繁地修改之前的内容。
+			第一阶段的代码量在2000行左右，这时已有了一个系统的雏形，
+			在这时我们完成了一系列测试，使得系统原型较为可靠，
+			而由于之前的单元测试的保证，集成测试发现的bug只有5个。
+			而第二阶段开发后，系统代码量累积到了4000行左右，
+			但由于只是在原型上增加一个模块而已，系统很快就可以组织起来测试。</para>
+	</sect1>
 </article>
