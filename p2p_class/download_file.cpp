@@ -15,7 +15,8 @@ CDownloadFile::CDownloadFile(const char* md5)
 	m_Clock(0),
 	m_StartTime(0),
 	m_PastTime(0),
-	m_LastSecBlock(0)
+	m_LastSecBlock(0),
+	m_Filename(md5)
 {
 	m_VecSource.clear();	
 	m_WorkSource.clear();
@@ -55,8 +56,6 @@ void CDownloadFile::Stop()
 		pthread_join(m_Thread, NULL);
 	if (m_Socket != SOCKET_ERROR)
 		close(m_Socket);
-	if (m_AdFile)
-		delete m_AdFile;
 	if (m_Protocol)
 		delete m_Protocol;
 }
@@ -89,6 +88,15 @@ void CDownloadFile::Work()
 		UpdateSources();
 		SelectSocket();
 		Sleep(1);
+	}
+	
+	if (m_AdFile)
+	{
+		delete m_AdFile;
+		std::string newname = m_Config->GetDirectory() + "/" + m_Filename;
+		rename(m_Filename.c_str(), newname.c_str());
+		std::string cfg = m_Filename + ".cfg";
+		remove(cfg.c_str());
 	}
 }
 const int g_LowerBoundOfSources = 1;
@@ -192,7 +200,7 @@ void CDownloadFile::DealSourceResponse(const unsigned char* hexHash, unsigned lo
 	if (MD5IsSame2Hex(m_MD5.c_str(), hexHash) == false)
 		return ;
 	if (m_AdFile == NULL)
-		m_AdFile = new CAdvancedFile(m_MD5.c_str(), filesize);
+		m_AdFile = new CAdvancedFile(m_Filename.c_str(), filesize);
 	for (size_t i = 0; i < vecSource->size(); ++i)
 		m_VecSource.push_back((*vecSource)[i]);	
 }
@@ -266,4 +274,9 @@ void CDownloadFile::GetDetail(KDownStatus& status, char& percent, std::string& m
 	md5 = m_MD5;
 	past = m_PastTime;
 	speed = m_Speed;
+}
+
+void CDownloadFile::SetFilename(const char* name)
+{
+	m_Filename = name;
 }

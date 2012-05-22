@@ -8,23 +8,59 @@
 #include "kad.h"
 
 bool g_DaemonStopped = true;
-CDownloadFile g_DownloadFile("2781dea1445042e8e02fa7303bd53f5b");
+//CDownloadFile g_DownloadFile("2781dea1445042e8e02fa7303bd53f5b");
 CUploadFile g_UploadFile;
 CConfig g_Config;
 CFileSystem g_FileSystem;
 CKad* g_Kad;
 std::list<CDownloadFile*> g_Manager;
 
+void DealTorrent(const char* command)
+{
+	FILE* file = fopen(command, "r");
+	if (file)
+	{
+		char buf[BUF_SIZE];
+		std::string md5 = "";
+		std::string filename = "";
+		while (fgets(buf, BUF_SIZE, file))
+		{
+			std::string equ = buf;
+			equ = TrimString(equ);
+			size_t pos = equ.find_first_of(':');
+			if (pos != equ.size())
+			{
+				std::string name = equ.substr(0, pos);
+				std::string value = equ.substr(pos + 1, equ.size() - pos - 1);
+				if (name == "md5")
+					md5 = value;
+				else if (name == "filename")
+					filename = value;
+
+			}
+		}
+		fclose(file);
+		if (md5 == "")
+			return;
+		CDownloadFile* down = new CDownloadFile(md5.c_str());
+		down->SetKad(g_Kad);
+		if (filename.size())
+			down->SetFilename(filename.c_str());
+		g_Manager.push_back(down);
+
+	}
+}
+
 void DealLocalCommand(const char* command, char* response)
 {
 	if (strcmp(command, "stop") == 0)
 	{
-		g_DownloadFile.Stop();
+		//g_DownloadFile.Stop();
 		g_DaemonStopped = true;
 	}
 	else if (strcmp(command, "download") == 0)
 	{
-		g_DownloadFile.Start(&g_Config);
+		//g_DownloadFile.Start(&g_Config);
 	}
 	else if (strcmp(command, "current") == 0)
 	{
@@ -36,11 +72,12 @@ void DealLocalCommand(const char* command, char* response)
 		unsigned short speed;
 
 		int offset = 0;
+		/*
 		g_DownloadFile.GetDetail(ds, percent, md5, past, speed);
 		sprintf(response+offset, "%s %d%% %d %lds %huk\n", 
 			md5.c_str(), percent, ds, past, speed);
 		offset = strlen(response);
-
+		*/
 		std::list<CDownloadFile*>::iterator it;
 		for (it = g_Manager.begin(); it != g_Manager.end(); ++it)
 		{
@@ -52,8 +89,22 @@ void DealLocalCommand(const char* command, char* response)
 	}
 	else
 	{
-		if (strlen(command) != 32)
+		int len = strlen(command);
+		if (len > 8)
+		{
+			char suffix[9];
+			suffix[8] = 0;
+			memcpy(suffix, command+len-8, 8);
+			if (strcmp(suffix, ".torrent") == 0)
+			{
+				//torrent
+				DealTorrent(command);
+				return;
+			}
+		}
+		if (len != 32)
 			return ;		
+		//md5 hash
 		CDownloadFile* down = new CDownloadFile(command);
 		down->SetKad(g_Kad);
 		g_Manager.push_back(down);

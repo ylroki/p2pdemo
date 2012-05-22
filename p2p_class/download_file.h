@@ -37,6 +37,7 @@ public:
 	void SetKad(CKad* kad);
 	void GetDetail(KDownStatus& status, char& percent, std::string& md5,
 		time_t& past, unsigned short& speed);
+	void SetFilename(const char* name);
 
 private:
 	static void* ThreadFunc(void* arg);
@@ -49,6 +50,7 @@ private:
 	void RecvMessage();
 
 	std::string m_MD5;
+	std::string m_Filename;
 	KDownStatus m_Status;
 	pthread_t m_Thread;
 	int m_Socket;
